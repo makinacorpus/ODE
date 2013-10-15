@@ -1,0 +1,5 @@
+[report]
+omit =
+    */memory:*
+    */python?.?/*
+    */site-packages/*

@@ -46,7 +46,7 @@ test: $(NOSE) $(COVERAGE) flake8
 	python setup.py test -q
 
 coverage: $(NOSE) $(COVERAGE)
-	nosetests --cover-package=ode --cover-erase --with-coverage --cover-branches
+	nosetests --cover-package=ode --cover-inclusive --cover-erase --with-coverage --cover-branches
 
 start: $(PROC) .env
 	$(PROC) start -f $(PROCFILE)
