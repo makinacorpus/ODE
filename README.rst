@@ -1,8 +1,8 @@
 ODE - Open Data Events
 ======================
 
-.. image:: https://travis-ci.org/LiberTIC/ode.png
-    :target: https://travis-ci.org/LiberTIC/ode
+.. image:: https://travis-ci.org/makinacorpus/ODE.png
+    :target: https://travis-ci.org/makinacorpus/ODE
 
-.. image:: https://coveralls.io/repos/LiberTIC/ode/badge.png
-    :target: https://coveralls.io/r/LiberTIC/ode
+.. image:: https://coveralls.io/repos/makinacorpus/ODE/badge.png
+    :target: https://coveralls.io/r/makinacorpus/ODE
