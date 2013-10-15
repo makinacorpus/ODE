@@ -3,7 +3,7 @@ import transaction
 
 from pyramid import testing
 
-from .models import DBSession
+from ode.models import DBSession
 
 
 class TestMyViewSuccessCondition(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestMyViewSuccessCondition(unittest.TestCase):
         self.config = testing.setUp()
         from sqlalchemy import create_engine
         engine = create_engine('sqlite://')
-        from .models import (
+        from ode.models import (
             Base,
             MyModel,
             )
@@ -26,7 +26,7 @@ class TestMyViewSuccessCondition(unittest.TestCase):
         testing.tearDown()
 
     def test_passing_view(self):
-        from .views import my_view
+        from ode.views import my_view
         request = testing.DummyRequest()
         info = my_view(request)
         self.assertEqual(info['one'].name, 'one')
@@ -45,7 +45,7 @@ class TestMyViewFailureCondition(unittest.TestCase):
         testing.tearDown()
 
     def test_failing_view(self):
-        from .views import my_view
+        from ode.views import my_view
         request = testing.DummyRequest()
         info = my_view(request)
         self.assertEqual(info.status_int, 500)

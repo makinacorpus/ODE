@@ -37,3 +37,6 @@ nosetests.xml
 
 # Vim
 *.sw?
+
+# Dev database
+ode.sqlite

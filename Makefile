@@ -43,7 +43,7 @@ develop:
 	python setup.py develop
 
 test: $(NOSE) $(COVERAGE) flake8
-	python setup.py test -q
+	nosetests
 
 coverage: $(NOSE) $(COVERAGE)
 	nosetests --cover-package=ode --cover-inclusive --cover-erase --with-coverage --cover-branches
