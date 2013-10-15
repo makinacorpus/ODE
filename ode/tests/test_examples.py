@@ -31,21 +31,3 @@ class TestMyViewSuccessCondition(unittest.TestCase):
         info = my_view(request)
         self.assertEqual(info['one'].name, 'one')
         self.assertEqual(info['project'], 'ode')
-
-
-class TestMyViewFailureCondition(unittest.TestCase):
-    def setUp(self):
-        self.config = testing.setUp()
-        from sqlalchemy import create_engine
-        engine = create_engine('sqlite://')
-        DBSession.configure(bind=engine)
-
-    def tearDown(self):
-        DBSession.remove()
-        testing.tearDown()
-
-    def test_failing_view(self):
-        from ode.views import my_view
-        request = testing.DummyRequest()
-        info = my_view(request)
-        self.assertEqual(info.status_int, 500)

@@ -46,7 +46,7 @@ test: $(NOSE) $(COVERAGE) flake8
 	nosetests
 
 coverage: $(NOSE) $(COVERAGE)
-	nosetests --cover-package=ode --cover-inclusive --cover-erase --with-coverage --cover-branches
+	nosetests --cover-package=ode --cover-inclusive --cover-erase --with-coverage --cover-branches --cover-tests
 
 start: $(PROC) .env
 	$(PROC) start -f $(PROCFILE)

@@ -12,6 +12,7 @@ requires = [
     'fanstatic==0.16',
     'pyramid_formalchemy',
     'pyramid_fanstatic',
+    'cornice',
     'fa.jquery',
     'pyramid',
     'pyramid_chameleon',
