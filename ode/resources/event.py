@@ -1,7 +1,8 @@
-from cornice.resource import resource
+from cornice.resource import resource, view
 import json
 
 from ode.models import DBSession, Event
+from ode.validation import EventSchema
 
 
 @resource(collection_path='/events', path='/events/{id}')
@@ -10,6 +11,7 @@ class EventResource(object):
     def __init__(self, request):
         self.request = request
 
+    @view(schema=EventSchema)
     def collection_post(self):
         event_info = json.loads(self.request.body)
         event = Event(title=event_info['title'])
@@ -17,6 +19,7 @@ class EventResource(object):
         DBSession.flush()
         return {'id': event.id, 'status': 'added'}
 
+    @view(schema=EventSchema)
     def collection_put(self):
         event_info = json.loads(self.request.body)
         event = DBSession.query(Event).filter_by(id=event_info['id']).first()
@@ -24,9 +27,9 @@ class EventResource(object):
         DBSession.add(event)
 
     def collection_get(self):
-        event = DBSession.query(Event).first()
-        event_info = {'title': event.title}
-        return [event_info]
+        query = DBSession.query(Event).all()
+        events = [{'title': event.title} for event in query]
+        return {'events': events}
 
     def get(self):
         id = self.request.matchdict['id']
