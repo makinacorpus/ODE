@@ -137,3 +137,15 @@ class TestEvent(TestCase):
         DBSession.flush()
         response = self.app.get('/events/%s' % event.id)
         self.assertDictEqual(response.json['event'], self.example_data)
+
+    def test_get_invalid_id(self):
+        response = self.app.get('/events/42', status=404)
+        self.assertEqual(response.json['status'], 404)
+
+    def test_put_invalid_id(self):
+        response = self.app.put('/events/42', status=404)
+        self.assertEqual(response.json['status'], 404)
+
+    def test_delete_invalid_id(self):
+        response = self.app.delete('/events/42', status=404)
+        self.assertEqual(response.json['status'], 404)
