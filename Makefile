@@ -59,3 +59,7 @@ serve:
 
 flake8: $(FLAKE8)
 	flake8 ode
+
+.PHONY: docs
+docs:
+	cd docs && make html
