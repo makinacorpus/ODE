@@ -14,7 +14,7 @@ class EventResource(object):
     @view(schema=EventSchema)
     def collection_post(self):
         event_info = json.loads(self.request.body)
-        event = Event(title=event_info['title'])
+        event = Event(**event_info)
         DBSession.add(event)
         DBSession.flush()
         return {'id': event.id, 'status': 'added'}
