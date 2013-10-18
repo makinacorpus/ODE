@@ -56,6 +56,7 @@ EVENT_FIELDS = [
     'telephone',
     'title',
     'town',
+    'url',
     'video_license',
     'video_url',
     'price_information',
@@ -102,6 +103,7 @@ class Event(Base):
     telephone = default_column()
     title = default_column()
     town = default_column()
+    url = default_column()
     video_license = default_column()
     video_url = default_column()
 

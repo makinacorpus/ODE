@@ -30,7 +30,7 @@ class TestEventMixin(object):
         'language': u'Français',
         'lastname': u'Éléonore',
         'latlong': u"1.0;2.0",
-        'location_name': u'Nîmes',
+        'location_name': u'Patinoire',
         'organiser': u'LiberTIC',
         'capacity': u'42',
         'price_information': u'Plutôt bon marché',
@@ -48,6 +48,7 @@ class TestEventMixin(object):
         'town': u'上海',
         'video_license': u'Video License Info',
         'video_url': 'http://example.com/video',
+        'url': 'http://example.com/events/covention-amis-elephant',
     }
 
     def setUp(self):

@@ -46,6 +46,8 @@ class EventResource(object):
         events = [event.json_data() for event in query]
         return {'events': events}
 
+    @view(accept='text/calendar', renderer='ical')
+    @view(accept='application/json')
     def get(self):
         """Get a specific event by id"""
         id = self.request.matchdict['id']

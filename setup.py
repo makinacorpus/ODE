@@ -9,6 +9,7 @@ with open(os.path.join(here, 'CHANGES.rst')) as f:
     CHANGES = f.read()
 
 requires = [
+    'icalendar',
     'fanstatic==0.16',
     'pyramid_formalchemy',
     'pyramid_fanstatic',
