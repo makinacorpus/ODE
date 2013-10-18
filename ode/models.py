@@ -1,21 +1,10 @@
-from sqlalchemy import (
-    Column,
-    Index,
-    Integer,
-    Text,
-    Unicode,
-    UnicodeText,
-    DateTime,
-    )
-
+import pyramid
+from sqlalchemy import (Column, Index, Integer, Text, Unicode, UnicodeText,
+                        DateTime)
 from sqlalchemy.ext.declarative import declarative_base
-
-from sqlalchemy.orm import (
-    scoped_session,
-    sessionmaker,
-    )
-
+from sqlalchemy.orm import scoped_session, sessionmaker
 from zope.sqlalchemy import ZopeTransactionExtension
+
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
@@ -82,6 +71,7 @@ class Event(Base):
     country = default_column()
     description = Column(UnicodeText(SAFE_MAX_LENGTH))
     email = default_column()
+    end_time = Column(DateTime)
     event_id = default_column()
     firstname = default_column()
     language = default_column()
@@ -99,6 +89,7 @@ class Event(Base):
     price_information = default_column()
     source = default_column()
     source_id = default_column()
+    start_time = Column(DateTime)
     target = default_column()
     telephone = default_column()
     title = default_column()
@@ -111,6 +102,14 @@ class Event(Base):
         return {
             name: getattr(self, name) for name in EVENT_FIELDS
         }
+
+    @property
+    def uid(self):
+        return "{}-{}@{}".format(
+            self.start_time.strftime("%Y%m%d%H%M%S"),
+            self.id,
+            pyramid.threadlocal.get_current_registry().settings['domain'],
+        )
 
 
 class MyModel(Base):
