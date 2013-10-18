@@ -8,7 +8,7 @@ from ode.tests.support import initTestingDB
 from ode.models import DBSession, Event
 
 
-class TestEvent(TestCase):
+class TestEventMixin(object):
 
     example_data = {
         'address': '10 rue des Roses',
@@ -62,6 +62,18 @@ class TestEvent(TestCase):
         del self.app
         DBSession.remove()
 
+    def create_event(self, *args, **kwargs):
+        event = Event(**kwargs)
+        DBSession.add(event)
+        return event
+
+    def assertTitleEqual(self, event_id, title):
+        event = DBSession.query(Event).filter_by(id=event_id).first()
+        self.assertEqual(event.title, title)
+
+
+class TestJson(TestEventMixin, TestCase):
+
     def test_root(self):
         response = self.app.get('/', status=200)
         self.assertTrue('Pyramid' in response.body)
@@ -71,15 +83,6 @@ class TestEvent(TestCase):
             event_info = {'title': u'Titre Événement'}
         response = self.app.post_json('/events', event_info)
         return response.json['id']
-
-    def assertTitleEqual(self, event_id, title):
-        event = DBSession.query(Event).filter_by(id=event_id).first()
-        self.assertEqual(event.title, title)
-
-    def create_event(self, *args, **kwargs):
-        event = Event(**kwargs)
-        DBSession.add(event)
-        return event
 
     def test_post_event(self):
         event_id = self.post_event()
