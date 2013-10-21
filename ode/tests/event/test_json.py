@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from datetime import datetime
 from unittest import TestCase
 
 from ode.models import DBSession, Event
@@ -11,52 +12,57 @@ def remove_id(dictionary):
     return result
 
 
-class TestJson(TestEventMixin, TestCase):
+example_data = {
+    'address': '10 rue des Roses',
+    'audio_license': 'CC',
+    'audio_url': 'http://example.com/audio',
+    'author_email': 'bob@example.com',
+    'author_firstname': u'François',
+    'author_lastname': u'Vittsjö',
+    'author_telephone': '000-999-23-30',
+    'country': u'日本',
+    'post_code': 'UVH-345',
+    'description': u'''
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a
+    diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac
+    quam viverra nec consectetur ante hendrerit. Donec et mollis dolor.
+    Praesent et diam eget libero egestas mattis sit amet vitae
+    augue.''',
+    'event_id': 'abc123',
+    'email': 'alice@example.com',
+    'firstname': 'Alice',
+    'language': u'Français',
+    'lastname': u'Éléonore',
+    'latlong': u"1.0;2.0",
+    'location_name': u'Patinoire',
+    'organiser': u'LiberTIC',
+    'capacity': u'42',
+    'price_information': u'Plutôt bon marché',
+    'performers': u'Basile Dupont;José Durand',
+    'photos1_license': u'License Info 1',
+    'photos1_url': u'http://example.com/photo1',
+    'photos2_license': u'License Info 2',
+    'photos2_url': u'http://example.com/photo2',
+    'press_url': u'http://example.com/photo2',
+    'source_id': u'xyz123',
+    'source': u'http://example.com/event-source',
+    'target': u'all',
+    'telephone': u'1234567890',
+    'title': u'Convention des amis des éléphants',
+    'town': u'上海',
+    'video_license': u'Video License Info',
+    'video_url': u'http://example.com/video',
+    'url': u'http://example.com/events/covention-amis-elephant',
+    'start_time': datetime(2013, 12, 19, 9),
+    'end_time': datetime(2013, 12, 19, 9),
+}
+example_json = dict(example_data)
+example_json['start_time'] = '2013-12-19T09:00:00'
+example_json['end_time'] = '2013-12-19T09:00:00'
 
-    example_data = {
-        'address': '10 rue des Roses',
-        'audio_license': 'CC',
-        'audio_url': 'http://example.com/audio',
-        'author_email': 'bob@example.com',
-        'author_firstname': u'François',
-        'author_lastname': u'Vittsjö',
-        'author_telephone': '000-999-23-30',
-        'country': u'日本',
-        'post_code': 'UVH-345',
-        'description': u'''
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a
-        diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac
-        quam viverra nec consectetur ante hendrerit. Donec et mollis dolor.
-        Praesent et diam eget libero egestas mattis sit amet vitae
-        augue.''',
-        'event_id': 'abc123',
-        'email': 'alice@example.com',
-        'firstname': 'Alice',
-        'language': u'Français',
-        'lastname': u'Éléonore',
-        'latlong': u"1.0;2.0",
-        'location_name': u'Patinoire',
-        'organiser': u'LiberTIC',
-        'capacity': u'42',
-        'price_information': u'Plutôt bon marché',
-        'performers': u'Basile Dupont;José Durand',
-        'photos1_license': u'License Info 1',
-        'photos1_url': u'http://example.com/photo1',
-        'photos2_license': u'License Info 2',
-        'photos2_url': u'http://example.com/photo2',
-        'press_url': u'http://example.com/photo2',
-        'source_id': u'xyz123',
-        'source': u'http://example.com/event-source',
-        'target': u'all',
-        'telephone': u'1234567890',
-        'title': u'Convention des amis des éléphants',
-        'town': u'上海',
-        'video_license': u'Video License Info',
-        'video_url': 'http://example.com/video',
-        'url': 'http://example.com/events/covention-amis-elephant',
-        'start_time': None,
-        'end_time': None,
-    }
+
+class TestJson(TestEventMixin, TestCase):
+    maxDiff = None
 
     def test_root(self):
         response = self.app.get('/', status=200)
@@ -67,6 +73,9 @@ class TestJson(TestEventMixin, TestCase):
             event_info = {'title': u'Titre Événement'}
         response = self.app.post_json('/events', event_info)
         return response.json['id']
+
+    def assertEqualIgnoringId(self, result, expected):
+        self.assertDictEqual(remove_id(result), expected)
 
     def test_post_event(self):
         event_id = self.post_event()
@@ -115,16 +124,15 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(DBSession.query(Event).count(), 0)
 
     def test_post_all_fields(self):
-        event_id = self.post_event(self.example_data)
+        event_id = self.post_event(example_json)
         event = DBSession.query(Event).filter_by(id=event_id).first()
-        self.assertDictEqual(remove_id(event.json_data()), self.example_data)
+        self.assertEqualIgnoringId(event.to_dict(), example_data)
 
     def test_get_all_fields(self):
-        event = self.create_event(**self.example_data)
+        event = self.create_event(**example_data)
         DBSession.flush()
         response = self.app.get('/events/%s' % event.id)
-        self.assertDictEqual(remove_id(response.json['event']),
-                             self.example_data)
+        self.assertEqualIgnoringId(response.json['event'], example_json)
 
     def test_get_invalid_id(self):
         response = self.app.get('/events/42', status=404)

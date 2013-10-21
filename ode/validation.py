@@ -1,4 +1,5 @@
-from colander import MappingSchema, SchemaNode, String, Length
+from colander import MappingSchema, SchemaNode, String, Length, DateTime
+from colander import drop
 from ode.models import SAFE_MAX_LENGTH
 
 
@@ -45,3 +46,6 @@ class EventSchema(MappingSchema):
     town = default_schema_node()
     video_license = default_schema_node()
     video_url = default_schema_node()
+    url = default_schema_node()
+    start_time = SchemaNode(DateTime(), missing=drop)
+    end_time = SchemaNode(DateTime(), missing=drop)

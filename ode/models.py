@@ -59,7 +59,7 @@ class Event(Base):
     video_license = default_column()
     video_url = default_column()
 
-    def json_data(self):
+    def to_dict(self):
         return {
             column.name: getattr(self, column.name)
             for column in Event.__mapper__.columns

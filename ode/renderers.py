@@ -1,7 +1,10 @@
+import datetime
+
 from icalendar import Calendar, Event
+from pyramid.renderers import JSON
 
 
-class Ical(object):
+class IcalRenderer(object):
 
     def __init__(self, info):
         pass
@@ -22,3 +25,11 @@ class Ical(object):
         event.add('dtend', event_data['end_time'])
         calendar.add_component(event)
         return calendar.to_ical()
+
+
+def datetime_adapter(obj, request):
+    return obj.isoformat()
+
+
+JsonRenderer = JSON()
+JsonRenderer.add_adapter(datetime.datetime, datetime_adapter)

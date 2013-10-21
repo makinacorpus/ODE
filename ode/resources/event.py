@@ -25,8 +25,7 @@ class EventResource(object):
     @view(schema=EventSchema)
     def collection_post(self):
         """Add a new event"""
-        event_info = json.loads(self.request.body)
-        event = Event(**event_info)
+        event = Event(**self.request.validated)
         DBSession.add(event)
         DBSession.flush()
         return {'id': event.id, 'status': 'created'}
@@ -43,11 +42,11 @@ class EventResource(object):
     def collection_get(self):
         """Get list of all events"""
         query = DBSession.query(Event).all()
-        events = [event.json_data() for event in query]
+        events = [event.to_dict() for event in query]
         return {'events': events}
 
     @view(accept='text/calendar', renderer='ical')
-    @view(accept='application/json')
+    @view(accept='application/json', renderer='json')
     def get(self):
         """Get a specific event by id"""
         id = self.request.matchdict['id']
@@ -57,7 +56,7 @@ class EventResource(object):
             raise HTTPNotFound()
         return {
             'status': 'success',
-            'event': event.json_data(),
+            'event': event.to_dict(),
         }
 
     def delete(self):
