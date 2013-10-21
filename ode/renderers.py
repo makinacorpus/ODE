@@ -19,5 +19,6 @@ class Ical(object):
         event.add('location', event_data['location_name'])
         event.add('url', event_data['url'])
         event.add('dtstart', event_data['start_time'])
+        event.add('dtend', event_data['end_time'])
         calendar.add_component(event)
         return calendar.to_ical()

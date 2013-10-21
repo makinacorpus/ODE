@@ -16,8 +16,9 @@ class TestIcal(TestEventMixin, TestCase):
         self.assertIn(string, response.body.decode('utf-8'))
 
     def get_event(self, **kwargs):
-        if not 'start_time' in kwargs:
-            kwargs['start_time'] = datetime(2014, 1, 25, 15, 0)
+        for mandatory in ('start_time', 'end_time'):
+            if mandatory not in kwargs:
+                kwargs[mandatory] = datetime(2014, 1, 25, 15, 0)
         event = self.create_event(**kwargs)
         DBSession.flush()
 
@@ -50,3 +51,7 @@ class TestIcal(TestEventMixin, TestCase):
     def test_start_time(self):
         _, response = self.get_event(start_time=datetime(2013, 12, 25, 15, 0))
         self.assertContains(response, u'DTSTART;VALUE=DATE-TIME:20131225T1500')
+
+    def test_end_time(self):
+        _, response = self.get_event(end_time=datetime(2013, 12, 25, 15, 0))
+        self.assertContains(response, u'DTEND;VALUE=DATE-TIME:20131225T1500')
