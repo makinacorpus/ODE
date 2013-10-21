@@ -1,4 +1,6 @@
 # -*- encoding: utf-8 -*-
+from datetime import datetime
+
 from pyramid import testing
 from webtest import TestApp
 
@@ -25,6 +27,9 @@ class TestEventMixin(object):
         testing.tearDown()
 
     def create_event(self, *args, **kwargs):
+        for mandatory in ('start_time', 'end_time'):
+            if mandatory not in kwargs:
+                kwargs[mandatory] = datetime(2014, 1, 25, 15, 0)
         event = Event(**kwargs)
         DBSession.add(event)
         return event
@@ -32,3 +37,6 @@ class TestEventMixin(object):
     def assertTitleEqual(self, event_id, title):
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(event.title, title)
+
+    def assertContains(self, response, string):
+        self.assertIn(string, response.body.decode('utf-8'))

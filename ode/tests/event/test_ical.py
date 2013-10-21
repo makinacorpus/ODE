@@ -6,19 +6,9 @@ from ode.models import DBSession
 from ode.tests.event import TestEventMixin
 
 
-class TestIcal(TestEventMixin, TestCase):
-
-    def test_root(self):
-        response = self.app.get('/', status=200)
-        self.assertTrue('Pyramid' in response.body)
-
-    def assertContains(self, response, string):
-        self.assertIn(string, response.body.decode('utf-8'))
+class TestGetEvent(TestEventMixin, TestCase):
 
     def get_event(self, **kwargs):
-        for mandatory in ('start_time', 'end_time'):
-            if mandatory not in kwargs:
-                kwargs[mandatory] = datetime(2014, 1, 25, 15, 0)
         event = self.create_event(**kwargs)
         DBSession.flush()
 
@@ -55,3 +45,14 @@ class TestIcal(TestEventMixin, TestCase):
     def test_end_time(self):
         _, response = self.get_event(end_time=datetime(2013, 12, 25, 15, 0))
         self.assertContains(response, u'DTEND;VALUE=DATE-TIME:20131225T1500')
+
+
+class TestGetEventList(TestEventMixin, TestCase):
+
+    def test_list_events(self):
+        self.create_event(title=u'Événement 1')
+        self.create_event(title=u'Événement 2')
+        response = self.app.get('/events',
+                                headers={'Accept': 'text/calendar'})
+        self.assertContains(response, u'SUMMARY:Événement 1')
+        self.assertContains(response, u'SUMMARY:Événement 2')

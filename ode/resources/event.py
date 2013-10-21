@@ -39,6 +39,8 @@ class EventResource(object):
             raise HTTPNotFound()
         return {'status': 'updated'}
 
+    @view(accept='text/calendar', renderer='ical')
+    @view(accept='application/json', renderer='json')
     def collection_get(self):
         """Get list of all events"""
         query = DBSession.query(Event).all()

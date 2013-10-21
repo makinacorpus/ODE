@@ -11,11 +11,20 @@ class IcalRenderer(object):
 
     def __call__(self, value, system):
         request = system.get('request')
-        event_data = value['event']
         if request is not None:
             response = request.response
             response.content_type = 'text/calendar'
         calendar = Calendar()
+        if 'events' in value:
+            for event_data in value['events']:
+                self.add_event(calendar, event_data)
+        else:
+            event_data = value['event']
+            self.add_event(calendar, event_data)
+        return calendar.to_ical()
+
+    @staticmethod
+    def add_event(calendar, event_data):
         event = Event()
         event.add('summary', event_data['title'])
         event.add('description', event_data['description'])
@@ -24,7 +33,6 @@ class IcalRenderer(object):
         event.add('dtstart', event_data['start_time'])
         event.add('dtend', event_data['end_time'])
         calendar.add_component(event)
-        return calendar.to_ical()
 
 
 def datetime_adapter(obj, request):
