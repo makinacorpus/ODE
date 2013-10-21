@@ -12,46 +12,6 @@ Base = declarative_base()
 
 SAFE_MAX_LENGTH = 1000
 
-EVENT_FIELDS = [
-    'address',
-    'audio_license',
-    'audio_url',
-    'author_email',
-    'author_firstname',
-    'author_lastname',
-    'author_telephone',
-    'country',
-    'post_code',
-    'description',
-    'event_id',
-    'email',
-    'firstname',
-    'language',
-    'lastname',
-    'latlong',
-    'location_name',
-    'organiser',
-    'capacity',
-    'price_information',
-    'performers',
-    'photos1_license',
-    'photos1_url',
-    'photos2_license',
-    'photos2_url',
-    'press_url',
-    'source_id',
-    'source',
-    'target',
-    'telephone',
-    'title',
-    'town',
-    'url',
-    'video_license',
-    'video_url',
-    'price_information',
-    'start_time',
-]
-
 
 def default_column():
     return Column(Unicode(SAFE_MAX_LENGTH))
@@ -101,7 +61,8 @@ class Event(Base):
 
     def json_data(self):
         return {
-            name: getattr(self, name) for name in EVENT_FIELDS
+            column.name: getattr(self, column.name)
+            for column in Event.__mapper__.columns
         }
 
     @property

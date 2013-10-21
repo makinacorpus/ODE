@@ -5,6 +5,12 @@ from ode.models import DBSession, Event
 from ode.tests.event import TestEventMixin
 
 
+def remove_id(dictionary):
+    result = dict(dictionary)
+    del result['id']
+    return result
+
+
 class TestJson(TestEventMixin, TestCase):
 
     example_data = {
@@ -49,6 +55,7 @@ class TestJson(TestEventMixin, TestCase):
         'video_url': 'http://example.com/video',
         'url': 'http://example.com/events/covention-amis-elephant',
         'start_time': None,
+        'end_time': None,
     }
 
     def test_root(self):
@@ -110,13 +117,14 @@ class TestJson(TestEventMixin, TestCase):
     def test_post_all_fields(self):
         event_id = self.post_event(self.example_data)
         event = DBSession.query(Event).filter_by(id=event_id).first()
-        self.assertDictEqual(event.json_data(), self.example_data)
+        self.assertDictEqual(remove_id(event.json_data()), self.example_data)
 
     def test_get_all_fields(self):
         event = self.create_event(**self.example_data)
         DBSession.flush()
         response = self.app.get('/events/%s' % event.id)
-        self.assertDictEqual(response.json['event'], self.example_data)
+        self.assertDictEqual(remove_id(response.json['event']),
+                             self.example_data)
 
     def test_get_invalid_id(self):
         response = self.app.get('/events/42', status=404)
