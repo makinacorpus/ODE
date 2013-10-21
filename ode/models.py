@@ -49,6 +49,7 @@ EVENT_FIELDS = [
     'video_license',
     'video_url',
     'price_information',
+    'start_time',
 ]
 
 

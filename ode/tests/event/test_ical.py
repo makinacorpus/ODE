@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
+from datetime import datetime
 
 from ode.models import DBSession
 from ode.tests.event import TestEventMixin
@@ -15,6 +16,8 @@ class TestIcal(TestEventMixin, TestCase):
         self.assertIn(string, response.body.decode('utf-8'))
 
     def get_event(self, **kwargs):
+        if not 'start_time' in kwargs:
+            kwargs['start_time'] = datetime(2014, 1, 25, 15, 0)
         event = self.create_event(**kwargs)
         DBSession.flush()
 
@@ -43,3 +46,7 @@ class TestIcal(TestEventMixin, TestCase):
     def test_url(self):
         event, response = self.get_event(url='http://example.com/')
         self.assertContains(response, u'URL:%s' % event.url)
+
+    def test_start_time(self):
+        _, response = self.get_event(start_time=datetime(2013, 12, 25, 15, 0))
+        self.assertContains(response, u'DTSTART;VALUE=DATE-TIME:20131225T1500')

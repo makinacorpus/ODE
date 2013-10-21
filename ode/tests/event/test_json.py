@@ -48,6 +48,7 @@ class TestJson(TestEventMixin, TestCase):
         'video_license': u'Video License Info',
         'video_url': 'http://example.com/video',
         'url': 'http://example.com/events/covention-amis-elephant',
+        'start_time': None,
     }
 
     def test_root(self):
