@@ -1,10 +1,9 @@
+# -*- encoding: utf-8 -*-
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
-from .models import (
-    DBSession,
-    Base,
-    )
+from .models import DBSession, Base
+from ode.deserializers import icalendar_extractor
 
 
 def main(global_config, **settings):
@@ -21,5 +20,6 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_renderer('ical', 'ode.renderers.IcalRenderer')
     config.add_renderer('json', 'ode.renderers.JsonRenderer')
+    config.add_cornice_deserializer('text/calendar', icalendar_extractor)
     config.scan()
     return config.make_wsgi_app()

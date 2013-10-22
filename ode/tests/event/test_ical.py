@@ -2,7 +2,9 @@
 from unittest import TestCase
 from datetime import datetime
 
-from ode.models import DBSession
+import icalendar
+
+from ode.models import DBSession, Event
 from ode.tests.event import TestEventMixin
 
 
@@ -56,3 +58,25 @@ class TestGetEventList(TestEventMixin, TestCase):
                                 headers={'Accept': 'text/calendar'})
         self.assertContains(response, u'SUMMARY:Événement 1')
         self.assertContains(response, u'SUMMARY:Événement 2')
+
+
+class TestPostEvent(TestEventMixin, TestCase):
+
+    start_time = datetime(2013, 12, 25, 15, 0)
+
+    def make_icalendar(self, titles):
+        calendar = icalendar.Calendar()
+        for title in titles:
+            event = icalendar.Event()
+            event.add('summary', title)
+            event.add('dtstart', self.start_time)
+            calendar.add_component(event)
+        return calendar.to_ical()
+
+    def test_post_single_event(self):
+        calendar = self.make_icalendar(titles=[u'Événement'])
+        response = self.app.post('/events', calendar,
+                                 headers={'content-type': 'text/calendar'})
+        self.assertEqual(response.json['status'], 'created')
+        event = DBSession.query(Event).filter_by(title=u'Événement').one()
+        self.assertEqual(event.start_time, self.start_time)
