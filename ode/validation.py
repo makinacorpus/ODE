@@ -59,3 +59,15 @@ class Events(SequenceSchema):
 
 class EventCollectionSchema(MappingSchema):
     events = Events()
+
+
+class SourceSchema(MappingSchema):
+    url = default_schema_node()
+
+
+class Sources(SequenceSchema):
+    source = SourceSchema()
+
+
+class SourceCollectionSchema(MappingSchema):
+    sources = Sources()

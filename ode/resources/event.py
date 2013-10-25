@@ -14,15 +14,7 @@ class EventResource(ResourceMixin):
 
     @view(schema=EventCollectionSchema)
     def collection_post(self):
-        """Add new events"""
-        events_data = self.request.validated['events']
-        result_data = []
-        for event_data in events_data:
-            event = Event(**event_data)
-            DBSession.add(event)
-            DBSession.flush()
-            result_data.append({'id': event.id, 'status': 'created'})
-        return {'events': result_data}
+        return ResourceMixin.collection_post(self)
 
     @view(schema=EventSchema)
     def put(self):

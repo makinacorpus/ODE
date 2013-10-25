@@ -22,3 +22,15 @@ class TestSource(BaseTestMixin, TestCase):
         self.app.delete('/sources/%s' % source.id)
         count = DBSession.query(Source).count()
         self.assertEqual(count, 0)
+
+    def test_create_source(self):
+        sources_info = {'sources': [{'url': u'http://example.com/mysource'}]}
+        self.app.post_json('/sources', sources_info)
+        source = DBSession.query(Source).one()
+        self.assertEqual(source.url, u'http://example.com/mysource')
+
+    def test_update_source(self):
+        pass
+
+    def test_get_source_list(self):
+        pass
