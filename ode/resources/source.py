@@ -12,18 +12,6 @@ class SourceResource(ResourceMixin):
 
     model = Source
 
-    def get(self):
-        """Get a specific event by id"""
-        id = self.request.matchdict['id']
-        try:
-            event = DBSession.query(Source).filter_by(id=id).one()
-        except NoResultFound:
-            raise HTTPNotFound()
-        return {
-            'status': 'success',
-            'source': event.to_dict(),
-        }
-
     @view(schema=SourceCollectionSchema)
     def collection_post(self):
         return ResourceMixin.collection_post(self)

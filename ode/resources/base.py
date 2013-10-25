@@ -37,3 +37,16 @@ class ResourceMixin(object):
             DBSession.flush()
             result_data.append({'id': resource.id, 'status': 'created'})
         return {self.name_plural: result_data}
+
+    def get(self):
+        """Get a specific event by id"""
+        id = self.request.matchdict['id']
+        try:
+            resource = DBSession.query(self.model).filter_by(id=id).one()
+        except NoResultFound:
+            raise HTTPNotFound()
+        return {
+            'status': 'success',
+            self.name: resource.to_dict(),
+        }
+

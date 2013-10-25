@@ -36,13 +36,4 @@ class EventResource(ResourceMixin):
     @view(accept='text/calendar', renderer='ical')
     @view(accept='application/json', renderer='json')
     def get(self):
-        """Get a specific event by id"""
-        id = self.request.matchdict['id']
-        try:
-            event = DBSession.query(Event).filter_by(id=id).one()
-        except NoResultFound:
-            raise HTTPNotFound()
-        return {
-            'status': 'success',
-            'event': event.to_dict(),
-        }
+        return ResourceMixin.get(self)
