@@ -1,19 +1,9 @@
 from cornice.resource import resource, view
 from sqlalchemy.orm.exc import NoResultFound
-from webob import Response, exc
-import json
 
 from ode.models import DBSession, Event
 from ode.validation import EventSchema, EventCollectionSchema
-
-
-class HTTPNotFound(exc.HTTPError):
-
-    def __init__(self, msg='Not Found'):
-        body = {'status': 404, 'message': msg}
-        Response.__init__(self, json.dumps(body))
-        self.status = 404
-        self.content_type = 'application/json'
+from ode.resources.exceptions import HTTPNotFound
 
 
 @resource(collection_path='/events', path='/events/{id}')

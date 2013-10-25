@@ -17,7 +17,16 @@ def default_column():
     return Column(Unicode(SAFE_MAX_LENGTH))
 
 
-class Event(Base):
+class ModelMixin(object):
+
+    def to_dict(self):
+        return {
+            column.name: getattr(self, column.name)
+            for column in self.__class__.__mapper__.columns
+        }
+
+
+class Event(ModelMixin, Base):
     __tablename__ = 'events'
     id = Column(Integer, primary_key=True)
 
@@ -59,12 +68,6 @@ class Event(Base):
     video_license = default_column()
     video_url = default_column()
 
-    def to_dict(self):
-        return {
-            column.name: getattr(self, column.name)
-            for column in Event.__mapper__.columns
-        }
-
     @property
     def uid(self):
         return "{}-{}@{}".format(
@@ -72,6 +75,12 @@ class Event(Base):
             self.id,
             pyramid.threadlocal.get_current_registry().settings['domain'],
         )
+
+
+class Source(ModelMixin, Base):
+    __tablename__ = 'sources'
+    id = Column(Integer, primary_key=True)
+    url = default_column()
 
 
 class MyModel(Base):
