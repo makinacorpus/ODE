@@ -30,7 +30,11 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertEqual(source.url, u'http://example.com/mysource')
 
     def test_update_source(self):
-        pass
+        source = self.make_source()
+        response = self.app.put_json('/sources/%s' % source.id, {
+            'url': 'http://example.com/myothersource',
+        })
+        self.assertEqual(response.json['status'], 'updated')
 
     def test_get_source_list(self):
         pass

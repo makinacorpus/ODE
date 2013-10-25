@@ -1,9 +1,7 @@
 from cornice.resource import resource, view
-from sqlalchemy.orm.exc import NoResultFound
 
 from ode.models import DBSession, Event
 from ode.validation import EventSchema, EventCollectionSchema
-from ode.resources.exceptions import HTTPNotFound
 from ode.resources.base import ResourceMixin
 
 
@@ -18,12 +16,7 @@ class EventResource(ResourceMixin):
 
     @view(schema=EventSchema)
     def put(self):
-        """Update existing event by id"""
-        event_id = self.request.matchdict['id']
-        query = DBSession.query(Event).filter_by(id=event_id)
-        if not query.update(self.request.validated):
-            raise HTTPNotFound()
-        return {'status': 'updated'}
+        return ResourceMixin.put(self)
 
     @view(accept='text/calendar', renderer='ical')
     @view(accept='application/json', renderer='json')

@@ -50,3 +50,10 @@ class ResourceMixin(object):
             self.name: resource.to_dict(),
         }
 
+    def put(self):
+        """Update existing event by id"""
+        resouce_id = self.request.matchdict['id']
+        query = DBSession.query(self.model).filter_by(id=resouce_id)
+        if not query.update(self.request.validated):
+            raise HTTPNotFound()
+        return {'status': 'updated'}
