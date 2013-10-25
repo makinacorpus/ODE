@@ -70,9 +70,11 @@ class TestJson(TestEventMixin, TestCase):
 
     def post_event(self, event_info=None):
         if event_info is None:
-            event_info = {'title': u'Titre Événement'}
-        response = self.app.post_json('/events', event_info)
-        return response.json['id']
+            events_info = {'events': [{'title': u'Titre Événement'}]}
+        else:
+            events_info = {'events': [event_info]}
+        response = self.app.post_json('/events', events_info)
+        return response.json['events'][0]['id']
 
     def assertEqualIgnoringId(self, result, expected):
         self.assertDictEqual(remove_id(result), expected)

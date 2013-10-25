@@ -4,7 +4,7 @@ from webob import Response, exc
 import json
 
 from ode.models import DBSession, Event
-from ode.validation import EventSchema
+from ode.validation import EventSchema, EventCollectionSchema
 
 
 class HTTPNotFound(exc.HTTPError):
@@ -22,13 +22,17 @@ class EventResource(object):
     def __init__(self, request):
         self.request = request
 
-    @view(schema=EventSchema)
+    @view(schema=EventCollectionSchema)
     def collection_post(self):
-        """Add a new event"""
-        event = Event(**self.request.validated)
-        DBSession.add(event)
-        DBSession.flush()
-        return {'id': event.id, 'status': 'created'}
+        """Add new events"""
+        events_data = self.request.validated['events']
+        result_data = []
+        for event_data in events_data:
+            event = Event(**event_data)
+            DBSession.add(event)
+            DBSession.flush()
+            result_data.append({'id': event.id, 'status': 'created'})
+        return {'events': result_data}
 
     @view(schema=EventSchema)
     def put(self):

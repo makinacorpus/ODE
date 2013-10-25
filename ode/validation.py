@@ -1,4 +1,6 @@
-from colander import MappingSchema, SchemaNode, String, Length, DateTime
+from colander import MappingSchema, SchemaNode, String
+from colander import Length, DateTime
+from colander import SequenceSchema
 from colander import drop
 from ode.models import SAFE_MAX_LENGTH
 
@@ -49,3 +51,11 @@ class EventSchema(MappingSchema):
     url = default_schema_node()
     start_time = SchemaNode(DateTime(), missing=drop)
     end_time = SchemaNode(DateTime(), missing=drop)
+
+
+class Events(SequenceSchema):
+    event = EventSchema()
+
+
+class EventCollectionSchema(MappingSchema):
+    events = Events()
