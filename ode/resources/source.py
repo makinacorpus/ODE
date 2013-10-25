@@ -3,13 +3,13 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from ode.models import DBSession, Source
 from ode.resources.exceptions import HTTPNotFound
+from ode.resources.base import ResourceMixin
 
 
 @resource(collection_path='/sources', path='/sources/{id}')
-class SourceResource(object):
+class SourceResource(ResourceMixin):
 
-    def __init__(self, request):
-        self.request = request
+    model = Source
 
     def get(self):
         """Get a specific event by id"""

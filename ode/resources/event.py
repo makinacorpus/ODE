@@ -4,13 +4,13 @@ from sqlalchemy.orm.exc import NoResultFound
 from ode.models import DBSession, Event
 from ode.validation import EventSchema, EventCollectionSchema
 from ode.resources.exceptions import HTTPNotFound
+from ode.resources.base import ResourceMixin
 
 
 @resource(collection_path='/events', path='/events/{id}')
-class EventResource(object):
+class EventResource(ResourceMixin):
 
-    def __init__(self, request):
-        self.request = request
+    model = Event
 
     @view(schema=EventCollectionSchema)
     def collection_post(self):
@@ -54,13 +54,3 @@ class EventResource(object):
             'status': 'success',
             'event': event.to_dict(),
         }
-
-    def delete(self):
-        """Delete a specific event by id"""
-        id = self.request.matchdict['id']
-        try:
-            event = DBSession.query(Event).filter_by(id=id).one()
-        except NoResultFound:
-            raise HTTPNotFound()
-        DBSession.delete(event)
-        return {'status': 'deleted'}
