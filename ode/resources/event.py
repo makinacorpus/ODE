@@ -1,6 +1,6 @@
 from cornice.resource import resource, view
 
-from ode.models import DBSession, Event
+from ode.models import Event
 from ode.validation import EventSchema, EventCollectionSchema
 from ode.resources.base import ResourceMixin
 
@@ -21,10 +21,7 @@ class EventResource(ResourceMixin):
     @view(accept='text/calendar', renderer='ical')
     @view(accept='application/json', renderer='json')
     def collection_get(self):
-        """Get list of all events"""
-        query = DBSession.query(Event).all()
-        events = [event.to_dict() for event in query]
-        return {'events': events}
+        return ResourceMixin.collection_get(self)
 
     @view(accept='text/calendar', renderer='ical')
     @view(accept='application/json', renderer='json')

@@ -18,7 +18,7 @@ class ResourceMixin(object):
         return self.name + 's'
 
     def delete(self):
-        """Delete an object by id"""
+        """Delete a resource by id"""
         id = self.request.matchdict['id']
         try:
             event = DBSession.query(self.model).filter_by(id=id).one()
@@ -39,7 +39,7 @@ class ResourceMixin(object):
         return {self.name_plural: result_data}
 
     def get(self):
-        """Get a specific event by id"""
+        """Get a specific resource by id"""
         id = self.request.matchdict['id']
         try:
             resource = DBSession.query(self.model).filter_by(id=id).one()
@@ -51,9 +51,15 @@ class ResourceMixin(object):
         }
 
     def put(self):
-        """Update existing event by id"""
+        """Update an existing resource by id"""
         resouce_id = self.request.matchdict['id']
         query = DBSession.query(self.model).filter_by(id=resouce_id)
         if not query.update(self.request.validated):
             raise HTTPNotFound()
         return {'status': 'updated'}
+
+    def collection_get(self):
+        """Get list of resources"""
+        query = DBSession.query(self.model).all()
+        resources = [resource.to_dict() for resource in query]
+        return {self.name_plural: resources}

@@ -6,12 +6,6 @@ from ode.tests import BaseTestMixin
 
 class TestSource(BaseTestMixin, TestCase):
 
-    def make_source(self):
-        source = Source(url=u"http://example.com")
-        DBSession.add(source)
-        DBSession.flush()
-        return source
-
     def test_get_source(self):
         source = self.make_source()
         response = self.app.get('/sources/%s' % source.id)
@@ -37,4 +31,7 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertEqual(response.json['status'], 'updated')
 
     def test_get_source_list(self):
-        pass
+        self.make_source(u"http://example.com/mysource")
+        self.make_source(u"http://example.com/myothersource")
+        response = self.app.get('/sources')
+        self.assertEqual(len(response.json['sources']), 2)

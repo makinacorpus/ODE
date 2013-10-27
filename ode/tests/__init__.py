@@ -4,7 +4,7 @@ from webtest import TestApp
 
 from ode import main
 from ode.tests.support import initTestingDB
-from ode.models import DBSession
+from ode.models import DBSession, Source
 
 
 class BaseTestMixin(object):
@@ -23,3 +23,9 @@ class BaseTestMixin(object):
         del self.app
         DBSession.remove()
         testing.tearDown()
+
+    def make_source(self, url=u"http://example.com"):
+        source = Source(url=url)
+        DBSession.add(source)
+        DBSession.flush()
+        return source

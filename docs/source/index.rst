@@ -7,7 +7,7 @@ Welcome to Open Data Events' documentation!
 ===========================================
 
 .. services::
-   :modules: ode.resources.event
+   :modules: ode.resources.event, ode.resources.source
 
 .. toctree::
    :maxdepth: 2

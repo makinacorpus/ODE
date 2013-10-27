@@ -24,6 +24,7 @@ requires = [
     'zope.sqlalchemy',
     'waitress',
     'colander',
+    'requests',
 ]
 
 setup(name='ode',
