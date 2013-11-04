@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
 from mock import Mock, patch
+from datetime import datetime
 
 from ode.models import Event, DBSession
 from ode.tests.event import TestEventMixin
@@ -41,6 +42,14 @@ class TestSource(TestEventMixin, TestCase):
         mock_requests.get.assert_called_with(source.url)
         event = DBSession.query(Event).one()
         self.assertEqual(event.title, u"Capitole du Libre")
+        self.assertEqual(event.url,
+                         u"http://www.agendadulibre.org/showevent.php?id=7064")
+        self.assertEqual(event.description,
+                         u"Un évènement de l'Agenda du Libre")
+        self.assertEqual(event.location_name, u"Toulouse")
+        self.assertEqual(event.uid, u"1234@example.com")
+        self.assertEqual(event.start_time, datetime(2012, 11, 24, 11))
+        self.assertEqual(event.end_time, datetime(2012, 11, 25, 17))
 
     def test_duplicate_is_ignored(self, mock_requests):
         existing_event = self.create_event(

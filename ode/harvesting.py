@@ -14,8 +14,12 @@ def harvest():
             if DBSession.query(Event).filter_by(uid=uid).count():
                 continue
             event = Event(
+                uid=uid,
                 title=event_info['summary'],
                 start_time=event_info['dtstart'].dt,
-                uid=uid,
+                url=event_info['url'],
+                description=event_info['description'],
+                location_name=event_info['location'],
+                end_time=event_info['dtend'].dt,
             )
             DBSession.add(event)
