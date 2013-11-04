@@ -69,6 +69,7 @@ class TestPostEvent(TestEventMixin, TestCase):
         calendar = icalendar.Calendar()
         for title in titles:
             event = icalendar.Event()
+            event.add('uid', '123@example.com')
             event.add('summary', title)
             event.add('dtstart', self.start_time)
             event.add('dtend', self.end_time)

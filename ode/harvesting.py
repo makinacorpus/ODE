@@ -2,6 +2,7 @@ import icalendar
 import requests
 
 from ode.models import DBSession, Source, Event
+from deserializers import icalendar_to_event_dict
 
 
 def harvest():
@@ -13,13 +14,5 @@ def harvest():
             uid = event_info['uid']
             if DBSession.query(Event).filter_by(uid=uid).count():
                 continue
-            event = Event(
-                uid=uid,
-                title=event_info['summary'],
-                start_time=event_info['dtstart'].dt,
-                url=event_info['url'],
-                description=event_info['description'],
-                location_name=event_info['location'],
-                end_time=event_info['dtend'].dt,
-            )
+            event = Event(**icalendar_to_event_dict(event_info))
             DBSession.add(event)
