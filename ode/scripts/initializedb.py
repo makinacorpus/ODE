@@ -1,6 +1,5 @@
 import os
 import sys
-import transaction
 
 from sqlalchemy import engine_from_config
 
@@ -11,11 +10,7 @@ from pyramid.paster import (
 
 from pyramid.scripts.common import parse_vars
 
-from ..models import (
-    DBSession,
-    MyModel,
-    Base,
-    )
+from ode.models import DBSession, Base
 
 
 def usage(argv):
@@ -35,6 +30,3 @@ def main(argv=sys.argv):
     engine = engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
     Base.metadata.create_all(engine)
-    with transaction.manager:
-        model = MyModel(name='one')
-        DBSession.add(model)

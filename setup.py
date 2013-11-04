@@ -51,5 +51,6 @@ setup(name='ode',
       main = ode:main
       [console_scripts]
       initialize_ode_db = ode.scripts.initializedb:main
+      harvest = ode.scripts.harvest:main
       """,
       )

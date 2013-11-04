@@ -16,3 +16,4 @@ def harvest():
                 continue
             event = Event(**icalendar_to_event_dict(event_info))
             DBSession.add(event)
+    DBSession.flush()

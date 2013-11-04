@@ -66,8 +66,8 @@ class TestJson(TestEventMixin, TestCase):
     maxDiff = None
 
     def test_root(self):
-        response = self.app.get('/', status=200)
-        self.assertTrue('Pyramid' in response.body)
+        response = self.app.get('/', status=302)
+        self.assertTrue('ode' in response.body)
 
     def post_event(self, event_info=None):
         if event_info:

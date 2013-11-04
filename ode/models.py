@@ -1,5 +1,5 @@
 import pyramid
-from sqlalchemy import (Column, Index, Integer, Text, Unicode, UnicodeText,
+from sqlalchemy import (Column, Integer, Unicode, UnicodeText,
                         DateTime)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -71,7 +71,7 @@ class Event(ModelMixin, Base):
     video_url = default_column()
 
     def __init__(self, *args, **kwargs):
-        if 'uid' not in kwargs:
+        if 'uid' not in kwargs and 'start_time' in kwargs:
             kwargs['uid'] = self.make_uid(kwargs['start_time'])
         super(Event, self).__init__(*args, **kwargs)
 
@@ -87,13 +87,3 @@ class Source(ModelMixin, Base):
     __tablename__ = 'sources'
     id = Column(Integer, primary_key=True)
     url = default_column()
-
-
-class MyModel(Base):
-    __tablename__ = 'models'
-    id = Column(Integer, primary_key=True)
-    name = Column(Text)
-    start = Column(DateTime)
-    end = Column(DateTime)
-
-Index('event_index', MyModel.name, unique=True, mysql_length=255)
