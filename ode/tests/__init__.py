@@ -24,8 +24,8 @@ class BaseTestMixin(object):
         DBSession.remove()
         testing.tearDown()
 
-    def make_source(self, url=u"http://example.com"):
-        source = Source(url=url)
+    def make_source(self, url=u"http://example.com", owner_id='123'):
+        source = Source(url=url, owner_id=owner_id)
         DBSession.add(source)
         DBSession.flush()
         return source

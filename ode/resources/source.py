@@ -4,6 +4,7 @@ from ode.models import Source
 from ode.resources.base import ResourceMixin
 from ode.validation import SourceCollectionSchema
 from ode.validation import SourceSchema
+from ode.validation import has_owner
 
 
 @resource(collection_path='/sources', path='/sources/{id}')
@@ -11,10 +12,10 @@ class SourceResource(ResourceMixin):
 
     model = Source
 
-    @view(schema=SourceCollectionSchema)
+    @view(validators=[has_owner], schema=SourceCollectionSchema)
     def collection_post(self):
         return ResourceMixin.collection_post(self)
 
-    @view(schema=SourceSchema)
+    @view(validators=[has_owner], schema=SourceSchema)
     def put(self):
         return ResourceMixin.put(self)

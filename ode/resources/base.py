@@ -1,7 +1,9 @@
 from sqlalchemy.orm.exc import NoResultFound
+from cornice.resource import view
 
 from ode.resources.exceptions import HTTPNotFound
 from ode.models import DBSession
+from ode.validation import has_owner
 
 
 class ResourceMixin(object):
@@ -17,11 +19,15 @@ class ResourceMixin(object):
     def name_plural(self):
         return self.name + 's'
 
+    @view(validators=[has_owner])
     def delete(self):
         """Delete a resource by id"""
         id = self.request.matchdict['id']
         try:
-            event = DBSession.query(self.model).filter_by(id=id).one()
+            event = DBSession.query(self.model).filter_by(
+                id=id,
+                owner_id=self.request.validated['owner_id'],
+            ).one()
         except NoResultFound:
             raise HTTPNotFound()
         DBSession.delete(event)
@@ -30,8 +36,10 @@ class ResourceMixin(object):
     def collection_post(self):
         """Add new resources"""
         resources_data = self.request.validated[self.name_plural]
+        owner_id = self.request.validated['owner_id']
         result_data = []
         for resource_data in resources_data:
+            resource_data['owner_id'] = owner_id
             resource = self.model(**resource_data)
             DBSession.add(resource)
             DBSession.flush()
@@ -53,7 +61,10 @@ class ResourceMixin(object):
     def put(self):
         """Update an existing resource by id"""
         resouce_id = self.request.matchdict['id']
-        query = DBSession.query(self.model).filter_by(id=resouce_id)
+        query = DBSession.query(self.model).filter_by(
+            id=resouce_id,
+            owner_id=self.request.validated['owner_id'],
+        )
         if not query.update(self.request.validated):
             raise HTTPNotFound()
         return {'status': 'updated'}
