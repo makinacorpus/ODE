@@ -3,7 +3,7 @@ from unittest import TestCase
 from mock import Mock, patch
 
 from ode.models import Event, DBSession
-from ode.tests import BaseTestMixin
+from ode.tests.event import TestEventMixin
 from ode.harvesting import harvest
 
 
@@ -18,7 +18,7 @@ X-WR-CALDESC:L'Agenda des évènements autour du Libre, tag toulibre
 BEGIN:VEVENT
 DTSTART;TZID=Europe/Paris:20121124T110000
 DTEND;TZID=Europe/Paris:20121125T170000
-UID:7064@agendadulibre.org
+UID:1234@example.com
 SUMMARY:Capitole du Libre
 URL:http://www.agendadulibre.org/showevent.php?id=7064
 DESCRIPTION:Un évènement de l'Agenda du Libre
@@ -29,7 +29,7 @@ END:VCALENDAR
 
 
 @patch('ode.harvesting.requests')
-class TestSource(BaseTestMixin, TestCase):
+class TestSource(TestEventMixin, TestCase):
 
     def test_fetch_data_from_source(self, mock_requests):
         mock_requests.get.return_value = Mock(
@@ -41,3 +41,20 @@ class TestSource(BaseTestMixin, TestCase):
         mock_requests.get.assert_called_with(source.url)
         event = DBSession.query(Event).one()
         self.assertEqual(event.title, u"Capitole du Libre")
+
+    def test_duplicate_is_ignored(self, mock_requests):
+        existing_event = self.create_event(
+            title=u'Existing event',
+            uid=u'1234@example.com',
+        )
+        DBSession.flush()
+
+        mock_requests.get.return_value = Mock(
+            content_type='text/calendar',
+            text=icalendar_example,
+        )
+        source = self.make_source()
+        harvest()
+        mock_requests.get.assert_called_with(source.url)
+        event = DBSession.query(Event).one()
+        self.assertEqual(event.title, existing_event.title)

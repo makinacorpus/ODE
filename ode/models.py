@@ -3,6 +3,7 @@ from sqlalchemy import (Column, Index, Integer, Text, Unicode, UnicodeText,
                         DateTime)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
+from uuid import uuid1
 from zope.sqlalchemy import ZopeTransactionExtension
 
 
@@ -64,15 +65,20 @@ class Event(ModelMixin, Base):
     telephone = default_column()
     title = default_column()
     town = default_column()
+    uid = Column(Unicode(SAFE_MAX_LENGTH), unique=True)
     url = default_column()
     video_license = default_column()
     video_url = default_column()
 
-    @property
-    def uid(self):
+    def __init__(self, *args, **kwargs):
+        if 'uid' not in kwargs:
+            kwargs['uid'] = self.make_uid(kwargs['start_time'])
+        super(Event, self).__init__(*args, **kwargs)
+
+    def make_uid(self, start_time):
         return "{}-{}@{}".format(
-            self.start_time.strftime("%Y%m%d%H%M%S"),
-            self.id,
+            start_time.strftime("%Y%m%d%H%M%S"),
+            uuid1().hex,
             pyramid.threadlocal.get_current_registry().settings['domain'],
         )
 

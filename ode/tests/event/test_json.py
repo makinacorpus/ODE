@@ -6,9 +6,10 @@ from ode.models import DBSession, Event
 from ode.tests.event import TestEventMixin
 
 
-def remove_id(dictionary):
+def remove_ids(dictionary):
     result = dict(dictionary)
     del result['id']
+    del result['uid']
     return result
 
 
@@ -69,15 +70,18 @@ class TestJson(TestEventMixin, TestCase):
         self.assertTrue('Pyramid' in response.body)
 
     def post_event(self, event_info=None):
-        if event_info is None:
-            events_info = {'events': [{'title': u'Titre Événement'}]}
-        else:
+        if event_info:
             events_info = {'events': [event_info]}
+        else:
+            events_info = {'events': [{'title': u'Titre Événement'}]}
+        for mandatory in ('start_time', 'end_time'):
+            if mandatory not in events_info['events'][0]:
+                events_info['events'][0][mandatory] = '2014-01-25T15:00'
         response = self.app.post_json('/events', events_info)
         return response.json['events'][0]['id']
 
     def assertEqualIgnoringId(self, result, expected):
-        self.assertDictEqual(remove_id(result), expected)
+        self.assertDictEqual(remove_ids(result), expected)
 
     def test_post_event(self):
         event_id = self.post_event()
@@ -94,6 +98,8 @@ class TestJson(TestEventMixin, TestCase):
         event_id = self.post_event()
         response = self.app.put_json('/events/%s' % event_id, {
             'title': 'EuroPython',
+            'start_time': '2014-01-25T15:00',
+            'end_time': '2014-01-25T15:00',
         })
         self.assertTitleEqual(event_id, 'EuroPython')
         self.assertEqual(response.json['status'], 'updated')
@@ -141,7 +147,10 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(response.json['status'], 404)
 
     def test_put_invalid_id(self):
-        response = self.app.put('/events/42', status=404)
+        response = self.app.put_json('/events/42', {
+            'start_time': '2014-01-25T15:00',
+            'end_time': '2014-01-25T15:00'
+        }, status=404)
         self.assertEqual(response.json['status'], 404)
 
     def test_delete_invalid_id(self):

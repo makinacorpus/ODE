@@ -9,5 +9,6 @@ def icalendar_extractor(request):
         events.append({
             'title': event['summary'],
             'start_time': event['dtstart'].dt.isoformat(),
+            'end_time': event['dtend'].dt.isoformat(),
         })
     return {'events': events}

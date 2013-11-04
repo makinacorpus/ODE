@@ -22,5 +22,5 @@ class TestModel(TestEventMixin, TestCase):
         start_time = datetime(2013, 01, 01)
         event = self.create_event(start_time=start_time)
         DBSession.flush()
-        self.assertEqual(event.uid,
-                         "20130101000000-%s@example.com" % event.id)
+        self.assertTrue(event.uid.startswith("20130101000000-"))
+        self.assertTrue(event.uid.endswith("@example.com"))

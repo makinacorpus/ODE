@@ -63,6 +63,7 @@ class TestGetEventList(TestEventMixin, TestCase):
 class TestPostEvent(TestEventMixin, TestCase):
 
     start_time = datetime(2013, 12, 25, 15, 0)
+    end_time = datetime(2013, 12, 27, 15, 0)
 
     def make_icalendar(self, titles):
         calendar = icalendar.Calendar()
@@ -70,6 +71,7 @@ class TestPostEvent(TestEventMixin, TestCase):
             event = icalendar.Event()
             event.add('summary', title)
             event.add('dtstart', self.start_time)
+            event.add('dtend', self.end_time)
             calendar.add_component(event)
         return calendar.to_ical()
 
