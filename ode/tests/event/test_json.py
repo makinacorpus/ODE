@@ -65,10 +65,6 @@ example_json['end_time'] = '2013-12-19T09:00:00'
 class TestJson(TestEventMixin, TestCase):
     maxDiff = None
 
-    def test_root(self):
-        response = self.app.get('/', status=302)
-        self.assertTrue('ode' in response.body)
-
     def post_event(self, event_info=None, headers=None, status=200):
         if headers is None:
             headers = {'X-ODE-Owner': '123'}
@@ -86,6 +82,17 @@ class TestJson(TestEventMixin, TestCase):
     def assertEqualIgnoringId(self, result, expected):
         self.assertDictEqual(remove_ids(result), expected)
 
+    def assertErrorMessage(self, response, message):
+        for error in response.json['errors']:
+            if message in error['description']:
+                return
+        raise AssertionError("Cannot find expected error message '%s'" %
+                             message)
+
+    def test_root(self):
+        response = self.app.get('/', status=302)
+        self.assertTrue('ode' in response.body)
+
     def test_post_event(self):
         event_id = self.post_event()
         self.assertTitleEqual(event_id, u'Titre Événement')
@@ -97,9 +104,9 @@ class TestJson(TestEventMixin, TestCase):
     def test_post_title_too_long(self):
         very_long_title = '*' * 1001
         response = self.app.post_json('/events', {
-            'title': very_long_title
+            'events': [{'title': very_long_title}],
         }, status=400, headers={'X-ODE-Owner': '123'})
-        self.assertEqual(response.json['status'], 'error')
+        self.assertErrorMessage(response, 'Longer than maximum')
 
     def test_update_event(self):
         event_id = self.post_event()
