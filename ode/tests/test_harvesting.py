@@ -29,17 +29,22 @@ END:VCALENDAR
 """
 
 
-@patch('ode.harvesting.requests')
 class TestSource(TestEventMixin, TestCase):
 
-    def test_fetch_data_from_source(self, mock_requests):
-        mock_requests.get.return_value = Mock(
+    def setup_requests_mock(self):
+        requests_patcher = patch('ode.harvesting.requests')
+        self.mock_requests = requests_patcher.start()
+        self.addCleanup(requests_patcher.stop)
+        self.mock_requests.get.return_value = Mock(
             content_type='text/calendar',
             text=icalendar_example,
         )
+
+    def test_fetch_data_from_source(self):
+        self.setup_requests_mock()
         source = self.make_source()
         harvest()
-        mock_requests.get.assert_called_with(source.url)
+        self.mock_requests.get.assert_called_with(source.url)
         event = DBSession.query(Event).one()
         self.assertEqual(event.title, u"Capitole du Libre")
         self.assertEqual(event.url,
@@ -51,19 +56,15 @@ class TestSource(TestEventMixin, TestCase):
         self.assertEqual(event.start_time, datetime(2012, 11, 24, 11))
         self.assertEqual(event.end_time, datetime(2012, 11, 25, 17))
 
-    def test_duplicate_is_ignored(self, mock_requests):
+    def test_duplicate_is_ignored(self):
         existing_event = self.create_event(
             title=u'Existing event',
             uid=u'1234@example.com',
         )
         DBSession.flush()
-
-        mock_requests.get.return_value = Mock(
-            content_type='text/calendar',
-            text=icalendar_example,
-        )
+        self.setup_requests_mock()
         source = self.make_source()
         harvest()
-        mock_requests.get.assert_called_with(source.url)
+        self.mock_requests.get.assert_called_with(source.url)
         event = DBSession.query(Event).one()
         self.assertEqual(event.title, existing_event.title)
