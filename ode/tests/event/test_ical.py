@@ -67,9 +67,9 @@ class TestPostEvent(TestEventMixin, TestCase):
 
     def make_icalendar(self, titles):
         calendar = icalendar.Calendar()
-        for title in titles:
+        for index, title in enumerate(titles):
             event = icalendar.Event()
-            event.add('uid', '123@example.com')
+            event.add('uid', '123-%s@example.com' % index)
             event.add('summary', title)
             event.add('dtstart', self.start_time)
             event.add('dtend', self.end_time)

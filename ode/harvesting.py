@@ -1,8 +1,20 @@
 import icalendar
 import requests
+from colander import Invalid
 
 from ode.models import DBSession, Source, Event
-from deserializers import icalendar_to_event_dict
+from ode.validation import EventSchema
+from deserializers import icalendar_to_cstruct
+
+
+def exists(uid):
+    return DBSession.query(Event).filter_by(uid=uid).count() > 0
+
+
+def validate(icalendar_event):
+    cstruct = icalendar_to_cstruct(icalendar_event)
+    schema = EventSchema()
+    return schema.deserialize(cstruct)
 
 
 def harvest():
@@ -10,10 +22,13 @@ def harvest():
     for source in query:
         response = requests.get(source.url)
         calendar = icalendar.Calendar.from_ical(response.text)
-        for event_info in calendar.walk()[1:]:
-            uid = event_info['uid']
-            if DBSession.query(Event).filter_by(uid=uid).count():
-                continue
-            event = Event(**icalendar_to_event_dict(event_info))
-            DBSession.add(event)
+        for icalendar_event in calendar.walk()[1:]:
+            uid = icalendar_event['uid']
+            if not exists(uid):
+                try:
+                    model_kwargs = validate(icalendar_event)
+                except Invalid:
+                    continue
+                event = Event(**model_kwargs)
+                DBSession.add(event)
     DBSession.flush()

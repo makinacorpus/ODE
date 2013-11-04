@@ -4,6 +4,9 @@ from icalendar import Calendar, Event
 from pyramid.renderers import JSON
 
 
+from ode.models import icalendar_to_model_keys
+
+
 class IcalRenderer(object):
 
     def __init__(self, info):
@@ -26,12 +29,8 @@ class IcalRenderer(object):
     @staticmethod
     def add_event(calendar, event_data):
         event = Event()
-        event.add('summary', event_data['title'])
-        event.add('description', event_data['description'])
-        event.add('location', event_data['location_name'])
-        event.add('url', event_data['url'])
-        event.add('dtstart', event_data['start_time'])
-        event.add('dtend', event_data['end_time'])
+        for icalendar_key, model_attribute in icalendar_to_model_keys.items():
+            event.add(icalendar_key, event_data[model_attribute])
         calendar.add_component(event)
 
 

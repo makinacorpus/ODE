@@ -90,3 +90,15 @@ class Source(ModelMixin, Base):
     id = Column(Integer, primary_key=True)
     url = default_column()
     owner_id = default_column()
+
+
+icalendar_to_model_keys = {
+    'uid': 'uid',
+    'summary': 'title',
+    'dtstart':  'start_time',
+    'dtend': 'end_time',
+    'summary': 'title',
+    'url': 'url',
+    'description': 'description',
+    'location': 'location_name',
+}

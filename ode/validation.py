@@ -57,6 +57,7 @@ class EventSchema(MappingSchema):
     town = default_schema_node()
     video_license = default_schema_node()
     video_url = default_schema_node()
+    uid = default_schema_node()
     url = default_schema_node()
     start_time = SchemaNode(DateTime())
     end_time = SchemaNode(DateTime())
