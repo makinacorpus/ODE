@@ -8,7 +8,7 @@ def has_owner(request):
     owner_id = request.headers.get('X-ODE-Owner', '').strip()
     if owner_id:
         request.validated['owner_id'] = owner_id
-    if not owner_id:
+    else:
         request.errors.add('body', 'owner_id',
                            'This request requires an X-ODE-Owner header')
         request.errors.status = 403
