@@ -24,7 +24,7 @@ class ModelMixin(object):
         return {
             column.name: getattr(self, column.name)
             for column in self.__class__.__mapper__.columns
-            if column.name != 'owner_id'
+            if column.name != 'producer_id'
         }
 
 
@@ -70,7 +70,7 @@ class Event(ModelMixin, Base):
     url = default_column()
     video_license = default_column()
     video_url = default_column()
-    owner_id = default_column()
+    producer_id = default_column()
 
     def __init__(self, *args, **kwargs):
         if 'uid' not in kwargs and 'start_time' in kwargs:
@@ -89,7 +89,7 @@ class Source(ModelMixin, Base):
     __tablename__ = 'sources'
     id = Column(Integer, primary_key=True)
     url = default_column()
-    owner_id = default_column()
+    producer_id = default_column()
 
 
 icalendar_to_model_keys = {

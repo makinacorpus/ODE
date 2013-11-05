@@ -67,7 +67,7 @@ class TestJson(TestEventMixin, TestCase):
 
     def post_event(self, event_info=None, headers=None, status=200):
         if headers is None:
-            headers = {'X-ODE-Owner': '123'}
+            headers = {'X-ODE-Producer-Id': '123'}
         if event_info:
             events_info = {'events': [event_info]}
         else:
@@ -97,15 +97,15 @@ class TestJson(TestEventMixin, TestCase):
         event_id = self.post_event()
         self.assertTitleEqual(event_id, u'Titre Événement')
 
-    def test_post_event_with_invalid_owner_id(self):
-        self.app.post_json('/v1/events', headers={'X-ODE-Owner': '\n'},
+    def test_post_event_with_invalid_producer_id(self):
+        self.app.post_json('/v1/events', headers={'X-ODE-Producer-Id': '\n'},
                            status=403)
 
     def test_post_title_too_long(self):
         very_long_title = '*' * 1001
         response = self.app.post_json('/v1/events', {
             'events': [{'title': very_long_title}],
-        }, status=400, headers={'X-ODE-Owner': '123'})
+        }, status=400, headers={'X-ODE-Producer-Id': '123'})
         self.assertErrorMessage(response, 'Longer than maximum')
 
     def test_update_event(self):
@@ -114,7 +114,7 @@ class TestJson(TestEventMixin, TestCase):
             'title': 'EuroPython',
             'start_time': '2014-01-25T15:00',
             'end_time': '2014-01-25T15:00',
-        }, headers={'X-ODE-Owner': '123'})
+        }, headers={'X-ODE-Producer-Id': '123'})
         self.assertTitleEqual(event_id, 'EuroPython')
         self.assertEqual(response.json['status'], 'updated')
 
@@ -123,7 +123,7 @@ class TestJson(TestEventMixin, TestCase):
         very_long_title = '*' * 1001
         response = self.app.put_json('/v1/events/%s' % event_id, {
             'title': very_long_title
-        }, headers={'X-ODE-Owner': '123'}, status=400)
+        }, headers={'X-ODE-Producer-Id': '123'}, status=400)
         self.assertEqual(response.json['status'], 'error')
 
     def test_list_events(self):
@@ -142,7 +142,8 @@ class TestJson(TestEventMixin, TestCase):
 
     def test_delete_event(self):
         id = self.post_event()
-        self.app.delete('/v1/events/%s' % id, headers={'X-ODE-Owner': '123'})
+        self.app.delete('/v1/events/%s' % id,
+                        headers={'X-ODE-Producer-Id': '123'})
         self.assertEqual(DBSession.query(Event).count(), 0)
 
     def test_post_all_fields(self):
@@ -164,10 +165,10 @@ class TestJson(TestEventMixin, TestCase):
         response = self.app.put_json('/v1/events/42', {
             'start_time': '2014-01-25T15:00',
             'end_time': '2014-01-25T15:00'
-        }, headers={'X-ODE-Owner': '123'}, status=404)
+        }, headers={'X-ODE-Producer-Id': '123'}, status=404)
         self.assertEqual(response.json['status'], 404)
 
     def test_delete_invalid_id(self):
         response = self.app.delete('/v1/events/42', status=404,
-                                   headers={'X-ODE-Owner': '123'})
+                                   headers={'X-ODE-Producer-Id': '123'})
         self.assertEqual(response.json['status'], 404)

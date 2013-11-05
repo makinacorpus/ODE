@@ -4,13 +4,13 @@ from colander import SequenceSchema
 from ode.models import SAFE_MAX_LENGTH
 
 
-def has_owner(request):
-    owner_id = request.headers.get('X-ODE-Owner', '').strip()
-    if owner_id:
-        request.validated['owner_id'] = owner_id
+def has_producer_id(request):
+    producer_id = request.headers.get('X-ODE-Producer-Id', '').strip()
+    if producer_id:
+        request.validated['producer_id'] = producer_id
     else:
-        request.errors.add('body', 'owner_id',
-                           'This request requires an X-ODE-Owner header')
+        request.errors.add('body', 'producer_id',
+                           'This request requires an X-ODE-Producer-Id header')
         request.errors.status = 403
 
 
