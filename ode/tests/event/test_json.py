@@ -53,7 +53,7 @@ example_data = {
     "town": u"上海",
     "video_license": u"Video License Info",
     "video_url": u"http://example.com/video",
-    "url": u"http://example.com/events/covention-amis-elephant",
+    "url": u"http://example.com/v1/events/covention-amis-elephant",
     "start_time": datetime(2013, 12, 19, 9),
     "end_time": datetime(2013, 12, 19, 9),
 }
@@ -75,8 +75,8 @@ class TestJson(TestEventMixin, TestCase):
         for mandatory in ('start_time', 'end_time'):
             if mandatory not in events_info['events'][0]:
                 events_info['events'][0][mandatory] = '2014-01-25T15:00'
-        response = self.app.post_json('/events', events_info, headers=headers,
-                                      status=status)
+        response = self.app.post_json('/v1/events', events_info,
+                                      headers=headers, status=status)
         return response.json['events'][0]['id']
 
     def assertEqualIgnoringId(self, result, expected):
@@ -98,19 +98,19 @@ class TestJson(TestEventMixin, TestCase):
         self.assertTitleEqual(event_id, u'Titre Événement')
 
     def test_post_event_with_invalid_owner_id(self):
-        self.app.post_json('/events', headers={'X-ODE-Owner': '\n'},
+        self.app.post_json('/v1/events', headers={'X-ODE-Owner': '\n'},
                            status=403)
 
     def test_post_title_too_long(self):
         very_long_title = '*' * 1001
-        response = self.app.post_json('/events', {
+        response = self.app.post_json('/v1/events', {
             'events': [{'title': very_long_title}],
         }, status=400, headers={'X-ODE-Owner': '123'})
         self.assertErrorMessage(response, 'Longer than maximum')
 
     def test_update_event(self):
         event_id = self.post_event()
-        response = self.app.put_json('/events/%s' % event_id, {
+        response = self.app.put_json('/v1/events/%s' % event_id, {
             'title': 'EuroPython',
             'start_time': '2014-01-25T15:00',
             'end_time': '2014-01-25T15:00',
@@ -121,7 +121,7 @@ class TestJson(TestEventMixin, TestCase):
     def test_update_title_too_long(self):
         event_id = self.post_event()
         very_long_title = '*' * 1001
-        response = self.app.put_json('/events/%s' % event_id, {
+        response = self.app.put_json('/v1/events/%s' % event_id, {
             'title': very_long_title
         }, headers={'X-ODE-Owner': '123'}, status=400)
         self.assertEqual(response.json['status'], 'error')
@@ -129,20 +129,20 @@ class TestJson(TestEventMixin, TestCase):
     def test_list_events(self):
         self.create_event(title=u'Événement 1')
         self.create_event(title=u'Événement 2')
-        response = self.app.get('/events')
+        response = self.app.get('/v1/events')
         events = response.json['events']
         self.assertEqual(len(events), 2)
         self.assertEqual(events[0]['title'], u'Événement 1')
 
     def test_get_event(self):
         id = self.post_event()
-        response = self.app.get('/events/%s' % id)
+        response = self.app.get('/v1/events/%s' % id)
         self.assertEqual(response.json['event']['title'],
                          u'Titre Événement')
 
     def test_delete_event(self):
         id = self.post_event()
-        self.app.delete('/events/%s' % id, headers={'X-ODE-Owner': '123'})
+        self.app.delete('/v1/events/%s' % id, headers={'X-ODE-Owner': '123'})
         self.assertEqual(DBSession.query(Event).count(), 0)
 
     def test_post_all_fields(self):
@@ -153,21 +153,21 @@ class TestJson(TestEventMixin, TestCase):
     def test_get_all_fields(self):
         event = self.create_event(**example_data)
         DBSession.flush()
-        response = self.app.get('/events/%s' % event.id)
+        response = self.app.get('/v1/events/%s' % event.id)
         self.assertEqualIgnoringId(response.json['event'], example_json)
 
     def test_get_invalid_id(self):
-        response = self.app.get('/events/42', status=404)
+        response = self.app.get('/v1/events/42', status=404)
         self.assertEqual(response.json['status'], 404)
 
     def test_put_invalid_id(self):
-        response = self.app.put_json('/events/42', {
+        response = self.app.put_json('/v1/events/42', {
             'start_time': '2014-01-25T15:00',
             'end_time': '2014-01-25T15:00'
         }, headers={'X-ODE-Owner': '123'}, status=404)
         self.assertEqual(response.json['status'], 404)
 
     def test_delete_invalid_id(self):
-        response = self.app.delete('/events/42', status=404,
+        response = self.app.delete('/v1/events/42', status=404,
                                    headers={'X-ODE-Owner': '123'})
         self.assertEqual(response.json['status'], 404)

@@ -7,7 +7,7 @@ from ode.validation import SourceSchema
 from ode.validation import has_owner
 
 
-@resource(collection_path='/sources', path='/sources/{id}')
+@resource(collection_path='/v1/sources', path='/v1/sources/{id}')
 class SourceResource(ResourceMixin):
 
     model = Source

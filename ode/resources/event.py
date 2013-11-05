@@ -5,7 +5,7 @@ from ode.validation import EventSchema, EventCollectionSchema, has_owner
 from ode.resources.base import ResourceMixin
 
 
-@resource(collection_path='/events', path='/events/{id}')
+@resource(collection_path='/v1/events', path='/v1/events/{id}')
 class EventResource(ResourceMixin):
 
     model = Event

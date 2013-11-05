@@ -14,7 +14,7 @@ class TestGetEvent(TestEventMixin, TestCase):
         event = self.create_event(**kwargs)
         DBSession.flush()
 
-        response = self.app.get('/events/%s' % event.id,
+        response = self.app.get('/v1/events/%s' % event.id,
                                 headers={'Accept': 'text/calendar'})
         return event, response
 
@@ -54,7 +54,7 @@ class TestGetEventList(TestEventMixin, TestCase):
     def test_list_events(self):
         self.create_event(title=u'Événement 1')
         self.create_event(title=u'Événement 2')
-        response = self.app.get('/events',
+        response = self.app.get('/v1/events',
                                 headers={'Accept': 'text/calendar'})
         self.assertContains(response, u'SUMMARY:Événement 1')
         self.assertContains(response, u'SUMMARY:Événement 2')
@@ -77,7 +77,7 @@ class TestPostEvent(TestEventMixin, TestCase):
         return calendar.to_ical()
 
     def post(self, calendar):
-        return self.app.post('/events', calendar, headers={
+        return self.app.post('/v1/events', calendar, headers={
             'content-type': 'text/calendar',
             'X-ODE-Owner': '123'
         })
