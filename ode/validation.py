@@ -1,6 +1,8 @@
 from colander import MappingSchema, SchemaNode, String
 from colander import Length, DateTime
 from colander import SequenceSchema
+import colander
+
 from ode.models import SAFE_MAX_LENGTH
 
 
@@ -72,7 +74,7 @@ class EventCollectionSchema(MappingSchema):
 
 
 class SourceSchema(MappingSchema):
-    url = default_schema_node()
+    url = SchemaNode(String(), validator=colander.url)
 
 
 class Sources(SequenceSchema):

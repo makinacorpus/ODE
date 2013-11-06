@@ -6,6 +6,9 @@ from ode.tests import BaseTestMixin
 
 class TestSource(BaseTestMixin, TestCase):
 
+    def assertSourceCount(self, count):
+        self.assertEqual(DBSession.query(Source).count(), count)
+
     def test_get_source(self):
         source = self.make_source()
         response = self.app.get('/v1/sources/%s' % source.id)
@@ -15,22 +18,19 @@ class TestSource(BaseTestMixin, TestCase):
         source = self.make_source(producer_id=123)
         self.app.delete('/v1/sources/%s' % source.id,
                         headers={'X-ODE-Producer-Id': '123'})
-        count = DBSession.query(Source).count()
-        self.assertEqual(count, 0)
+        self.assertSourceCount(0)
 
     def test_anonymous_cannot_delete(self):
         source = self.make_source()
         self.app.delete('/v1/sources/%s' % source.id, status=403)
-        count = DBSession.query(Source).count()
-        self.assertEqual(count, 1)
+        self.assertSourceCount(1)
 
     def test_other_people_stuff(self):
         source = self.make_source(producer_id='abc')
         self.app.delete('/v1/sources/%s' % source.id,
                         headers={'X-ODE-Producer-Id': '123'},
                         status=404)
-        count = DBSession.query(Source).count()
-        self.assertEqual(count, 1)
+        self.assertSourceCount(1)
 
     def test_create_source(self):
         sources_info = {'sources': [{'url': u'http://example.com/mysource'}]}
@@ -40,10 +40,17 @@ class TestSource(BaseTestMixin, TestCase):
         source = DBSession.query(Source).one()
         self.assertEqual(source.url, u'http://example.com/mysource')
 
+    def test_url_is_required(self):
+        sources_info = {'sources': [{'url': u'\t  \r '}]}
+        self.app.post_json('/v1/sources', sources_info, headers={
+            'X-ODE-Producer-Id': '123'
+        }, status=400)
+        self.assertSourceCount(0)
+
     def test_anonymous_cannot_create(self):
         sources_info = {'sources': [{'url': u'http://example.com/mysource'}]}
         self.app.post_json('/v1/sources', sources_info, status=403)
-        self.assertEqual(DBSession.query(Source).count(), 0)
+        self.assertSourceCount(0)
 
     def test_update_source(self):
         source = self.make_source()
@@ -61,7 +68,7 @@ class TestSource(BaseTestMixin, TestCase):
     def test_cannot_update_other_people_stuff(self):
         source = self.make_source(producer_id='abc')
         response = self.app.put_json('/v1/sources/%s' % source.id,
-                                     {'url': 'whatever'},
+                                     {'url': 'http://example.com'},
                                      status=404,
                                      headers={'X-ODE-Producer-Id': '123'})
         self.assertEqual(response.json['status'], 404)
