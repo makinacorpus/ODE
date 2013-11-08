@@ -150,6 +150,7 @@ class TestJson(TestEventMixin, TestCase):
         event_id = self.post_event(example_json)
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqualIgnoringId(event.to_dict(), example_data)
+        self.assertIn('@', event.uid)
 
     def test_get_all_fields(self):
         event = self.create_event(**example_data)
