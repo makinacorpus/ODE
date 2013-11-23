@@ -1,0 +1,17 @@
+-e git+https://github.com/makinacorpus/cornice.git@request-data-extractors#egg=cornice
+icalendar
+fanstatic==0.16
+pyramid_formalchemy
+pyramid_fanstatic
+fa.jquery
+pyramid
+pyramid_chameleon
+pyramid_debugtoolbar
+pyramid_tm
+SQLAlchemy
+transaction
+zope.sqlalchemy
+waitress
+colander
+requests
+webtest

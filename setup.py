@@ -7,25 +7,9 @@ with open(os.path.join(here, 'README.rst')) as f:
     README = f.read()
 with open(os.path.join(here, 'CHANGES.rst')) as f:
     CHANGES = f.read()
+with open(os.path.join(here, 'requirements.txt')) as f:
+    REQUIRES = f.read().split()
 
-requires = [
-    'icalendar',
-    'fanstatic==0.16',
-    'pyramid_formalchemy',
-    'pyramid_fanstatic',
-    'cornice',
-    'fa.jquery',
-    'pyramid',
-    'pyramid_chameleon',
-    'pyramid_debugtoolbar',
-    'pyramid_tm',
-    'SQLAlchemy',
-    'transaction',
-    'zope.sqlalchemy',
-    'waitress',
-    'colander',
-    'requests',
-]
 
 setup(name='ode',
       version='0.0',
@@ -45,7 +29,7 @@ setup(name='ode',
       include_package_data=True,
       zip_safe=False,
       test_suite='ode',
-      install_requires=requires,
+      install_requires=REQUIRES,
       entry_points="""\
       [paste.app_factory]
       main = ode:main

@@ -1,3 +1,4 @@
+mock
 webtest
 Sphinx
 -e git+https://github.com/makinacorpus/cornice.git@request-data-extractors#egg=cornice
