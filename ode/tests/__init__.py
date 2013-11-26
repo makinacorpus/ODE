@@ -1,10 +1,19 @@
 # -*- encoding: utf-8 -*-
+import json
+
 from pyramid import testing
-from webtest import TestApp
+from webtest import TestApp as BaseTestApp
 
 from ode import main
 from ode.tests.support import initTestingDB
 from ode.models import DBSession, Source
+
+
+class TestApp(BaseTestApp):
+
+    def get_json(self, url, status=200):
+        response = self.get(url, status=status)
+        return json.loads(response.body)
 
 
 class BaseTestMixin(object):

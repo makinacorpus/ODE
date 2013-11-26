@@ -1,4 +1,4 @@
-from colander import MappingSchema, SchemaNode, String
+from colander import MappingSchema, SchemaNode, String, Integer
 from colander import Length, DateTime
 from colander import SequenceSchema
 import colander
@@ -84,3 +84,18 @@ class Sources(SequenceSchema):
 
 class SourceCollectionSchema(MappingSchema):
     sources = Sources()
+
+
+class QueryStringSchema(MappingSchema):
+    limit = SchemaNode(Integer(), missing=None)
+
+
+def validate_querystring(request):
+    schema = QueryStringSchema()
+    try:
+        request.validated = schema.deserialize(request.GET)
+    except colander.Invalid, e:
+        errors = e.asdict()
+        for field, message in errors.items():
+            request.errors.add('body', field, message)
+        request.errors.status = 400

@@ -4,6 +4,7 @@ from cornice.resource import view
 from ode.resources.exceptions import HTTPNotFound
 from ode.models import DBSession
 from ode.validation import has_producer_id
+from ode.validation import validate_querystring
 
 
 class ResourceMixin(object):
@@ -69,8 +70,12 @@ class ResourceMixin(object):
             raise HTTPNotFound()
         return {'status': 'updated'}
 
+    @view(validators=[validate_querystring])
     def collection_get(self):
         """Get list of resources"""
-        query = DBSession.query(self.model).all()
-        resources = [resource.to_dict() for resource in query]
+        query = DBSession.query(self.model)
+        limit = self.request.validated.get('limit')
+        if limit:
+            query = query.limit(limit)
+        resources = [resource.to_dict() for resource in query.all()]
         return {self.name_plural: resources}

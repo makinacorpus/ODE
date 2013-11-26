@@ -78,3 +78,15 @@ class TestSource(BaseTestMixin, TestCase):
         self.make_source(u"http://example.com/myothersource")
         response = self.app.get('/v1/sources')
         self.assertEqual(len(response.json['sources']), 2)
+
+    def test_valid_limit(self):
+        for i in range(1, 11):
+            self.make_source(u"http://example.com/feed%s" % i)
+        response = self.app.get_json('/v1/sources?limit=5')
+        self.assertEqual(len(response['sources']), 5)
+
+    def test_invalid_limit(self):
+        response = self.app.get_json('/v1/sources?limit=BOGUS', status=400)
+        self.assertEqual(response['status'], 'error')
+        self.assertEqual(response['errors'][0]['description'],
+                         '"BOGUS" is not a number')
