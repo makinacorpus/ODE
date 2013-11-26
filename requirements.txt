@@ -12,6 +12,6 @@ SQLAlchemy
 transaction
 zope.sqlalchemy
 waitress
-colander
+colander==1.0b1
 requests
 webtest
