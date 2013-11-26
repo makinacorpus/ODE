@@ -82,13 +82,6 @@ class TestJson(TestEventMixin, TestCase):
     def assertEqualIgnoringId(self, result, expected):
         self.assertDictEqual(remove_ids(result), expected)
 
-    def assertErrorMessage(self, response, message):
-        for error in response.json['errors']:
-            if message in error['description']:
-                return
-        raise AssertionError("Cannot find expected error message '%s'" %
-                             message)
-
     def test_root(self):
         response = self.app.get('/', status=302)
         self.assertTrue('ode' in response.body)

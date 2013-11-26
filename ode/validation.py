@@ -88,6 +88,7 @@ class SourceCollectionSchema(MappingSchema):
 
 class QueryStringSchema(MappingSchema):
     limit = SchemaNode(Integer(), missing=None)
+    offset = SchemaNode(Integer(), missing=None)
 
 
 def validate_querystring(request):

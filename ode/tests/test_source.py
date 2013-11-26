@@ -86,7 +86,26 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertEqual(len(response['sources']), 5)
 
     def test_invalid_limit(self):
-        response = self.app.get_json('/v1/sources?limit=BOGUS', status=400)
-        self.assertEqual(response['status'], 'error')
-        self.assertEqual(response['errors'][0]['description'],
-                         '"BOGUS" is not a number')
+        response = self.app.get('/v1/sources?limit=BOGUS', status=400)
+        self.assertErrorMessage(response, '"BOGUS" is not a number')
+
+    def test_valid_offset(self):
+        for i in range(1, 11):
+            self.make_source(u"http://example.com/feed%s" % i)
+        response = self.app.get_json('/v1/sources?offset=5')
+        self.assertEqual(response['sources'][0]['url'],
+                         'http://example.com/feed6')
+
+    def test_invalid_offset(self):
+        response = self.app.get('/v1/sources?offset=BOGUS', status=400)
+        self.assertErrorMessage(response, '"BOGUS" is not a number')
+
+    def test_offset_and_limit(self):
+        for i in range(1, 11):
+            self.make_source(u"http://example.com/feed%s" % i)
+        response = self.app.get_json('/v1/sources?offset=5&limit=3')
+        self.assertEqual(len(response['sources']), 3)
+        self.assertEqual(response['sources'][0]['url'],
+                         'http://example.com/feed6')
+        self.assertEqual(response['sources'][-1]['url'],
+                         'http://example.com/feed8')

@@ -38,3 +38,11 @@ class BaseTestMixin(object):
         DBSession.add(source)
         DBSession.flush()
         return source
+
+    def assertErrorMessage(self, response, message):
+        for error in response.json['errors']:
+            if message in error['description']:
+                return
+        raise AssertionError("Cannot find expected error message '%s'" %
+                             message)
+

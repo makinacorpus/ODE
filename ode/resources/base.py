@@ -77,5 +77,8 @@ class ResourceMixin(object):
         limit = self.request.validated.get('limit')
         if limit:
             query = query.limit(limit)
+        offset = self.request.validated.get('offset')
+        if offset:
+            query = query.offset(offset)
         resources = [resource.to_dict() for resource in query.all()]
         return {self.name_plural: resources}
