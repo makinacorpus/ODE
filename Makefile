@@ -3,6 +3,7 @@ dev_requirements:
 
 develop:
 	python setup.py develop
+	initialize_ode_db development.ini
 
 test: dev_requirements
 	nosetests -v
