@@ -31,6 +31,11 @@ class IcalRenderer(object):
         event = Event()
         for icalendar_key, model_attribute in icalendar_to_model_keys.items():
             event.add(icalendar_key, event_data[model_attribute])
+        location = event_data['locations'][0]
+        event.add('location', location['name'])
+        date = location['dates'][0]
+        event.add('dtstart', date['start_time'])
+        event.add('dtend', date['end_time'])
         calendar.add_component(event)
 
 

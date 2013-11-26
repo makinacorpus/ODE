@@ -21,18 +21,38 @@ def default_schema_node():
                       validator=Length(1, SAFE_MAX_LENGTH))
 
 
+class DateSchema(MappingSchema):
+    start_time = SchemaNode(DateTime())
+    end_time = SchemaNode(DateTime(), missing=None)
+
+
+class DateSequenceSchema(SequenceSchema):
+    date = DateSchema()
+
+
+class LocationSchema(MappingSchema):
+    name = default_schema_node()
+    address = default_schema_node()
+    post_code = default_schema_node()
+    town = default_schema_node()
+    capacity = default_schema_node()
+    country = default_schema_node()
+    dates = DateSequenceSchema()
+
+
+class LocationCollectionSchema(SequenceSchema):
+    location = LocationSchema()
+
+
 class EventSchema(MappingSchema):
     title = SchemaNode(String(), validator=Length(1, SAFE_MAX_LENGTH))
     audio_license = default_schema_node()
-    address = default_schema_node()
     audio_license = default_schema_node()
     audio_url = default_schema_node()
     author_email = default_schema_node()
     author_firstname = default_schema_node()
     author_lastname = default_schema_node()
     author_telephone = default_schema_node()
-    country = default_schema_node()
-    post_code = default_schema_node()
     description = default_schema_node()
     event_id = default_schema_node()
     email = default_schema_node()
@@ -40,10 +60,8 @@ class EventSchema(MappingSchema):
     language = default_schema_node()
     lastname = default_schema_node()
     latlong = default_schema_node()
-    location_name = default_schema_node()
     price_information = default_schema_node()
     organiser = default_schema_node()
-    capacity = default_schema_node()
     price_information = default_schema_node()
     performers = default_schema_node()
     photos1_license = default_schema_node()
@@ -56,14 +74,12 @@ class EventSchema(MappingSchema):
     target = default_schema_node()
     telephone = default_schema_node()
     title = default_schema_node()
-    town = default_schema_node()
     video_license = default_schema_node()
     video_url = default_schema_node()
     uid = SchemaNode(String(), missing=colander.drop,
                      validator=Length(1, SAFE_MAX_LENGTH))
     url = default_schema_node()
-    start_time = SchemaNode(DateTime())
-    end_time = SchemaNode(DateTime())
+    locations = LocationCollectionSchema()
 
 
 class Events(SequenceSchema):

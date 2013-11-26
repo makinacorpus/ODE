@@ -2,4 +2,5 @@ nose
 mock
 webtest
 Sphinx
+autopep8
 -e git+https://github.com/makinacorpus/cornice.git@request-data-extractors#egg=cornice

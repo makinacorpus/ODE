@@ -6,7 +6,7 @@ develop:
 	python setup.py develop
 	initialize_ode_db development.ini
 
-test: dev_requirements
+test: dev_requirements flake8
 	nosetests -v
 
 coverage: dev_requirements

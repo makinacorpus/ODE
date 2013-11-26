@@ -34,7 +34,7 @@ class TestGetEvent(TestEventMixin, TestCase):
     def test_location(self):
         event, response = self.get_event(location_name='Location Name')
         self.assertContains(response,
-                            u'LOCATION:%s' % event.location_name)
+                            u'LOCATION:%s' % event.locations[0].name)
 
     def test_url(self):
         event, response = self.get_event(url='http://example.com/')
@@ -73,6 +73,7 @@ class TestPostEvent(TestEventMixin, TestCase):
             event.add('summary', title)
             event.add('dtstart', self.start_time)
             event.add('dtend', self.end_time)
+            event.add('location', 'Toulouse')
             calendar.add_component(event)
         return calendar.to_ical()
 
@@ -87,13 +88,17 @@ class TestPostEvent(TestEventMixin, TestCase):
         response = self.post(calendar)
         self.assertEqual(response.json['events'][0]['status'], 'created')
         event = DBSession.query(Event).filter_by(title=u'Événement').one()
-        self.assertEqual(event.start_time, self.start_time)
+        self.assertEqual(event.locations[0].dates[0].start_time,
+                         self.start_time)
 
     def test_post_multiple_events(self):
         calendar = self.make_icalendar(titles=[u'Événement 1', u'Événement 2'])
         response = self.post(calendar)
         self.assertEqual(response.json['events'][0]['status'], 'created')
         event = DBSession.query(Event).filter_by(title=u'Événement 1').one()
-        self.assertEqual(event.start_time, self.start_time)
+        self.assertEqual(event.locations[0].name, 'Toulouse')
+        self.assertEqual(event.locations[0].dates[0].start_time,
+                         self.start_time)
         event = DBSession.query(Event).filter_by(title=u'Événement 2').one()
-        self.assertEqual(event.start_time, self.start_time)
+        self.assertEqual(event.locations[0].dates[0].start_time,
+                         self.start_time)

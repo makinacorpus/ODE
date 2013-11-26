@@ -1,8 +1,10 @@
 from cornice.resource import resource, view
 
 from ode.models import Event
+from ode.models import DBSession
 from ode.validation import EventSchema, EventCollectionSchema, has_producer_id
 from ode.resources.base import ResourceMixin
+from ode.resources.exceptions import HTTPNotFound
 
 
 @resource(collection_path='/v1/events', path='/v1/events/{id}')
@@ -16,7 +18,16 @@ class EventResource(ResourceMixin):
 
     @view(validators=[has_producer_id], schema=EventSchema)
     def put(self):
-        return ResourceMixin.put(self)
+        """Update an existing resource by id"""
+        resouce_id = self.request.matchdict['id']
+        query = DBSession.query(self.model).filter_by(
+            id=resouce_id,
+            producer_id=self.request.validated['producer_id'],
+        )
+        del self.request.validated['locations']  # FIXME update locations
+        if not query.update(self.request.validated):
+            raise HTTPNotFound()
+        return {'status': 'updated'}
 
     @view(accept='text/calendar', renderer='ical')
     @view(accept='application/json', renderer='json')

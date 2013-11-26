@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from datetime import datetime
 from unittest import TestCase
+from copy import deepcopy
 
 from ode.models import DBSession, Event
 from ode.tests.event import TestEventMixin
@@ -14,15 +15,12 @@ def remove_ids(dictionary):
 
 
 example_data = {
-    "address": "10 rue des Roses",
     "audio_license": "CC",
     "audio_url": "http://example.com/audio",
     "author_email": "bob@example.com",
     "author_firstname": u"François",
     "author_lastname": u"Vittsjö",
     "author_telephone": "000-999-23-30",
-    "country": u"日本",
-    "post_code": "UVH-345",
     "description": u"""
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a
     diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac
@@ -31,13 +29,11 @@ example_data = {
     augue.""",
     "event_id": "abc123",
     "email": "alice@example.com",
+    "latlong": "1;3",
     "firstname": "Alice",
     "language": u"Français",
     "lastname": u"Éléonore",
-    "latlong": u"1.0;2.0",
-    "location_name": u"Patinoire",
     "organiser": u"LiberTIC",
-    "capacity": u"42",
     "price_information": u"Plutôt bon marché",
     "performers": u"Basile Dupont;José Durand",
     "photos1_license": u"License Info 1",
@@ -50,16 +46,36 @@ example_data = {
     "target": u"all",
     "telephone": u"1234567890",
     "title": u"Convention des amis des éléphants",
-    "town": u"上海",
     "video_license": u"Video License Info",
     "video_url": u"http://example.com/video",
     "url": u"http://example.com/v1/events/covention-amis-elephant",
-    "start_time": datetime(2013, 12, 19, 9),
-    "end_time": datetime(2013, 12, 19, 9),
+    "locations": [
+        {
+            "name": u"Le café du commerce",
+            "address": "10 rue des Roses",
+            "country": u"日本",
+            "post_code": "UVH-345",
+            "town": u"上海",
+            "capacity": u"42",
+            "dates": [
+                {
+                    "start_time": datetime(2013, 12, 19, 9),
+                    "end_time": datetime(2013, 12, 19, 18),
+                },
+                {
+                    "start_time": datetime(2013, 12, 20, 10),
+                    "end_time": datetime(2013, 12, 20, 14),
+                },
+            ]
+        }
+    ]
 }
-example_json = dict(example_data)
-example_json['start_time'] = '2013-12-19T09:00:00'
-example_json['end_time'] = '2013-12-19T09:00:00'
+example_json = deepcopy(example_data)
+example_dates = example_json['locations'][0]['dates']
+example_dates[0]['start_time'] = "2013-12-19T09:00:00"
+example_dates[0]['end_time'] = "2013-12-19T18:00:00"
+example_dates[1]['start_time'] = "2013-12-20T10:00:00"
+example_dates[1]['end_time'] = "2013-12-20T14:00:00"
 
 
 class TestJson(TestEventMixin, TestCase):
@@ -68,19 +84,22 @@ class TestJson(TestEventMixin, TestCase):
     def post_event(self, event_info=None, headers=None, status=200):
         if headers is None:
             headers = {'X-ODE-Producer-Id': '123'}
-        if event_info:
-            events_info = {'events': [event_info]}
-        else:
-            events_info = {'events': [{'title': u'Titre Événement'}]}
-        for mandatory in ('start_time', 'end_time'):
-            if mandatory not in events_info['events'][0]:
-                events_info['events'][0][mandatory] = '2014-01-25T15:00'
+        if event_info is None:
+            event_info = {'title': u'Titre Événement'}
+        if not 'locations' in event_info:
+            event_info['locations'] = example_json['locations']
+        events_info = {'events': [event_info]}
         response = self.app.post_json('/v1/events', events_info,
                                       headers=headers, status=status)
         return response.json['events'][0]['id']
 
     def assertEqualIgnoringId(self, result, expected):
-        self.assertDictEqual(remove_ids(result), expected)
+        result = remove_ids(result)
+        for key in result:
+            if isinstance(result[key], dict):
+                self.assertDictEqual(result[key], expected[key])
+            else:
+                self.assertEqual(result[key], expected[key])
 
     def test_root(self):
         response = self.app.get('/', status=302)
@@ -103,11 +122,12 @@ class TestJson(TestEventMixin, TestCase):
 
     def test_update_event(self):
         event_id = self.post_event()
-        response = self.app.put_json('/v1/events/%s' % event_id, {
+        put_data = {
             'title': 'EuroPython',
-            'start_time': '2014-01-25T15:00',
-            'end_time': '2014-01-25T15:00',
-        }, headers={'X-ODE-Producer-Id': '123'})
+        }
+        put_data['locations'] = example_json['locations']
+        response = self.app.put_json('/v1/events/%s' % event_id, put_data,
+                                     headers={'X-ODE-Producer-Id': '123'})
         self.assertTitleEqual(event_id, 'EuroPython')
         self.assertEqual(response.json['status'], 'updated')
 
@@ -146,9 +166,9 @@ class TestJson(TestEventMixin, TestCase):
         self.assertIn('@', event.uid)
 
     def test_get_all_fields(self):
-        event = self.create_event(**example_data)
+        event_id = self.post_event(example_json)
         DBSession.flush()
-        response = self.app.get('/v1/events/%s' % event.id)
+        response = self.app.get('/v1/events/%s' % event_id)
         self.assertEqualIgnoringId(response.json['event'], example_json)
 
     def test_get_invalid_id(self):
@@ -156,10 +176,13 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(response.json['status'], 404)
 
     def test_put_invalid_id(self):
-        response = self.app.put_json('/v1/events/42', {
-            'start_time': '2014-01-25T15:00',
-            'end_time': '2014-01-25T15:00'
-        }, headers={'X-ODE-Producer-Id': '123'}, status=404)
+        put_data = {
+            u'title': u'Un événement',
+        }
+        put_data['locations'] = example_json['locations']
+        response = self.app.put_json(
+            '/v1/events/42', put_data,
+            headers={'X-ODE-Producer-Id': '123'}, status=404)
         self.assertEqual(response.json['status'], 404)
 
     def test_delete_invalid_id(self):

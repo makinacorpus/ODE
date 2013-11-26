@@ -10,9 +10,6 @@ install:
  - pip install -r dev_requirements.txt --use-mirrors
  - python setup.py develop
 
-before_script:
- - make flake8
-
 script:
  - make test
  - make coverage
