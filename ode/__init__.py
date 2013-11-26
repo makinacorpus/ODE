@@ -21,5 +21,5 @@ def main(global_config, **settings):
     config.add_renderer('ical', 'ode.renderers.IcalRenderer')
     config.add_renderer('json', 'ode.renderers.JsonRenderer')
     config.add_cornice_deserializer('text/calendar', icalendar_extractor)
-    config.scan()
+    config.scan(ignore='ode.tests')
     return config.make_wsgi_app()

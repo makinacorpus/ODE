@@ -2,6 +2,7 @@ dev_requirements:
 	pip install -r dev_requirements.txt
 
 develop:
+	pip install -r requirements.txt
 	python setup.py develop
 	initialize_ode_db development.ini
 

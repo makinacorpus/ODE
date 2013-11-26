@@ -7,8 +7,6 @@ with open(os.path.join(here, 'README.rst')) as f:
     README = f.read()
 with open(os.path.join(here, 'CHANGES.rst')) as f:
     CHANGES = f.read()
-with open(os.path.join(here, 'requirements.txt')) as f:
-    REQUIRES = f.read().split()
 
 
 setup(name='ode',
@@ -29,7 +27,6 @@ setup(name='ode',
       include_package_data=True,
       zip_safe=False,
       test_suite='ode',
-      install_requires=REQUIRES,
       entry_points="""\
       [paste.app_factory]
       main = ode:main
