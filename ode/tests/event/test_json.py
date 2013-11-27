@@ -147,6 +147,17 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(len(events), 2)
         self.assertEqual(events[0]['data']['title'], u'Événement 1')
 
+    def test_list_limit(self):
+        for i in range(1, 6):
+            self.create_event(title=u'Événement %s' % i)
+
+        response = self.app.get('/v1/events?limit=3')
+
+        collection = response.json['collection']
+        self.assertEqual(collection['total_count'], 5)
+        events = collection['items']
+        self.assertEqual(len(events), 3)
+
     def test_get_event(self):
         id = self.post_event()
         response = self.app.get('/v1/events/%s' % id)

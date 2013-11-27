@@ -5,6 +5,7 @@ from ode.models import DBSession
 from ode.validation import EventSchema, EventCollectionSchema, has_producer_id
 from ode.resources.base import ResourceMixin
 from ode.resources.exceptions import HTTPNotFound
+from ode.validation import validate_querystring
 
 
 @resource(collection_path='/v1/events', path='/v1/events/{id}')
@@ -29,8 +30,10 @@ class EventResource(ResourceMixin):
             raise HTTPNotFound()
         return {'status': 'updated'}
 
-    @view(accept='text/calendar', renderer='ical')
-    @view(accept='application/json', renderer='json')
+    @view(accept='text/calendar', renderer='ical',
+          validators=[validate_querystring])
+    @view(accept='application/json', renderer='json',
+          validators=[validate_querystring])
     def collection_get(self):
         return ResourceMixin.collection_get(self)
 
