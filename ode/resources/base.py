@@ -1,7 +1,7 @@
 from sqlalchemy.orm.exc import NoResultFound
 from cornice.resource import view
 
-from ode.resources.exceptions import HTTPNotFound
+from ode.resources.exceptions import HTTPNotFound, HTTPBadRequest
 from ode.models import DBSession
 from ode.validation import has_producer_id
 from ode.validation import validate_querystring
@@ -74,13 +74,23 @@ class ResourceMixin(object):
     def collection_get(self):
         """Get list of resources"""
         query = DBSession.query(self.model)
-        limit = self.request.validated.get('limit')
         total_count = query.count()
+        limit = self.request.validated.get('limit')
         if limit:
             query = query.limit(limit)
         offset = self.request.validated.get('offset')
         if offset:
             query = query.offset(offset)
+        sort_by = self.request.validated.get('sort_by')
+        if sort_by:
+            order_criterion = getattr(self.model, sort_by, None)
+            if order_criterion:
+                if self.request.validated['sort_direction'] == 'desc':
+                    order_criterion = order_criterion.desc()
+                query = query.order_by(order_criterion)
+            else:
+                message = "{} is not a valid sorting criterion"
+                raise HTTPBadRequest(message.format(sort_by))
         resources = [{"data": resource.to_dict()} for resource in query.all()]
         return {'collection': {
             'current_count': len(resources),

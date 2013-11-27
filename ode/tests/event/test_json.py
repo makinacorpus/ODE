@@ -158,6 +158,43 @@ class TestJson(TestEventMixin, TestCase):
         events = collection['items']
         self.assertEqual(len(events), 3)
 
+    def create_sortable_events(self):
+        self.create_event(title=u'BBB')
+        self.create_event(title=u'CCC')
+        self.create_event(title=u'AAA')
+
+    def test_default_order(self):
+        self.create_sortable_events()
+
+        response = self.app.get('/v1/events?sort_by=title')
+
+        items = response.json['collection']['items']
+        self.assertEqual(items[0]['data']['title'], 'AAA')
+        self.assertEqual(items[1]['data']['title'], 'BBB')
+        self.assertEqual(items[2]['data']['title'], 'CCC')
+
+    def test_descending_order(self):
+        self.create_sortable_events()
+
+        response = self.app.get(
+            '/v1/events?sort_by=title&sort_direction=desc')
+
+        items = response.json['collection']['items']
+        self.assertEqual(items[0]['data']['title'], 'CCC')
+        self.assertEqual(items[1]['data']['title'], 'BBB')
+        self.assertEqual(items[2]['data']['title'], 'AAA')
+
+    def test_invalid_sort_direction(self):
+        response = self.app.get(
+            '/v1/events?sort_by=title&sort_direction=BOGUS',
+            status=400)
+        self.assertErrorMessage(response, 'not one of asc, desc')
+
+    def test_invalid_order_field(self):
+        response = self.app.get('/v1/events?sort_by=BOGUS',
+                                status=400)
+        self.assertErrorMessage(response, 'not a valid sorting')
+
     def test_get_event(self):
         id = self.post_event()
         response = self.app.get('/v1/events/%s' % id)

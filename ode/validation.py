@@ -1,6 +1,6 @@
 from colander import MappingSchema, SchemaNode, String, Integer
 from colander import Length, DateTime
-from colander import SequenceSchema
+from colander import SequenceSchema, OneOf
 import colander
 
 from ode.models import SAFE_MAX_LENGTH
@@ -105,6 +105,9 @@ class SourceCollectionSchema(MappingSchema):
 class QueryStringSchema(MappingSchema):
     limit = SchemaNode(Integer(), missing=None)
     offset = SchemaNode(Integer(), missing=None)
+    sort_by = SchemaNode(String(), missing=None)
+    sort_direction = SchemaNode(String(), missing='asc',
+                                validator=OneOf(['asc', 'desc']))
 
 
 def validate_querystring(request):
