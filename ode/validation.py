@@ -82,24 +82,40 @@ class EventSchema(MappingSchema):
     locations = LocationCollectionSchema()
 
 
-class Events(SequenceSchema):
-    event = EventSchema()
+class EventItem(MappingSchema):
+    data = EventSchema()
+
+
+class EventItemsSchema(SequenceSchema):
+    item = EventItem()
 
 
 class EventCollectionSchema(MappingSchema):
-    events = Events()
+    items = EventItemsSchema()
+
+
+class EventDataSchema(MappingSchema):
+    collection = EventCollectionSchema()
 
 
 class SourceSchema(MappingSchema):
     url = SchemaNode(String(), validator=colander.url)
 
 
-class Sources(SequenceSchema):
-    source = SourceSchema()
+class SourceItem(MappingSchema):
+    data = SourceSchema()
+
+
+class SourceItemsSchema(SequenceSchema):
+    item = SourceItem()
 
 
 class SourceCollectionSchema(MappingSchema):
-    sources = Sources()
+    items = SourceItemsSchema()
+
+
+class SourceDataSchema(MappingSchema):
+    collection = SourceCollectionSchema()
 
 
 class QueryStringSchema(MappingSchema):

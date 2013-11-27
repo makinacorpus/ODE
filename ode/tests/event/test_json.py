@@ -88,10 +88,14 @@ class TestJson(TestEventMixin, TestCase):
             event_info = {'title': u'Titre Événement'}
         if not 'locations' in event_info:
             event_info['locations'] = example_json['locations']
-        events_info = {'events': [event_info]}
-        response = self.app.post_json('/v1/events', events_info,
+        body_data = {
+            'collection': {
+                'items': [{'data': event_info}]
+            }
+        }
+        response = self.app.post_json('/v1/events', body_data,
                                       headers=headers, status=status)
-        return response.json['events'][0]['id']
+        return response.json['collection']['items'][0]['data']['id']
 
     def assertEqualIgnoringId(self, result, expected):
         result = remove_ids(result)
@@ -116,7 +120,7 @@ class TestJson(TestEventMixin, TestCase):
     def test_post_title_too_long(self):
         very_long_title = '*' * 1001
         response = self.app.post_json('/v1/events', {
-            'events': [{'title': very_long_title}],
+            'collection': {'items': [{'data': {'title': very_long_title}}]},
         }, status=400, headers={'X-ODE-Producer-Id': '123'})
         self.assertErrorMessage(response, 'Longer than maximum')
 

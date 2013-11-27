@@ -24,5 +24,5 @@ def icalendar_extractor(request):
     events = []
     for icalendar_event in calendar.walk()[1:]:
         cstruct = icalendar_to_cstruct(icalendar_event)
-        events.append(cstruct)
-    return {'events': events}
+        events.append({'data': cstruct})
+    return {'collection': {'items': events}}

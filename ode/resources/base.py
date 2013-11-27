@@ -16,10 +16,6 @@ class ResourceMixin(object):
     def name(self):
         return self.model.__name__.lower()
 
-    @property
-    def name_plural(self):
-        return self.name + 's'
-
     @view(validators=[has_producer_id])
     def delete(self):
         """Delete a resource by id"""
@@ -36,16 +32,25 @@ class ResourceMixin(object):
 
     def collection_post(self):
         """Add new resources"""
-        resources_data = self.request.validated[self.name_plural]
+        collection = self.request.validated['collection']
+        items = collection['items']
         producer_id = self.request.validated['producer_id']
-        result_data = []
-        for resource_data in resources_data:
-            resource_data['producer_id'] = producer_id
-            resource = self.model(**resource_data)
+        result_items = []
+        for item in items:
+            item_data = item['data']
+            item_data['producer_id'] = producer_id
+            resource = self.model(**item_data)
             DBSession.add(resource)
             DBSession.flush()
-            result_data.append({'id': resource.id, 'status': 'created'})
-        return {self.name_plural: result_data}
+            result_items.append({
+                'data': {'id': resource.id},
+                'status': 'created',
+            })
+        return {
+            'collection': {
+                'items': result_items
+            }
+        }
 
     def get(self):
         """Get a specific resource by id"""

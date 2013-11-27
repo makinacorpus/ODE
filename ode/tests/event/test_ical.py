@@ -86,7 +86,8 @@ class TestPostEvent(TestEventMixin, TestCase):
     def test_post_single_event(self):
         calendar = self.make_icalendar(titles=[u'Événement'])
         response = self.post(calendar)
-        self.assertEqual(response.json['events'][0]['status'], 'created')
+        items = response.json['collection']['items']
+        self.assertEqual(items[0]['status'], 'created')
         event = DBSession.query(Event).filter_by(title=u'Événement').one()
         self.assertEqual(event.locations[0].dates[0].start_time,
                          self.start_time)
@@ -94,7 +95,8 @@ class TestPostEvent(TestEventMixin, TestCase):
     def test_post_multiple_events(self):
         calendar = self.make_icalendar(titles=[u'Événement 1', u'Événement 2'])
         response = self.post(calendar)
-        self.assertEqual(response.json['events'][0]['status'], 'created')
+        items = response.json['collection']['items']
+        self.assertEqual(items[0]['status'], 'created')
         event = DBSession.query(Event).filter_by(title=u'Événement 1').one()
         self.assertEqual(event.locations[0].name, 'Toulouse')
         self.assertEqual(event.locations[0].dates[0].start_time,

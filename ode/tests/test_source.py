@@ -33,7 +33,13 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertSourceCount(1)
 
     def test_create_source(self):
-        sources_info = {'sources': [{'url': u'http://example.com/mysource'}]}
+        sources_info = {
+            'collection': {
+                'items': [
+                    {'data': {'url': u'http://example.com/mysource'}}
+                ]
+            }
+        }
         self.app.post_json('/v1/sources', sources_info, headers={
             'X-ODE-Producer-Id': '123'
         })
