@@ -25,8 +25,12 @@ class EventResource(ResourceMixin):
             id=resouce_id,
             producer_id=self.request.validated['producer_id'],
         )
-        del self.request.validated['locations']  # FIXME update locations
-        if not query.update(self.request.validated):
+        self.request.validated['producer_id'] = {
+            'value': self.request.validated['producer_id']
+        }
+        data = self.flatten_values(self.request.validated)
+        del data['locations']  # FIXME update locations
+        if not query.update(data):
             raise HTTPNotFound()
         return {'status': 'updated'}
 

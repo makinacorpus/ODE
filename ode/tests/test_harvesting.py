@@ -71,11 +71,11 @@ class TestHarvesting(TestEventMixin, TestCase):
         self.assertEqual(event.description,
                          u"Un évènement de l'Agenda du Libre")
         self.assertEqual(event.locations[0].name, u"Toulouse")
-        self.assertEqual(event.uid, u"1234@example.com")
         self.assertEqual(event.locations[0].dates[0].start_time,
                          datetime(2012, 11, 24, 11))
         self.assertEqual(event.locations[0].dates[0].end_time,
                          datetime(2012, 11, 25, 17))
+        self.assertEqual(event.uid, u"1234@example.com")
 
     def test_duplicate_is_ignored(self):
         existing_event = self.create_event(

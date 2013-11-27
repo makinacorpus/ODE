@@ -15,67 +15,72 @@ def remove_ids(dictionary):
 
 
 example_data = {
-    "audio_license": "CC",
-    "audio_url": "http://example.com/audio",
-    "author_email": "bob@example.com",
-    "author_firstname": u"François",
-    "author_lastname": u"Vittsjö",
-    "author_telephone": "000-999-23-30",
-    "description": u"""
+    "audio_license": {'value': "CC"},
+    "audio_url": {'value': "http://example.com/audio"},
+    "author_email": {'value': "bob@example.com"},
+    "author_firstname": {'value': u"François"},
+    "author_lastname": {'value': u"Vittsjö"},
+    "author_telephone": {'value': "000-999-23-30"},
+    "description": {'value': u"""
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a
     diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac
     quam viverra nec consectetur ante hendrerit. Donec et mollis dolor.
     Praesent et diam eget libero egestas mattis sit amet vitae
-    augue.""",
-    "event_id": "abc123",
-    "email": "alice@example.com",
-    "latlong": "1;3",
-    "firstname": "Alice",
-    "language": u"Français",
-    "lastname": u"Éléonore",
-    "organiser": u"LiberTIC",
-    "price_information": u"Plutôt bon marché",
-    "performers": u"Basile Dupont;José Durand",
-    "photos1_license": u"License Info 1",
-    "photos1_url": u"http://example.com/photo1",
-    "photos2_license": u"License Info 2",
-    "photos2_url": u"http://example.com/photo2",
-    "press_url": u"http://example.com/photo2",
-    "source_id": u"xyz123",
-    "source": u"http://example.com/event-source",
-    "target": u"all",
-    "telephone": u"1234567890",
-    "title": u"Convention des amis des éléphants",
-    "video_license": u"Video License Info",
-    "video_url": u"http://example.com/video",
-    "url": u"http://example.com/v1/events/covention-amis-elephant",
-    "locations": [
-        {
-            "name": u"Le café du commerce",
-            "address": "10 rue des Roses",
-            "country": u"日本",
-            "post_code": "UVH-345",
-            "town": u"上海",
-            "capacity": u"42",
-            "dates": [
-                {
-                    "start_time": datetime(2013, 12, 19, 9),
-                    "end_time": datetime(2013, 12, 19, 18),
-                },
-                {
-                    "start_time": datetime(2013, 12, 20, 10),
-                    "end_time": datetime(2013, 12, 20, 14),
-                },
-            ]
-        }
-    ]
+    augue."""},
+    "event_id": {'value': "abc123"},
+    "email": {'value': "alice@example.com"},
+    "latlong": {'value': "1;3"},
+    "firstname": {'value': "Alice"},
+    "language": {'value': u"Français"},
+    "lastname": {'value': u"Éléonore"},
+    "organiser": {'value': u"LiberTIC"},
+    "price_information": {'value': u"Plutôt bon marché"},
+    "performers": {'value': u"Basile Dupont;José Durand"},
+    "photos1_license": {'value': u"License Info 1"},
+    "photos1_url": {'value': u"http://example.com/photo1"},
+    "photos2_license": {'value': u"License Info 2"},
+    "photos2_url": {'value': u"http://example.com/photo2"},
+    "press_url": {'value': u"http://example.com/photo2"},
+    "source_id": {'value': u"xyz123"},
+    "source": {'value': u"http://example.com/event-source"},
+    "target": {'value': u"all"},
+    "telephone": {'value': u"1234567890"},
+    "title": {'value': u"Convention des amis des éléphants"},
+    "video_license": {'value': u"Video License Info"},
+    "video_url": {'value': u"http://example.com/video"},
+    "url": {'value': u"http://example.com/v1/events/covention-amis-elephant"},
+    "locations": {
+        'value': [
+            {
+                "name": {'value': u"Le café du commerce"},
+                "address": {'value': "10 rue des Roses"},
+                "country": {'value': u"日本"},
+                "post_code": {'value': "UVH-345"},
+                "town": {'value': u"上海"},
+                "capacity": {'value': u"42"},
+                "dates": {
+                    'value': [
+                        {
+                            "start_time": {'value': datetime(2013, 12, 19, 9)},
+                            "end_time": {'value': datetime(2013, 12, 19, 18)},
+                        },
+                        {
+                            "start_time": {
+                                'value': datetime(2013, 12, 20, 10)},
+                            "end_time": {'value': datetime(2013, 12, 20, 14)},
+                        },
+                    ]
+                }
+            }
+        ]
+    }
 }
 example_json = deepcopy(example_data)
-example_dates = example_json['locations'][0]['dates']
-example_dates[0]['start_time'] = "2013-12-19T09:00:00"
-example_dates[0]['end_time'] = "2013-12-19T18:00:00"
-example_dates[1]['start_time'] = "2013-12-20T10:00:00"
-example_dates[1]['end_time'] = "2013-12-20T14:00:00"
+example_dates = example_json['locations']['value'][0]['dates']['value']
+example_dates[0]['start_time']['value'] = "2013-12-19T09:00:00"
+example_dates[0]['end_time']['value'] = "2013-12-19T18:00:00"
+example_dates[1]['start_time']['value'] = "2013-12-20T10:00:00"
+example_dates[1]['end_time']['value'] = "2013-12-20T14:00:00"
 
 
 class TestJson(TestEventMixin, TestCase):
@@ -85,7 +90,7 @@ class TestJson(TestEventMixin, TestCase):
         if headers is None:
             headers = {'X-ODE-Producer-Id': '123'}
         if event_info is None:
-            event_info = {'title': u'Titre Événement'}
+            event_info = {'title': {'value': u'Titre Événement'}}
         if not 'locations' in event_info:
             event_info['locations'] = example_json['locations']
         body_data = {
@@ -95,7 +100,7 @@ class TestJson(TestEventMixin, TestCase):
         }
         response = self.app.post_json('/v1/events', body_data,
                                       headers=headers, status=status)
-        return response.json['collection']['items'][0]['data']['id']
+        return response.json['collection']['items'][0]['data']['id']['value']
 
     def assertEqualIgnoringId(self, result, expected):
         result = remove_ids(result)
@@ -120,16 +125,20 @@ class TestJson(TestEventMixin, TestCase):
     def test_post_title_too_long(self):
         very_long_title = '*' * 1001
         response = self.app.post_json('/v1/events', {
-            'collection': {'items': [{'data': {'title': very_long_title}}]},
+            'collection': {
+                'items': [
+                    {'data': {'title': {'value': very_long_title}}}
+                ]
+            },
         }, status=400, headers={'X-ODE-Producer-Id': '123'})
         self.assertErrorMessage(response, 'Longer than maximum')
 
     def test_update_event(self):
         event_id = self.post_event()
         put_data = {
-            'title': 'EuroPython',
+            'title': {'value': 'EuroPython'},
+            'locations': example_json['locations'],
         }
-        put_data['locations'] = example_json['locations']
         response = self.app.put_json('/v1/events/%s' % event_id, put_data,
                                      headers={'X-ODE-Producer-Id': '123'})
         self.assertTitleEqual(event_id, 'EuroPython')
@@ -149,7 +158,7 @@ class TestJson(TestEventMixin, TestCase):
         response = self.app.get('/v1/events')
         events = response.json['collection']['items']
         self.assertEqual(len(events), 2)
-        self.assertEqual(events[0]['data']['title'], u'Événement 1')
+        self.assertEqual(events[0]['data']['title']['value'], u'Événement 1')
 
     def test_list_limit(self):
         for i in range(1, 6):
@@ -173,9 +182,9 @@ class TestJson(TestEventMixin, TestCase):
         response = self.app.get('/v1/events?sort_by=title')
 
         items = response.json['collection']['items']
-        self.assertEqual(items[0]['data']['title'], 'AAA')
-        self.assertEqual(items[1]['data']['title'], 'BBB')
-        self.assertEqual(items[2]['data']['title'], 'CCC')
+        self.assertEqual(items[0]['data']['title']['value'], 'AAA')
+        self.assertEqual(items[1]['data']['title']['value'], 'BBB')
+        self.assertEqual(items[2]['data']['title']['value'], 'CCC')
 
     def test_descending_order(self):
         self.create_sortable_events()
@@ -184,9 +193,9 @@ class TestJson(TestEventMixin, TestCase):
             '/v1/events?sort_by=title&sort_direction=desc')
 
         items = response.json['collection']['items']
-        self.assertEqual(items[0]['data']['title'], 'CCC')
-        self.assertEqual(items[1]['data']['title'], 'BBB')
-        self.assertEqual(items[2]['data']['title'], 'AAA')
+        self.assertEqual(items[0]['data']['title']['value'], 'CCC')
+        self.assertEqual(items[1]['data']['title']['value'], 'BBB')
+        self.assertEqual(items[2]['data']['title']['value'], 'AAA')
 
     def test_invalid_sort_direction(self):
         response = self.app.get(
@@ -202,7 +211,7 @@ class TestJson(TestEventMixin, TestCase):
     def test_get_event(self):
         id = self.post_event()
         response = self.app.get('/v1/events/%s' % id)
-        self.assertEqual(response.json['event']['title'],
+        self.assertEqual(response.json['event']['title']['value'],
                          u'Titre Événement')
 
     def test_delete_event(self):
@@ -229,7 +238,7 @@ class TestJson(TestEventMixin, TestCase):
 
     def test_put_invalid_id(self):
         put_data = {
-            u'title': u'Un événement',
+            u'title': {'value': u'Un événement'},
         }
         put_data['locations'] = example_json['locations']
         response = self.app.put_json(

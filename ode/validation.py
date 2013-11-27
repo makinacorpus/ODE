@@ -17,8 +17,10 @@ def has_producer_id(request):
 
 
 def default_schema_node():
-    return SchemaNode(String(), missing='',
-                      validator=Length(1, SAFE_MAX_LENGTH))
+    class _DefaultFieldSchema(MappingSchema):
+        value = SchemaNode(String(), missing='',
+                           validator=Length(1, SAFE_MAX_LENGTH))
+    return _DefaultFieldSchema(missing=None)
 
 
 class LocationSchema(MappingSchema):
@@ -30,16 +32,27 @@ class LocationSchema(MappingSchema):
     country = default_schema_node()
 
     @instantiate()
-    class dates(SequenceSchema):
+    class dates(MappingSchema):
 
         @instantiate()
-        class date(MappingSchema):
-            start_time = SchemaNode(DateTime())
-            end_time = SchemaNode(DateTime(), missing=None)
+        class value(SequenceSchema):
+
+            @instantiate()
+            class date(MappingSchema):
+
+                @instantiate()
+                class start_time(MappingSchema):
+                    value = SchemaNode(DateTime())
+
+                @instantiate()
+                class end_time(MappingSchema):
+                    value = SchemaNode(DateTime(), missing=None)
 
 
 class EventSchema(MappingSchema):
-    title = SchemaNode(String(), validator=Length(1, SAFE_MAX_LENGTH))
+    @instantiate()
+    class title(MappingSchema):
+        value = SchemaNode(String(), validator=Length(1, SAFE_MAX_LENGTH))
     audio_license = default_schema_node()
     audio_license = default_schema_node()
     audio_url = default_schema_node()
@@ -67,16 +80,21 @@ class EventSchema(MappingSchema):
     source = default_schema_node()
     target = default_schema_node()
     telephone = default_schema_node()
-    title = default_schema_node()
     video_license = default_schema_node()
     video_url = default_schema_node()
-    uid = SchemaNode(String(), missing=colander.drop,
-                     validator=Length(1, SAFE_MAX_LENGTH))
     url = default_schema_node()
 
+    @instantiate(missing=colander.drop)
+    class uid(MappingSchema):
+        value = SchemaNode(String(), missing=colander.drop,
+                           validator=Length(1, SAFE_MAX_LENGTH))
+
     @instantiate()
-    class locations(SequenceSchema):
-        location = LocationSchema()
+    class locations(MappingSchema):
+
+        @instantiate()
+        class value(SequenceSchema):
+            location = LocationSchema()
 
 
 class EventCollectionSchema(MappingSchema):
@@ -93,7 +111,9 @@ class EventCollectionSchema(MappingSchema):
 
 
 class SourceSchema(MappingSchema):
-    url = SchemaNode(String(), validator=colander.url)
+    @instantiate()
+    class url(MappingSchema):
+        value = SchemaNode(String(), validator=colander.url)
 
 
 class SourceCollectionSchema(MappingSchema):

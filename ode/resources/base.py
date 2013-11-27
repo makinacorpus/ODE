@@ -2,7 +2,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from cornice.resource import view
 
 from ode.resources.exceptions import HTTPNotFound, HTTPBadRequest
-from ode.models import DBSession
+from ode.models import DBSession, flatten_values
 from ode.validation import has_producer_id
 from ode.validation import validate_querystring
 
@@ -30,6 +30,18 @@ class ResourceMixin(object):
         DBSession.delete(event)
         return {'status': 'deleted'}
 
+    @staticmethod
+    def flatten_values(mapping):
+        mapping = flatten_values(mapping)
+        if 'locations' in mapping:
+            locations = mapping['locations']
+            for i, location in enumerate(locations):
+                locations[i] = flatten_values(location)
+                for j, date in enumerate(locations[i]['dates']):
+                    locations[i]['dates'][j] = flatten_values(
+                        locations[i]['dates'][j])
+        return mapping
+
     def collection_post(self):
         """Add new resources"""
         collection = self.request.validated['collection']
@@ -37,13 +49,13 @@ class ResourceMixin(object):
         producer_id = self.request.validated['producer_id']
         result_items = []
         for item in items:
-            item_data = item['data']
+            item_data = self.flatten_values(item['data'])
             item_data['producer_id'] = producer_id
             resource = self.model(**item_data)
             DBSession.add(resource)
             DBSession.flush()
             result_items.append({
-                'data': {'id': resource.id},
+                'data': {'id': {'value': resource.id}},
                 'status': 'created',
             })
         return {
@@ -63,17 +75,6 @@ class ResourceMixin(object):
             'status': 'success',
             self.name: resource.to_dict(),
         }
-
-    def put(self):
-        """Update an existing resource by id"""
-        resouce_id = self.request.matchdict['id']
-        query = DBSession.query(self.model).filter_by(
-            id=resouce_id,
-            producer_id=self.request.validated['producer_id'],
-        )
-        if not query.update(self.request.validated):
-            raise HTTPNotFound()
-        return {'status': 'updated'}
 
     @view(validators=[validate_querystring])
     def collection_get(self):

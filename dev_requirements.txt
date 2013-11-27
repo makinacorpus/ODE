@@ -3,4 +3,5 @@ mock
 webtest
 Sphinx
 autopep8
+coverage
 -e git+https://github.com/makinacorpus/cornice.git@request-data-extractors#egg=cornice

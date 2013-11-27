@@ -4,6 +4,7 @@ from datetime import datetime
 
 from ode.models import DBSession
 from ode.tests.event import TestEventMixin
+from ode.models import flatten_values
 
 
 class TestModel(TestEventMixin, TestCase):
@@ -25,3 +26,9 @@ class TestModel(TestEventMixin, TestCase):
         event = self.create_event(start_time=start_time)
         DBSession.flush()
         self.assertTrue(event.uid.endswith("@example.com"))
+
+    def test_flatten_values(self):
+        self.assertEqual(
+            flatten_values({'a': {'value': 1}, 'b': {'value': 2}}),
+            {'a': 1, 'b': 2},
+        )

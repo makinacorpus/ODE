@@ -12,7 +12,8 @@ class TestSource(BaseTestMixin, TestCase):
     def test_get_source(self):
         source = self.make_source()
         response = self.app.get('/v1/sources/%s' % source.id)
-        self.assertEqual(response.json['source']['url'], 'http://example.com')
+        self.assertEqual(response.json['source']['url']['value'],
+                         'http://example.com')
 
     def test_delete_source(self):
         source = self.make_source(producer_id=123)
@@ -36,7 +37,9 @@ class TestSource(BaseTestMixin, TestCase):
         sources_info = {
             'collection': {
                 'items': [
-                    {'data': {'url': u'http://example.com/mysource'}}
+                    {'data': {
+                        'url': {'value': u'http://example.com/mysource'}
+                    }}
                 ]
             }
         }
@@ -62,19 +65,20 @@ class TestSource(BaseTestMixin, TestCase):
         source = self.make_source()
         response = self.app.put_json(
             '/v1/sources/%s' % source.id,
-            {'url': 'http://example.com/myothersource'},
+            {'url': {'value': 'http://example.com/myothersource'}},
             headers={'X-ODE-Producer-Id': '123'})
         self.assertEqual(response.json['status'], 'updated')
 
     def test_update_required_producer_id(self):
         source = self.make_source()
-        self.app.put_json('/v1/sources/%s' % source.id, {'url': 'whatever'},
+        self.app.put_json('/v1/sources/%s' % source.id,
+                          {'url': {'value': 'whatever'}},
                           status=403)
 
     def test_cannot_update_other_people_stuff(self):
         source = self.make_source(producer_id='abc')
         response = self.app.put_json('/v1/sources/%s' % source.id,
-                                     {'url': 'http://example.com'},
+                                     {'url': {'value': 'http://example.com'}},
                                      status=404,
                                      headers={'X-ODE-Producer-Id': '123'})
         self.assertEqual(response.json['status'], 404)
@@ -100,7 +104,8 @@ class TestSource(BaseTestMixin, TestCase):
             self.make_source(u"http://example.com/feed%s" % i)
         response = self.app.get_json('/v1/sources?offset=5')
         item = response['collection']['items'][0]
-        self.assertEqual(item['data']['url'], 'http://example.com/feed6')
+        self.assertEqual(item['data']['url']['value'],
+                         'http://example.com/feed6')
 
     def test_invalid_offset(self):
         response = self.app.get('/v1/sources?offset=BOGUS', status=400)
@@ -115,5 +120,7 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertEqual(collection['total_count'], 10)
         self.assertEqual(len(items), 3)
         self.assertEqual(collection['current_count'], 3)
-        self.assertEqual(items[0]['data']['url'], 'http://example.com/feed6')
-        self.assertEqual(items[-1]['data']['url'], 'http://example.com/feed8')
+        self.assertEqual(items[0]['data']['url']['value'],
+                         'http://example.com/feed6')
+        self.assertEqual(items[-1]['data']['url']['value'],
+                         'http://example.com/feed8')

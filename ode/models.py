@@ -28,13 +28,13 @@ class ModelMixin(object):
                 continue
             if column.name == 'id' and self.__class__.__name__ != 'Event':
                 continue
-            result[column.name] = getattr(self, column.name)
+            result[column.name] = {'value': getattr(self, column.name)}
         for collection_name in ('locations', 'dates'):
             if hasattr(self, collection_name):
-                result[collection_name] = []
+                result[collection_name] = {'value': []}
                 collection = getattr(self, collection_name)
                 for obj in collection:
-                    result[collection_name].append(obj.to_dict())
+                    result[collection_name]['value'].append(obj.to_dict())
         return result
 
 
@@ -138,3 +138,13 @@ icalendar_to_model_keys = {
     'url': 'url',
     'description': 'description',
 }
+
+
+def flatten_values(mapping):
+    result = {}
+    for key, field in mapping.items():
+        if field is None:
+            continue
+        else:
+            result[key] = field['value']
+    return result
