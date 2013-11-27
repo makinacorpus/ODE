@@ -2,7 +2,7 @@ from cornice.resource import resource, view
 
 from ode.models import Event
 from ode.models import DBSession
-from ode.validation import EventSchema, EventDataSchema, has_producer_id
+from ode.validation import EventSchema, EventCollectionSchema, has_producer_id
 from ode.resources.base import ResourceMixin
 from ode.resources.exceptions import HTTPNotFound
 from ode.validation import validate_querystring
@@ -13,7 +13,7 @@ class EventResource(ResourceMixin):
 
     model = Event
 
-    @view(validators=[has_producer_id], schema=EventDataSchema)
+    @view(validators=[has_producer_id], schema=EventCollectionSchema)
     def collection_post(self):
         return ResourceMixin.collection_post(self)
 

@@ -1,5 +1,5 @@
 from colander import MappingSchema, SchemaNode, String, Integer
-from colander import Length, DateTime
+from colander import Length, DateTime, instantiate
 from colander import SequenceSchema, OneOf
 import colander
 
@@ -21,15 +21,6 @@ def default_schema_node():
                       validator=Length(1, SAFE_MAX_LENGTH))
 
 
-class DateSchema(MappingSchema):
-    start_time = SchemaNode(DateTime())
-    end_time = SchemaNode(DateTime(), missing=None)
-
-
-class DateSequenceSchema(SequenceSchema):
-    date = DateSchema()
-
-
 class LocationSchema(MappingSchema):
     name = default_schema_node()
     address = default_schema_node()
@@ -37,11 +28,14 @@ class LocationSchema(MappingSchema):
     town = default_schema_node()
     capacity = default_schema_node()
     country = default_schema_node()
-    dates = DateSequenceSchema()
 
+    @instantiate()
+    class dates(SequenceSchema):
 
-class LocationCollectionSchema(SequenceSchema):
-    location = LocationSchema()
+        @instantiate()
+        class date(MappingSchema):
+            start_time = SchemaNode(DateTime())
+            end_time = SchemaNode(DateTime(), missing=None)
 
 
 class EventSchema(MappingSchema):
@@ -79,43 +73,40 @@ class EventSchema(MappingSchema):
     uid = SchemaNode(String(), missing=colander.drop,
                      validator=Length(1, SAFE_MAX_LENGTH))
     url = default_schema_node()
-    locations = LocationCollectionSchema()
 
-
-class EventItem(MappingSchema):
-    data = EventSchema()
-
-
-class EventItemsSchema(SequenceSchema):
-    item = EventItem()
+    @instantiate()
+    class locations(SequenceSchema):
+        location = LocationSchema()
 
 
 class EventCollectionSchema(MappingSchema):
-    items = EventItemsSchema()
 
+    @instantiate()
+    class collection(MappingSchema):
 
-class EventDataSchema(MappingSchema):
-    collection = EventCollectionSchema()
+        @instantiate()
+        class items(SequenceSchema):
+
+            @instantiate()
+            class item(MappingSchema):
+                data = EventSchema()
 
 
 class SourceSchema(MappingSchema):
     url = SchemaNode(String(), validator=colander.url)
 
 
-class SourceItem(MappingSchema):
-    data = SourceSchema()
-
-
-class SourceItemsSchema(SequenceSchema):
-    item = SourceItem()
-
-
 class SourceCollectionSchema(MappingSchema):
-    items = SourceItemsSchema()
 
+    @instantiate()
+    class collection(MappingSchema):
 
-class SourceDataSchema(MappingSchema):
-    collection = SourceCollectionSchema()
+        @instantiate()
+        class items(SequenceSchema):
+
+            @instantiate()
+            class item(MappingSchema):
+                data = SourceSchema()
 
 
 class QueryStringSchema(MappingSchema):

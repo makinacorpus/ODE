@@ -2,7 +2,7 @@ from cornice.resource import resource, view
 
 from ode.models import Source
 from ode.resources.base import ResourceMixin
-from ode.validation import SourceDataSchema
+from ode.validation import SourceCollectionSchema
 from ode.validation import SourceSchema
 from ode.validation import has_producer_id
 
@@ -12,7 +12,7 @@ class SourceResource(ResourceMixin):
 
     model = Source
 
-    @view(validators=[has_producer_id], schema=SourceDataSchema)
+    @view(validators=[has_producer_id], schema=SourceCollectionSchema)
     def collection_post(self):
         return ResourceMixin.collection_post(self)
 
