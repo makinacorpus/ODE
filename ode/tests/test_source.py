@@ -104,7 +104,10 @@ class TestSource(BaseTestMixin, TestCase):
         for i in range(1, 11):
             self.make_source(u"http://example.com/feed%s" % i)
         response = self.app.get_json('/v1/sources?offset=5&limit=3')
-        items = response['collection']['items']
+        collection = response['collection']
+        items = collection['items']
+        self.assertEqual(collection['total_count'], 10)
         self.assertEqual(len(items), 3)
+        self.assertEqual(collection['current_count'], 3)
         self.assertEqual(items[0]['data']['url'], 'http://example.com/feed6')
         self.assertEqual(items[-1]['data']['url'], 'http://example.com/feed8')

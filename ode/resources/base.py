@@ -75,10 +75,15 @@ class ResourceMixin(object):
         """Get list of resources"""
         query = DBSession.query(self.model)
         limit = self.request.validated.get('limit')
+        total_count = query.count()
         if limit:
             query = query.limit(limit)
         offset = self.request.validated.get('offset')
         if offset:
             query = query.offset(offset)
         resources = [{"data": resource.to_dict()} for resource in query.all()]
-        return {'collection': {'items': resources}}
+        return {'collection': {
+            'current_count': len(resources),
+            'total_count': total_count,
+            'items': resources,
+        }}
