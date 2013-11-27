@@ -143,9 +143,9 @@ class TestJson(TestEventMixin, TestCase):
         self.create_event(title=u'Événement 1')
         self.create_event(title=u'Événement 2')
         response = self.app.get('/v1/events')
-        events = response.json['events']
+        events = response.json['collection']['items']
         self.assertEqual(len(events), 2)
-        self.assertEqual(events[0]['title'], u'Événement 1')
+        self.assertEqual(events[0]['data']['title'], u'Événement 1')
 
     def test_get_event(self):
         id = self.post_event()

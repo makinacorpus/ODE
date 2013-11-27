@@ -77,13 +77,13 @@ class TestSource(BaseTestMixin, TestCase):
         self.make_source(u"http://example.com/mysource")
         self.make_source(u"http://example.com/myothersource")
         response = self.app.get('/v1/sources')
-        self.assertEqual(len(response.json['sources']), 2)
+        self.assertEqual(len(response.json['collection']['items']), 2)
 
     def test_valid_limit(self):
         for i in range(1, 11):
             self.make_source(u"http://example.com/feed%s" % i)
         response = self.app.get_json('/v1/sources?limit=5')
-        self.assertEqual(len(response['sources']), 5)
+        self.assertEqual(len(response['collection']['items']), 5)
 
     def test_invalid_limit(self):
         response = self.app.get('/v1/sources?limit=BOGUS', status=400)
@@ -93,8 +93,8 @@ class TestSource(BaseTestMixin, TestCase):
         for i in range(1, 11):
             self.make_source(u"http://example.com/feed%s" % i)
         response = self.app.get_json('/v1/sources?offset=5')
-        self.assertEqual(response['sources'][0]['url'],
-                         'http://example.com/feed6')
+        item = response['collection']['items'][0]
+        self.assertEqual(item['data']['url'], 'http://example.com/feed6')
 
     def test_invalid_offset(self):
         response = self.app.get('/v1/sources?offset=BOGUS', status=400)
@@ -104,8 +104,7 @@ class TestSource(BaseTestMixin, TestCase):
         for i in range(1, 11):
             self.make_source(u"http://example.com/feed%s" % i)
         response = self.app.get_json('/v1/sources?offset=5&limit=3')
-        self.assertEqual(len(response['sources']), 3)
-        self.assertEqual(response['sources'][0]['url'],
-                         'http://example.com/feed6')
-        self.assertEqual(response['sources'][-1]['url'],
-                         'http://example.com/feed8')
+        items = response['collection']['items']
+        self.assertEqual(len(items), 3)
+        self.assertEqual(items[0]['data']['url'], 'http://example.com/feed6')
+        self.assertEqual(items[-1]['data']['url'], 'http://example.com/feed8')
