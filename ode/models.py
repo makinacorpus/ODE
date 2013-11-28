@@ -26,7 +26,8 @@ class ModelMixin(object):
         for column in self.__class__.__mapper__.columns:
             if column.name in ('producer_id', 'location_id', 'event_id'):
                 continue
-            if column.name == 'id' and self.__class__.__name__ != 'Event':
+            if column.name == 'id' and not getattr(self, 'json_includes_id',
+                                                   False):
                 continue
             result[column.name] = {'value': getattr(self, column.name)}
         for collection_name in ('locations', 'dates'):
@@ -40,6 +41,7 @@ class ModelMixin(object):
 
 class Event(ModelMixin, Base):
     __tablename__ = 'events'
+    json_includes_id = True
     id = Column(Integer, primary_key=True)
 
     audio_license = default_column()
@@ -137,6 +139,7 @@ class Date(ModelMixin, Base):
 
 class Source(ModelMixin, Base):
     __tablename__ = 'sources'
+    json_includes_id = True
     id = Column(Integer, primary_key=True)
     url = default_column()
     producer_id = default_column()

@@ -84,10 +84,15 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertEqual(response.json['status'], 404)
 
     def test_get_source_list(self):
-        self.make_source(u"http://example.com/mysource")
+        source = self.make_source(u"http://example.com/mysource")
         self.make_source(u"http://example.com/myothersource")
+
         response = self.app.get('/v1/sources')
-        self.assertEqual(len(response.json['collection']['items']), 2)
+
+        items = response.json['collection']['items']
+        self.assertEqual(len(items), 2)
+        source_id = items[0]['data']['id']['value']
+        self.assertEqual(source_id, source.id)
 
     def test_valid_limit(self):
         for i in range(1, 11):
