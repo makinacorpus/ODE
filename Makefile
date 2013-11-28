@@ -27,3 +27,6 @@ flake8: $(FLAKE8)
 .PHONY: docs
 docs:
 	cd docs && make html
+
+harvest:
+	harvest development.ini
