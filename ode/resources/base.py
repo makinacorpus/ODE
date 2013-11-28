@@ -80,13 +80,6 @@ class ResourceMixin(object):
     def collection_get(self):
         """Get list of resources"""
         query = DBSession.query(self.model)
-        total_count = query.count()
-        limit = self.request.validated.get('limit')
-        if limit:
-            query = query.limit(limit)
-        offset = self.request.validated.get('offset')
-        if offset:
-            query = query.offset(offset)
         sort_by = self.request.validated.get('sort_by')
         if sort_by:
             order_criterion = getattr(self.model, sort_by, None)
@@ -97,6 +90,13 @@ class ResourceMixin(object):
             else:
                 message = "{} is not a valid sorting criterion"
                 raise HTTPBadRequest(message.format(sort_by))
+        total_count = query.count()
+        limit = self.request.validated.get('limit')
+        if limit:
+            query = query.limit(limit)
+        offset = self.request.validated.get('offset')
+        if offset:
+            query = query.offset(offset)
         resources = [{"data": resource.to_dict()} for resource in query.all()]
         return {'collection': {
             'current_count': len(resources),

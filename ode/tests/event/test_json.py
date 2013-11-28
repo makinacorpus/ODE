@@ -208,6 +208,16 @@ class TestJson(TestEventMixin, TestCase):
                                 status=400)
         self.assertErrorMessage(response, 'not a valid sorting')
 
+    def test_order_with_limit(self):
+        self.create_sortable_events()
+
+        response = self.app.get('/v1/events?sort_by=title&limit=2')
+
+        items = response.json['collection']['items']
+        self.assertEqual(len(items), 2)
+        self.assertEqual(items[0]['data']['title']['value'], 'AAA')
+        self.assertEqual(items[1]['data']['title']['value'], 'BBB')
+
     def test_get_event(self):
         id = self.post_event()
         response = self.app.get('/v1/events/%s' % id)
