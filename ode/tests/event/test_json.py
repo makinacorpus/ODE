@@ -102,6 +102,14 @@ class TestJson(TestEventMixin, TestCase):
                                       headers=headers, status=status)
         return response.json['collection']['items'][0]['data']['id']['value']
 
+    def make_locations_data(self, name, start_time):
+        locations_data = deepcopy(example_json['locations'])
+        location = locations_data['value'][0]
+        location['name'] = {'value': name}
+        date1 = location['dates']['value'][0]
+        date1['start_time']['value'] = start_time
+        return locations_data
+
     def assertEqualIgnoringId(self, result, expected):
         result = remove_ids(result)
         for key in result:
@@ -137,12 +145,20 @@ class TestJson(TestEventMixin, TestCase):
         event_id = self.post_event()
         put_data = {
             'title': {'value': 'EuroPython'},
-            'locations': example_json['locations'],
+            'locations': self.make_locations_data(
+                name=u'Évian',
+                start_time="2013-12-19T10:00:00"
+            )
         }
-        response = self.app.put_json('/v1/events/%s' % event_id, put_data,
-                                     headers={'X-ODE-Producer-Id': '123'})
-        self.assertTitleEqual(event_id, 'EuroPython')
+
+        response = self.app.put_json(
+            '/v1/events/%s' % event_id, put_data,
+            headers={'X-ODE-Producer-Id': '123'})
+
+        event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(response.json['status'], 'updated')
+        self.assertEqual(event.title, 'EuroPython')
+        self.assertEqual(event.locations[0].name, u"Évian")
 
     def test_update_title_too_long(self):
         event_id = self.post_event()

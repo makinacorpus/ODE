@@ -29,9 +29,13 @@ class EventResource(ResourceMixin):
             'value': self.request.validated['producer_id']
         }
         data = flatten_values(self.request.validated)
-        del data['locations']  # FIXME update locations
-        if not query.update(data):
+        if 'locations' in data:
+            locations = data.pop('locations')
+        event = query.first()
+        if not event:
             raise HTTPNotFound()
+        event.set_locations(locations)
+        query.update(data)
         return {'status': 'updated'}
 
     @view(accept='text/calendar', renderer='ical',
