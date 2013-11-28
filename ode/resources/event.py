@@ -1,7 +1,7 @@
 from cornice.resource import resource, view
 
 from ode.models import Event
-from ode.models import DBSession, flatten_values
+from ode.models import DBSession
 from ode.validation import EventSchema, EventCollectionSchema, has_producer_id
 from ode.resources.base import ResourceMixin
 from ode.resources.exceptions import HTTPNotFound
@@ -28,17 +28,10 @@ class EventResource(ResourceMixin):
         self.request.validated['producer_id'] = {
             'value': self.request.validated['producer_id']
         }
-        data = flatten_values(self.request.validated)
-        if 'locations' in data:
-            locations = data.pop('locations')
-        if 'sounds' in data:
-            sounds = data.pop('sounds')
         event = query.first()
         if not event:
             raise HTTPNotFound()
-        event.set_locations(locations)
-        event.set_sounds(sounds)
-        query.update(data)
+        event.update_from_appstruct(self.request.validated)
         return {'status': 'updated'}
 
     @view(accept='text/calendar', renderer='ical',

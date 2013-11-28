@@ -2,7 +2,7 @@ import icalendar
 import requests
 from colander import Invalid
 
-from ode.models import DBSession, Source, Event, flatten_values
+from ode.models import DBSession, Source, Event
 from ode.validation import EventSchema
 from deserializers import icalendar_to_cstruct
 
@@ -29,7 +29,6 @@ def harvest():
                     model_kwargs = validate(icalendar_event)
                 except Invalid:
                     continue
-                model_kwargs = flatten_values(model_kwargs)
                 event = Event(**model_kwargs)
                 DBSession.add(event)
     DBSession.flush()

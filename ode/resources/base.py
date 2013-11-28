@@ -2,7 +2,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from cornice.resource import view
 
 from ode.resources.exceptions import HTTPNotFound, HTTPBadRequest
-from ode.models import DBSession, flatten_values
+from ode.models import DBSession
 from ode.validation import has_producer_id
 from ode.validation import validate_querystring
 
@@ -37,9 +37,8 @@ class ResourceMixin(object):
         producer_id = self.request.validated['producer_id']
         result_items = []
         for item in items:
-            item_data = flatten_values(item['data'])
-            item_data['producer_id'] = producer_id
-            resource = self.model(**item_data)
+            item['data']['producer_id'] = producer_id
+            resource = self.model(**item['data'])
             DBSession.add(resource)
             DBSession.flush()
             result_items.append({

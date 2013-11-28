@@ -28,7 +28,13 @@ class TestModel(TestEventMixin, TestCase):
         self.assertTrue(event.uid.endswith("@example.com"))
 
     def test_flatten_values(self):
+        input_struct = {
+            'a': {'value': 1},
+            'b': {'value': 2},
+            'c': None,
+            'd': 3,
+        }
         self.assertEqual(
-            flatten_values({'a': {'value': 1}, 'b': {'value': 2}}),
-            {'a': 1, 'b': 2},
+            flatten_values(input_struct),
+            {'a': 1, 'b': 2, 'c': None, 'd': 3},
         )

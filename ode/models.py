@@ -40,6 +40,23 @@ class ModelMixin(object):
                     result[name]['value'].append(obj.to_dict())
         return result
 
+    @classmethod
+    def appstruct_list_to_objects(cls, appstruct_list):
+        objects = []
+        for appstruct in appstruct_list:
+            obj = cls()
+            obj.update_from_appstruct(appstruct)
+            objects.append(obj)
+        return objects
+
+    def update_from_appstruct(self, appstruct):
+        appstruct = flatten_values(appstruct)
+        for key, value in appstruct.items():
+            if isinstance(value, list):
+                klass = collection_classes[key]
+                value = klass.appstruct_list_to_objects(appstruct.get(key, []))
+            setattr(self, key, value)
+
 
 class Media(ModelMixin, Base):
     __tablename__ = 'media'
@@ -91,42 +108,13 @@ class Event(ModelMixin, Base):
     def __init__(self, *args, **kwargs):
         if 'uid' not in kwargs:
             kwargs['uid'] = self.make_uid()
-        locations = kwargs.get('locations', [])
-        if locations:
-            del kwargs['locations']
-            self.set_locations(locations)
-        sounds = kwargs.get('sounds', [])
-        if sounds:
-            del kwargs['sounds']
-            self.set_sounds(sounds)
-        super(Event, self).__init__(*args, **kwargs)
+        self.update_from_appstruct(kwargs)
 
     def make_uid(self):
         return "{}@{}".format(
             uuid1().hex,
             pyramid.threadlocal.get_current_registry().settings['domain'],
         )
-
-    def set_locations(self, appstruct):
-        locations = []
-        for location_struct in appstruct:
-            location_struct = flatten_values(location_struct)
-            dates = location_struct.get('dates')
-            if 'dates' in location_struct:
-                del location_struct['dates']
-            location = Location(**location_struct)
-            if dates:
-                location.set_dates(dates)
-            locations.append(location)
-        self.locations = locations
-
-    def set_sounds(self, appstruct):
-        sounds = []
-        for sound_struct in appstruct:
-            sound_struct = flatten_values(sound_struct)
-            sound = Media(**sound_struct)
-            sounds.append(sound)
-        self.sounds = sounds
 
 
 class Location(ModelMixin, Base):
@@ -142,13 +130,6 @@ class Location(ModelMixin, Base):
     country = default_column()
     event_id = Column(Integer, ForeignKey('events.id'))
     dates = relationship('Date')
-
-    def set_dates(self, appstruct):
-        dates = []
-        for date_struct in appstruct:
-            date = Date(**flatten_values(date_struct))
-            dates.append(date)
-        self.dates = dates
 
 
 class Date(ModelMixin, Base):
@@ -167,6 +148,10 @@ class Source(ModelMixin, Base):
     url = default_column()
     producer_id = default_column()
 
+    def __init__(self, *args, **kwargs):
+        kwargs = flatten_values(kwargs)
+        super(Source, self).__init__(*args, **kwargs)
+
 
 icalendar_to_model_keys = {
     'uid': 'uid',
@@ -179,6 +164,14 @@ icalendar_to_model_keys = {
 def flatten_values(mapping):
     result = {}
     for key, field in mapping.items():
-        if field is not None:
+        if isinstance(field, dict):
             result[key] = field['value']
+        else:
+            result[key] = field
     return result
+
+collection_classes = {
+    'dates': Date,
+    'locations': Location,
+    'sounds': Media,
+}

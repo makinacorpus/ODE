@@ -152,7 +152,7 @@ class TestJson(TestEventMixin, TestCase):
         put_data = {
             'title': {'value': 'EuroPython'},
             'locations': self.make_locations_data(
-                name=u'Évian',
+                name=u'Le café des artistes',
                 start_time="2013-12-19T10:00:00"
             )
         }
@@ -164,7 +164,7 @@ class TestJson(TestEventMixin, TestCase):
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(response.json['status'], 'updated')
         self.assertEqual(event.title, 'EuroPython')
-        self.assertEqual(event.locations[0].name, u"Évian")
+        self.assertEqual(event.locations[0].name, u"Le café des artistes")
 
     def test_update_title_too_long(self):
         event_id = self.post_event()
