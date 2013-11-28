@@ -31,10 +31,13 @@ class EventResource(ResourceMixin):
         data = flatten_values(self.request.validated)
         if 'locations' in data:
             locations = data.pop('locations')
+        if 'sounds' in data:
+            sounds = data.pop('sounds')
         event = query.first()
         if not event:
             raise HTTPNotFound()
         event.set_locations(locations)
+        event.set_sounds(sounds)
         query.update(data)
         return {'status': 'updated'}
 

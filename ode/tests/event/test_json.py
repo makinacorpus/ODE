@@ -15,8 +15,6 @@ def remove_ids(dictionary):
 
 
 example_data = {
-    "audio_license": {'value': "CC"},
-    "audio_url": {'value': "http://example.com/audio"},
     "author_email": {'value': "bob@example.com"},
     "author_firstname": {'value': u"François"},
     "author_lastname": {'value': u"Vittsjö"},
@@ -71,6 +69,14 @@ example_data = {
                         },
                     ]
                 }
+            }
+        ]
+    },
+    "sounds": {
+        'value': [
+            {
+                "license": {'value': "CC By"},
+                "url": {'value': "http://example.com/audio"},
             }
         ]
     }
@@ -251,6 +257,8 @@ class TestJson(TestEventMixin, TestCase):
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqualIgnoringId(event.to_dict(), example_data)
         self.assertIn('@', event.uid)
+        self.assertEqual(event.sounds[0].url, 'http://example.com/audio')
+        self.assertEqual(event.sounds[0].license, 'CC By')
 
     def test_get_all_fields(self):
         event_id = self.post_event(example_json)

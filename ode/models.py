@@ -21,31 +21,40 @@ def default_column():
 
 class ModelMixin(object):
 
+    collections = []
+    json_includes_id = False
+
     def to_dict(self):
         result = {}
         for column in self.__class__.__mapper__.columns:
             if column.name in ('producer_id', 'location_id', 'event_id'):
                 continue
-            if column.name == 'id' and not getattr(self, 'json_includes_id',
-                                                   False):
+            if column.name == 'id' and not self.json_includes_id:
                 continue
             result[column.name] = {'value': getattr(self, column.name)}
-        for collection_name in ('locations', 'dates'):
-            if hasattr(self, collection_name):
-                result[collection_name] = {'value': []}
-                collection = getattr(self, collection_name)
+        for name in self.collections:
+            if hasattr(self, name):
+                result[name] = {'value': []}
+                collection = getattr(self, name)
                 for obj in collection:
-                    result[collection_name]['value'].append(obj.to_dict())
+                    result[name]['value'].append(obj.to_dict())
         return result
+
+
+class Media(ModelMixin, Base):
+    __tablename__ = 'media'
+    id = Column(Integer, primary_key=True)
+    event_id = Column(Integer, ForeignKey('events.id'))
+    license = Column(UnicodeText(20))
+    url = default_column()
 
 
 class Event(ModelMixin, Base):
     __tablename__ = 'events'
+    collections = ['locations', 'sounds']
     json_includes_id = True
     id = Column(Integer, primary_key=True)
 
-    audio_license = default_column()
-    audio_url = default_column()
     author_email = default_column()
     author_firstname = default_column()
     author_lastname = default_column()
@@ -77,6 +86,7 @@ class Event(ModelMixin, Base):
     producer_id = default_column()
 
     locations = relationship('Location')
+    sounds = relationship('Media')
 
     def __init__(self, *args, **kwargs):
         if 'uid' not in kwargs:
@@ -85,6 +95,10 @@ class Event(ModelMixin, Base):
         if locations:
             del kwargs['locations']
             self.set_locations(locations)
+        sounds = kwargs.get('sounds', [])
+        if sounds:
+            del kwargs['sounds']
+            self.set_sounds(sounds)
         super(Event, self).__init__(*args, **kwargs)
 
     def make_uid(self):
@@ -106,10 +120,19 @@ class Event(ModelMixin, Base):
             locations.append(location)
         self.locations = locations
 
+    def set_sounds(self, appstruct):
+        sounds = []
+        for sound_struct in appstruct:
+            sound_struct = flatten_values(sound_struct)
+            sound = Media(**sound_struct)
+            sounds.append(sound)
+        self.sounds = sounds
+
 
 class Location(ModelMixin, Base):
     __tablename__ = 'locations'
     id = Column(Integer, primary_key=True)
+    collections = ['dates']
 
     name = default_column()
     address = default_column()

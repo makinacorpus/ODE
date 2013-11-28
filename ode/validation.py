@@ -23,6 +23,11 @@ def default_schema_node():
     return _DefaultFieldSchema(missing=None)
 
 
+class MediaSchema(MappingSchema):
+    license = default_schema_node()
+    url = default_schema_node()
+
+
 class LocationSchema(MappingSchema):
     name = default_schema_node()
     address = default_schema_node()
@@ -95,6 +100,13 @@ class EventSchema(MappingSchema):
         @instantiate()
         class value(SequenceSchema):
             location = LocationSchema()
+
+    @instantiate(missing={'value': []})
+    class sounds(MappingSchema):
+
+        @instantiate()
+        class value(SequenceSchema):
+            sound = MediaSchema()
 
 
 class EventCollectionSchema(MappingSchema):
