@@ -30,18 +30,6 @@ class ResourceMixin(object):
         DBSession.delete(event)
         return {'status': 'deleted'}
 
-    @staticmethod
-    def flatten_values(mapping):
-        mapping = flatten_values(mapping)
-        if 'locations' in mapping:
-            locations = mapping['locations']
-            for i, location in enumerate(locations):
-                locations[i] = flatten_values(location)
-                for j, date in enumerate(locations[i]['dates']):
-                    locations[i]['dates'][j] = flatten_values(
-                        locations[i]['dates'][j])
-        return mapping
-
     def collection_post(self):
         """Add new resources"""
         collection = self.request.validated['collection']
@@ -49,7 +37,7 @@ class ResourceMixin(object):
         producer_id = self.request.validated['producer_id']
         result_items = []
         for item in items:
-            item_data = self.flatten_values(item['data'])
+            item_data = flatten_values(item['data'])
             item_data['producer_id'] = producer_id
             resource = self.model(**item_data)
             DBSession.add(resource)

@@ -1,7 +1,7 @@
 from cornice.resource import resource, view
 
 from ode.models import Event
-from ode.models import DBSession
+from ode.models import DBSession, flatten_values
 from ode.validation import EventSchema, EventCollectionSchema, has_producer_id
 from ode.resources.base import ResourceMixin
 from ode.resources.exceptions import HTTPNotFound
@@ -28,7 +28,7 @@ class EventResource(ResourceMixin):
         self.request.validated['producer_id'] = {
             'value': self.request.validated['producer_id']
         }
-        data = self.flatten_values(self.request.validated)
+        data = flatten_values(self.request.validated)
         del data['locations']  # FIXME update locations
         if not query.update(data):
             raise HTTPNotFound()

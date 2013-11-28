@@ -93,8 +93,10 @@ class Event(ModelMixin, Base):
 
     def append_locations(self, appstruct):
         for location_struct in appstruct:
-            dates = location_struct.get('dates', [])
-            del location_struct['dates']
+            location_struct = flatten_values(location_struct)
+            dates = location_struct.get('dates')
+            if 'dates' in location_struct:
+                del location_struct['dates']
             location = Location(**location_struct)
             if dates:
                 location.append_dates(dates)
@@ -116,7 +118,7 @@ class Location(ModelMixin, Base):
 
     def append_dates(self, appstruct):
         for date_struct in appstruct:
-            date = Date(**date_struct)
+            date = Date(**flatten_values(date_struct))
             self.dates.append(date)
 
 
@@ -147,8 +149,6 @@ icalendar_to_model_keys = {
 def flatten_values(mapping):
     result = {}
     for key, field in mapping.items():
-        if field is None:
-            continue
-        else:
+        if field is not None:
             result[key] = field['value']
     return result
