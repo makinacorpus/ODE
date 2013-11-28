@@ -82,17 +82,7 @@ class Event(ModelMixin, Base):
         locations = kwargs.get('locations', [])
         if locations:
             del kwargs['locations']
-            for location_data in locations:
-                dates = location_data.get('dates', [])
-                location_kwargs = dict(location_data)
-                del location_kwargs['dates']
-                location = Location(**location_kwargs)
-                self.locations.append(location)
-                if dates:
-                    del location_data['dates']
-                    for date_data in dates:
-                        date = Date(**date_data)
-                        location.dates.append(date)
+            self.append_locations(locations)
         super(Event, self).__init__(*args, **kwargs)
 
     def make_uid(self):
@@ -100,6 +90,15 @@ class Event(ModelMixin, Base):
             uuid1().hex,
             pyramid.threadlocal.get_current_registry().settings['domain'],
         )
+
+    def append_locations(self, appstruct):
+        for location_struct in appstruct:
+            dates = location_struct.get('dates', [])
+            del location_struct['dates']
+            location = Location(**location_struct)
+            if dates:
+                location.append_dates(dates)
+            self.locations.append(location)
 
 
 class Location(ModelMixin, Base):
@@ -114,6 +113,11 @@ class Location(ModelMixin, Base):
     country = default_column()
     event_id = Column(Integer, ForeignKey('events.id'))
     dates = relationship('Date')
+
+    def append_dates(self, appstruct):
+        for date_struct in appstruct:
+            date = Date(**date_struct)
+            self.dates.append(date)
 
 
 class Date(ModelMixin, Base):
