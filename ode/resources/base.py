@@ -3,7 +3,7 @@ from cornice.resource import view
 
 from ode.resources.exceptions import HTTPNotFound, HTTPBadRequest
 from ode.models import DBSession
-from ode.validation import has_producer_id
+from ode.validation import has_provider_id
 from ode.validation import validate_querystring
 
 
@@ -16,14 +16,14 @@ class ResourceMixin(object):
     def name(self):
         return self.model.__name__.lower()
 
-    @view(validators=[has_producer_id])
+    @view(validators=[has_provider_id])
     def delete(self):
         """Delete a resource by id"""
         id = self.request.matchdict['id']
         try:
             event = DBSession.query(self.model).filter_by(
                 id=id,
-                producer_id=self.request.validated['producer_id'],
+                provider_id=self.request.validated['provider_id'],
             ).one()
         except NoResultFound:
             raise HTTPNotFound()
@@ -34,10 +34,10 @@ class ResourceMixin(object):
         """Add new resources"""
         collection = self.request.validated['collection']
         items = collection['items']
-        producer_id = self.request.validated['producer_id']
+        provider_id = self.request.validated['provider_id']
         result_items = []
         for item in items:
-            item['data']['producer_id'] = producer_id
+            item['data']['provider_id'] = provider_id
             resource = self.model(**item['data'])
             DBSession.add(resource)
             DBSession.flush()
@@ -67,9 +67,9 @@ class ResourceMixin(object):
     def collection_get(self):
         """Get list of resources"""
         query = DBSession.query(self.model)
-        if 'producer_id' in self.request.validated:
+        if 'provider_id' in self.request.validated:
             query = query.filter_by(
-                producer_id=self.request.validated['producer_id'])
+                provider_id=self.request.validated['provider_id'])
         sort_by = self.request.validated.get('sort_by')
         if sort_by:
             order_criterion = getattr(self.model, sort_by, None)
@@ -99,10 +99,10 @@ class ResourceMixin(object):
         resouce_id = self.request.matchdict['id']
         query = DBSession.query(self.model).filter_by(
             id=resouce_id,
-            producer_id=self.request.validated['producer_id'],
+            provider_id=self.request.validated['provider_id'],
         )
-        self.request.validated['producer_id'] = {
-            'value': self.request.validated['producer_id']
+        self.request.validated['provider_id'] = {
+            'value': self.request.validated['provider_id']
         }
         event = query.first()
         if not event:

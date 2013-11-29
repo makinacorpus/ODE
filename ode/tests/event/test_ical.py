@@ -80,7 +80,7 @@ class TestPostEvent(TestEventMixin, TestCase):
     def post(self, calendar):
         return self.app.post('/v1/events', calendar, headers={
             'content-type': 'text/calendar',
-            'X-ODE-Producer-Id': '123'
+            'X-ODE-Provider-Id': '123'
         })
 
     def test_post_single_event(self):

@@ -29,7 +29,7 @@ class ModelMixin(object):
     def to_dict(self):
         result = {}
         for column in self.__class__.__mapper__.columns:
-            if column.name in ('producer_id', 'location_id', 'event_id'):
+            if column.name in ('provider_id', 'location_id', 'event_id'):
                 continue
             if column.name == 'id' and not self.json_includes_id:
                 continue
@@ -132,7 +132,7 @@ class Event(ModelMixin, Base):
     title = default_column()
     uid = Column(Unicode(SAFE_MAX_LENGTH), unique=True)
     url = default_column()
-    producer_id = default_column()
+    provider_id = default_column()
 
     locations = relationship('Location')
     sounds = relationship('Sound')
@@ -183,7 +183,7 @@ class Source(ModelMixin, Base):
     id = Column(Integer, primary_key=True)
     url = default_column()
     active = Column(Boolean())
-    producer_id = default_column()
+    provider_id = default_column()
 
     def __init__(self, *args, **kwargs):
         kwargs = flatten_values(kwargs)

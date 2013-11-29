@@ -117,7 +117,7 @@ class TestJson(TestEventMixin, TestCase):
 
     def post_event(self, event_info=None, headers=None, status=200):
         if headers is None:
-            headers = {'X-ODE-Producer-Id': '123'}
+            headers = {'X-ODE-Provider-Id': '123'}
         if event_info is None:
             event_info = {'title': {'value': u'Titre Événement'}}
         if not 'locations' in event_info:
@@ -155,8 +155,8 @@ class TestJson(TestEventMixin, TestCase):
         event_id = self.post_event()
         self.assertTitleEqual(event_id, u'Titre Événement')
 
-    def test_post_event_with_invalid_producer_id(self):
-        self.app.post_json('/v1/events', headers={'X-ODE-Producer-Id': '\n'},
+    def test_post_event_with_invalid_provider_id(self):
+        self.app.post_json('/v1/events', headers={'X-ODE-Provider-Id': '\n'},
                            status=403)
 
     def test_post_title_too_long(self):
@@ -167,7 +167,7 @@ class TestJson(TestEventMixin, TestCase):
                     {'data': {'title': {'value': very_long_title}}}
                 ]
             },
-        }, status=400, headers={'X-ODE-Producer-Id': '123'})
+        }, status=400, headers={'X-ODE-Provider-Id': '123'})
         self.assertErrorMessage(response, 'Longer than maximum')
 
     def test_update_event(self):
@@ -182,7 +182,7 @@ class TestJson(TestEventMixin, TestCase):
 
         response = self.app.put_json(
             '/v1/events/%s' % event_id, put_data,
-            headers={'X-ODE-Producer-Id': '123'})
+            headers={'X-ODE-Provider-Id': '123'})
 
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(response.json['status'], 'updated')
@@ -194,7 +194,7 @@ class TestJson(TestEventMixin, TestCase):
         very_long_title = '*' * 1001
         response = self.app.put_json('/v1/events/%s' % event_id, {
             'title': very_long_title
-        }, headers={'X-ODE-Producer-Id': '123'}, status=400)
+        }, headers={'X-ODE-Provider-Id': '123'}, status=400)
         self.assertEqual(response.json['status'], 'error')
 
     def test_list_events(self):
@@ -272,7 +272,7 @@ class TestJson(TestEventMixin, TestCase):
     def test_delete_event(self):
         id = self.post_event()
         self.app.delete('/v1/events/%s' % id,
-                        headers={'X-ODE-Producer-Id': '123'})
+                        headers={'X-ODE-Provider-Id': '123'})
         self.assertEqual(DBSession.query(Event).count(), 0)
 
     def test_post_all_fields(self):
@@ -321,10 +321,10 @@ class TestJson(TestEventMixin, TestCase):
         put_data['locations'] = example_json['locations']
         response = self.app.put_json(
             '/v1/events/42', put_data,
-            headers={'X-ODE-Producer-Id': '123'}, status=404)
+            headers={'X-ODE-Provider-Id': '123'}, status=404)
         self.assertEqual(response.json['status'], 404)
 
     def test_delete_invalid_id(self):
         response = self.app.delete('/v1/events/42', status=404,
-                                   headers={'X-ODE-Producer-Id': '123'})
+                                   headers={'X-ODE-Provider-Id': '123'})
         self.assertEqual(response.json['status'], 404)

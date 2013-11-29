@@ -6,13 +6,13 @@ import colander
 from models import TAG_MAX_LENGTH, SAFE_MAX_LENGTH
 
 
-def has_producer_id(request):
-    producer_id = request.headers.get('X-ODE-Producer-Id', '').strip()
-    if producer_id:
-        request.validated['producer_id'] = producer_id
+def has_provider_id(request):
+    provider_id = request.headers.get('X-ODE-Provider-Id', '').strip()
+    if provider_id:
+        request.validated['provider_id'] = provider_id
     else:
-        request.errors.add('body', 'producer_id',
-                           'This request requires an X-ODE-Producer-Id header')
+        request.errors.add('body', 'provider_id',
+                           'This request requires an X-ODE-Provider-Id header')
         request.errors.status = 403
 
 
