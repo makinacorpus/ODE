@@ -4,6 +4,7 @@ from sqlalchemy import (Column, Integer, Unicode, UnicodeText,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm import relationship
+from sqlalchemy import Table
 from uuid import uuid1
 from zope.sqlalchemy import ZopeTransactionExtension
 
@@ -13,6 +14,7 @@ Base = declarative_base()
 
 
 SAFE_MAX_LENGTH = 1000
+TAG_MAX_LENGTH = 50
 
 
 def default_column():
@@ -82,6 +84,26 @@ class Image(ModelMixin, Base):
     url = default_column()
 
 
+tag_association = Table(
+    'tag_association', Base.metadata,
+    Column('tag_id', Integer, ForeignKey('tags.id')),
+    Column('event_id', Integer, ForeignKey('events.id'))
+)
+
+
+category_association = Table(
+    'category_association', Base.metadata,
+    Column('tag_id', Integer, ForeignKey('tags.id')),
+    Column('event_id', Integer, ForeignKey('events.id'))
+)
+
+
+class Tag(ModelMixin, Base):
+    __tablename__ = 'tags'
+    id = Column(Integer, primary_key=True)
+    name = Column(UnicodeText(TAG_MAX_LENGTH))
+
+
 class Event(ModelMixin, Base):
     __tablename__ = 'events'
     collections = ['locations', 'sounds', 'videos', 'images']
@@ -116,6 +138,8 @@ class Event(ModelMixin, Base):
     sounds = relationship('Sound')
     videos = relationship('Video')
     images = relationship('Image')
+    tags = relationship('Tag', secondary=tag_association)
+    categories = relationship('Tag', secondary=category_association)
 
     def __init__(self, *args, **kwargs):
         if 'uid' not in kwargs:
@@ -188,4 +212,6 @@ collection_classes = {
     'sounds': Sound,
     'videos': Video,
     'images': Image,
+    'tags': Tag,
+    'categories': Tag,
 }

@@ -1,6 +1,7 @@
 from colander import MappingSchema, SchemaNode, String, Integer
 from colander import Length, DateTime, instantiate
 from colander import SequenceSchema, OneOf
+from models import TAG_MAX_LENGTH
 import colander
 
 from ode.models import SAFE_MAX_LENGTH
@@ -26,6 +27,13 @@ def default_schema_node():
 class MediaSchema(MappingSchema):
     license = default_schema_node()
     url = default_schema_node()
+
+
+class TagSchema(MappingSchema):
+
+    @instantiate()
+    class name(MappingSchema):
+        value = SchemaNode(String(), validator=Length(1, TAG_MAX_LENGTH))
 
 
 class LocationSchema(MappingSchema):
@@ -58,9 +66,6 @@ class EventSchema(MappingSchema):
     @instantiate()
     class title(MappingSchema):
         value = SchemaNode(String(), validator=Length(1, SAFE_MAX_LENGTH))
-    audio_license = default_schema_node()
-    audio_license = default_schema_node()
-    audio_url = default_schema_node()
     author_email = default_schema_node()
     author_firstname = default_schema_node()
     author_lastname = default_schema_node()
@@ -76,17 +81,11 @@ class EventSchema(MappingSchema):
     organiser = default_schema_node()
     price_information = default_schema_node()
     performers = default_schema_node()
-    photos1_license = default_schema_node()
-    photos1_url = default_schema_node()
-    photos2_license = default_schema_node()
-    photos2_url = default_schema_node()
     press_url = default_schema_node()
     source_id = default_schema_node()
     source = default_schema_node()
     target = default_schema_node()
     telephone = default_schema_node()
-    video_license = default_schema_node()
-    video_url = default_schema_node()
     url = default_schema_node()
 
     @instantiate(missing=colander.drop)
@@ -121,6 +120,20 @@ class EventSchema(MappingSchema):
         @instantiate()
         class value(SequenceSchema):
             image = MediaSchema()
+
+    @instantiate(missing={'value': []})
+    class tags(MappingSchema):
+
+        @instantiate()
+        class value(SequenceSchema):
+            tag = TagSchema()
+
+    @instantiate(missing={'value': []})
+    class categories(MappingSchema):
+
+        @instantiate()
+        class value(SequenceSchema):
+            tag = TagSchema()
 
 
 class EventCollectionSchema(MappingSchema):

@@ -90,6 +90,19 @@ example_data = {
             }
         ]
     },
+    "tags": {
+        'value': [
+            {"name": {'value': u"Jazz"}},
+            {"name": {'value': u"Classical"}},
+            {"name": {'value': u"Bourrée auvergnate"}},
+        ]
+    },
+    "categories": {
+        'value': [
+            {"name": {'value': u"Music"}},
+            {"name": {'value': u"音楽"}},
+        ]
+    },
 }
 example_json = deepcopy(example_data)
 example_dates = example_json['locations']['value'][0]['dates']['value']
@@ -266,11 +279,30 @@ class TestJson(TestEventMixin, TestCase):
         event_id = self.post_event(example_json)
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqualIgnoringId(event.to_dict(), example_data)
+
+    def test_uid(self):
+        event_id = self.post_event(example_json)
+        event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertIn('@', event.uid)
+
+    def test_media(self):
+        event_id = self.post_event(example_json)
+        event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(event.sounds[0].url, 'http://example.com/audio')
         self.assertEqual(event.sounds[0].license, 'CC By')
         self.assertEqual(event.videos[0].url, 'http://example.com/video')
         self.assertEqual(event.images[0].url, 'http://example.com/image')
+
+    def test_tags_and_categories(self):
+        event_id = self.post_event(example_json)
+        event = DBSession.query(Event).filter_by(id=event_id).first()
+        self.assertEqual(len(event.tags), 3)
+        self.assertEqual(event.tags[0].name, u"Jazz")
+        self.assertEqual(event.tags[1].name, u"Classical")
+        self.assertEqual(event.tags[2].name, u"Bourrée auvergnate")
+        self.assertEqual(len(event.categories), 2)
+        self.assertEqual(event.categories[0].name, u"Music")
+        self.assertEqual(event.categories[1].name, u"音楽")
 
     def test_get_all_fields(self):
         event_id = self.post_event(example_json)
