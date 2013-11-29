@@ -90,3 +90,19 @@ class ResourceMixin(object):
             'total_count': total_count,
             'items': resources,
         }}
+
+    def put(self):
+        """Update an existing resource by id"""
+        resouce_id = self.request.matchdict['id']
+        query = DBSession.query(self.model).filter_by(
+            id=resouce_id,
+            producer_id=self.request.validated['producer_id'],
+        )
+        self.request.validated['producer_id'] = {
+            'value': self.request.validated['producer_id']
+        }
+        event = query.first()
+        if not event:
+            raise HTTPNotFound()
+        event.update_from_appstruct(self.request.validated)
+        return {'status': 'updated'}

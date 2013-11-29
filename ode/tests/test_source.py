@@ -67,9 +67,15 @@ class TestSource(BaseTestMixin, TestCase):
         source = self.make_source()
         response = self.app.put_json(
             '/v1/sources/%s' % source.id,
-            {'url': {'value': 'http://example.com/myothersource'}},
+            {
+                'url': {'value': 'http://example.com/myothersource'},
+                'active': {'value': False}
+            },
             headers={'X-ODE-Producer-Id': '123'})
         self.assertEqual(response.json['status'], 'updated')
+        source = DBSession.query(Source).one()
+        self.assertEqual(source.url, u'http://example.com/myothersource')
+        self.assertEqual(source.active, False)
 
     def test_update_required_producer_id(self):
         source = self.make_source()

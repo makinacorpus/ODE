@@ -1,10 +1,8 @@
 from cornice.resource import resource, view
 
 from ode.models import Event
-from ode.models import DBSession
 from ode.validation import EventSchema, EventCollectionSchema, has_producer_id
 from ode.resources.base import ResourceMixin
-from ode.resources.exceptions import HTTPNotFound
 from ode.validation import validate_querystring
 
 
@@ -19,20 +17,7 @@ class EventResource(ResourceMixin):
 
     @view(validators=[has_producer_id], schema=EventSchema)
     def put(self):
-        """Update an existing resource by id"""
-        resouce_id = self.request.matchdict['id']
-        query = DBSession.query(self.model).filter_by(
-            id=resouce_id,
-            producer_id=self.request.validated['producer_id'],
-        )
-        self.request.validated['producer_id'] = {
-            'value': self.request.validated['producer_id']
-        }
-        event = query.first()
-        if not event:
-            raise HTTPNotFound()
-        event.update_from_appstruct(self.request.validated)
-        return {'status': 'updated'}
+        return ResourceMixin.put(self)
 
     @view(accept='text/calendar', renderer='ical',
           validators=[validate_querystring])
