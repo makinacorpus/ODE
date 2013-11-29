@@ -1,10 +1,9 @@
-from colander import MappingSchema, SchemaNode, String, Integer
+from colander import MappingSchema, SchemaNode, String, Integer, Boolean
 from colander import Length, DateTime, instantiate
 from colander import SequenceSchema, OneOf
-from models import TAG_MAX_LENGTH
 import colander
 
-from ode.models import SAFE_MAX_LENGTH
+from models import TAG_MAX_LENGTH, SAFE_MAX_LENGTH
 
 
 def has_producer_id(request):
@@ -153,6 +152,10 @@ class SourceSchema(MappingSchema):
     @instantiate()
     class url(MappingSchema):
         value = SchemaNode(String(), validator=colander.url)
+
+    @instantiate(missing=False)
+    class active(MappingSchema):
+        value = SchemaNode(Boolean())
 
 
 class SourceCollectionSchema(MappingSchema):

@@ -38,7 +38,8 @@ class TestSource(BaseTestMixin, TestCase):
             'collection': {
                 'items': [
                     {'data': {
-                        'url': {'value': u'http://example.com/mysource'}
+                        'url': {'value': u'http://example.com/mysource'},
+                        'active': {'value': True},
                     }}
                 ]
             }
@@ -48,6 +49,7 @@ class TestSource(BaseTestMixin, TestCase):
         })
         source = DBSession.query(Source).one()
         self.assertEqual(source.url, u'http://example.com/mysource')
+        self.assertEqual(source.active, True)
 
     def test_url_is_required(self):
         sources_info = {'sources': [{'url': u'\t  \r '}]}

@@ -1,6 +1,6 @@
 import pyramid
 from sqlalchemy import (Column, Integer, Unicode, UnicodeText,
-                        DateTime, ForeignKey)
+                        DateTime, ForeignKey, Boolean)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm import relationship
@@ -182,6 +182,7 @@ class Source(ModelMixin, Base):
     json_includes_id = True
     id = Column(Integer, primary_key=True)
     url = default_column()
+    active = Column(Boolean())
     producer_id = default_column()
 
     def __init__(self, *args, **kwargs):
