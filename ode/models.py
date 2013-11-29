@@ -58,8 +58,24 @@ class ModelMixin(object):
             setattr(self, key, value)
 
 
-class Media(ModelMixin, Base):
-    __tablename__ = 'media'
+class Sound(ModelMixin, Base):
+    __tablename__ = 'sounds'
+    id = Column(Integer, primary_key=True)
+    event_id = Column(Integer, ForeignKey('events.id'))
+    license = Column(UnicodeText(20))
+    url = default_column()
+
+
+class Video(ModelMixin, Base):
+    __tablename__ = 'videos'
+    id = Column(Integer, primary_key=True)
+    event_id = Column(Integer, ForeignKey('events.id'))
+    license = Column(UnicodeText(20))
+    url = default_column()
+
+
+class Image(ModelMixin, Base):
+    __tablename__ = 'images'
     id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey('events.id'))
     license = Column(UnicodeText(20))
@@ -68,7 +84,7 @@ class Media(ModelMixin, Base):
 
 class Event(ModelMixin, Base):
     __tablename__ = 'events'
-    collections = ['locations', 'sounds']
+    collections = ['locations', 'sounds', 'videos', 'images']
     json_includes_id = True
     id = Column(Integer, primary_key=True)
 
@@ -98,12 +114,12 @@ class Event(ModelMixin, Base):
     title = default_column()
     uid = Column(Unicode(SAFE_MAX_LENGTH), unique=True)
     url = default_column()
-    video_license = default_column()
-    video_url = default_column()
     producer_id = default_column()
 
     locations = relationship('Location')
-    sounds = relationship('Media')
+    sounds = relationship('Sound')
+    videos = relationship('Video')
+    images = relationship('Image')
 
     def __init__(self, *args, **kwargs):
         if 'uid' not in kwargs:
@@ -173,5 +189,7 @@ def flatten_values(mapping):
 collection_classes = {
     'dates': Date,
     'locations': Location,
-    'sounds': Media,
+    'sounds': Sound,
+    'videos': Video,
+    'images': Image,
 }

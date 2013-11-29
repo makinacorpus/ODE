@@ -44,8 +44,6 @@ example_data = {
     "target": {'value': u"all"},
     "telephone": {'value': u"1234567890"},
     "title": {'value': u"Convention des amis des éléphants"},
-    "video_license": {'value': u"Video License Info"},
-    "video_url": {'value': u"http://example.com/video"},
     "url": {'value': u"http://example.com/v1/events/covention-amis-elephant"},
     "locations": {
         'value': [
@@ -79,7 +77,23 @@ example_data = {
                 "url": {'value': "http://example.com/audio"},
             }
         ]
-    }
+    },
+    "videos": {
+        'value': [
+            {
+                "license": {'value': "CC By"},
+                "url": {'value': "http://example.com/video"},
+            }
+        ]
+    },
+    "images": {
+        'value': [
+            {
+                "license": {'value': "CC By"},
+                "url": {'value': "http://example.com/image"},
+            }
+        ]
+    },
 }
 example_json = deepcopy(example_data)
 example_dates = example_json['locations']['value'][0]['dates']['value']
@@ -259,6 +273,8 @@ class TestJson(TestEventMixin, TestCase):
         self.assertIn('@', event.uid)
         self.assertEqual(event.sounds[0].url, 'http://example.com/audio')
         self.assertEqual(event.sounds[0].license, 'CC By')
+        self.assertEqual(event.videos[0].url, 'http://example.com/video')
+        self.assertEqual(event.images[0].url, 'http://example.com/image')
 
     def test_get_all_fields(self):
         event_id = self.post_event(example_json)

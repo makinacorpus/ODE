@@ -108,6 +108,20 @@ class EventSchema(MappingSchema):
         class value(SequenceSchema):
             sound = MediaSchema()
 
+    @instantiate(missing={'value': []})
+    class videos(MappingSchema):
+
+        @instantiate()
+        class value(SequenceSchema):
+            video = MediaSchema()
+
+    @instantiate(missing={'value': []})
+    class images(MappingSchema):
+
+        @instantiate()
+        class value(SequenceSchema):
+            image = MediaSchema()
+
 
 class EventCollectionSchema(MappingSchema):
 
