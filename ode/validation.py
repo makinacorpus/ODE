@@ -182,7 +182,7 @@ class QueryStringSchema(MappingSchema):
 def validate_querystring(request):
     schema = QueryStringSchema()
     try:
-        request.validated = schema.deserialize(request.GET)
+        request.validated.update(schema.deserialize(request.GET))
     except colander.Invalid, e:
         errors = e.asdict()
         for field, message in errors.items():

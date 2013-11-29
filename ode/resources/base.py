@@ -67,6 +67,9 @@ class ResourceMixin(object):
     def collection_get(self):
         """Get list of resources"""
         query = DBSession.query(self.model)
+        if 'producer_id' in self.request.validated:
+            query = query.filter_by(
+                producer_id=self.request.validated['producer_id'])
         sort_by = self.request.validated.get('sort_by')
         if sort_by:
             order_criterion = getattr(self.model, sort_by, None)

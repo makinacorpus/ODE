@@ -92,42 +92,49 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertEqual(response.json['status'], 404)
 
     def test_get_source_list(self):
-        source = self.make_source(u"http://example.com/mysource")
-        self.make_source(u"http://example.com/myothersource")
+        source1 = self.make_source(u"http://example.com/mysource")
+        source2 = self.make_source(u"http://example.com/myothersource")
+        self.make_source(u"http://example.com/hersource", producer_id='456')
 
-        response = self.app.get('/v1/sources')
+        response = self.app.get('/v1/sources',
+                                headers={'X-ODE-Producer-Id': '123'})
 
         items = response.json['collection']['items']
         self.assertEqual(len(items), 2)
-        source_id = items[0]['data']['id']['value']
-        self.assertEqual(source_id, source.id)
+        self.assertEqual(items[0]['data']['id']['value'], source1.id)
+        self.assertEqual(items[1]['data']['id']['value'], source2.id)
 
     def test_valid_limit(self):
         for i in range(1, 11):
             self.make_source(u"http://example.com/feed%s" % i)
-        response = self.app.get_json('/v1/sources?limit=5')
+        response = self.app.get_json('/v1/sources?limit=5',
+                                     headers={'X-ODE-Producer-Id': '123'})
         self.assertEqual(len(response['collection']['items']), 5)
 
     def test_invalid_limit(self):
-        response = self.app.get('/v1/sources?limit=BOGUS', status=400)
+        response = self.app.get('/v1/sources?limit=BOGUS', status=400,
+                                headers={'X-ODE-Producer-Id': '123'})
         self.assertErrorMessage(response, '"BOGUS" is not a number')
 
     def test_valid_offset(self):
         for i in range(1, 11):
             self.make_source(u"http://example.com/feed%s" % i)
-        response = self.app.get_json('/v1/sources?offset=5')
+        response = self.app.get_json('/v1/sources?offset=5',
+                                     headers={'X-ODE-Producer-Id': '123'})
         item = response['collection']['items'][0]
         self.assertEqual(item['data']['url']['value'],
                          'http://example.com/feed6')
 
     def test_invalid_offset(self):
-        response = self.app.get('/v1/sources?offset=BOGUS', status=400)
+        response = self.app.get('/v1/sources?offset=BOGUS', status=400,
+                                headers={'X-ODE-Producer-Id': '123'})
         self.assertErrorMessage(response, '"BOGUS" is not a number')
 
     def test_offset_and_limit(self):
         for i in range(1, 11):
             self.make_source(u"http://example.com/feed%s" % i)
-        response = self.app.get_json('/v1/sources?offset=5&limit=3')
+        response = self.app.get_json('/v1/sources?offset=5&limit=3',
+                                     headers={'X-ODE-Producer-Id': '123'})
         collection = response['collection']
         items = collection['items']
         self.assertEqual(collection['total_count'], 10)

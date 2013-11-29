@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-import json
-
 from pyramid import testing
 from webtest import TestApp as BaseTestApp
 
@@ -11,13 +9,13 @@ from ode.models import DBSession, Source
 
 class TestApp(BaseTestApp):
 
-    def get_json(self, url, status=200):
-        response = self.get(url, status=status)
-        return json.loads(response.body)
+    def get_json(self, url, status=200, headers={}):
+        response = self.get(url, status=status, headers=headers)
+        return response.json
 
     def delete_json(self, url, status=200, headers={}):
         response = self.delete(url, status=status, headers=headers)
-        return json.loads(response.body)
+        return response.json
 
 
 class BaseTestMixin(object):
