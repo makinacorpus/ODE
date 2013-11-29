@@ -15,6 +15,10 @@ class TestApp(BaseTestApp):
         response = self.get(url, status=status)
         return json.loads(response.body)
 
+    def delete_json(self, url, status=200, headers={}):
+        response = self.delete(url, status=status, headers=headers)
+        return json.loads(response.body)
+
 
 class BaseTestMixin(object):
 
