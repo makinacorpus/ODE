@@ -10,7 +10,6 @@ from zope.sqlalchemy import ZopeTransactionExtension
 
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
-Base = declarative_base()
 
 
 SAFE_MAX_LENGTH = 1000
@@ -21,10 +20,12 @@ def default_column():
     return Column(Unicode(SAFE_MAX_LENGTH))
 
 
-class ModelMixin(object):
+class BaseModel(object):
 
     collections = []
     json_includes_id = False
+
+    id = Column(Integer, primary_key=True)
 
     def to_dict(self):
         result = {}
@@ -60,25 +61,25 @@ class ModelMixin(object):
             setattr(self, key, value)
 
 
-class Sound(ModelMixin, Base):
+Base = declarative_base(cls=BaseModel)
+
+
+class Sound(Base):
     __tablename__ = 'sounds'
-    id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey('events.id'))
     license = Column(UnicodeText(20))
     url = default_column()
 
 
-class Video(ModelMixin, Base):
+class Video(Base):
     __tablename__ = 'videos'
-    id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey('events.id'))
     license = Column(UnicodeText(20))
     url = default_column()
 
 
-class Image(ModelMixin, Base):
+class Image(Base):
     __tablename__ = 'images'
-    id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey('events.id'))
     license = Column(UnicodeText(20))
     url = default_column()
@@ -98,17 +99,15 @@ category_association = Table(
 )
 
 
-class Tag(ModelMixin, Base):
+class Tag(Base):
     __tablename__ = 'tags'
-    id = Column(Integer, primary_key=True)
     name = Column(UnicodeText(TAG_MAX_LENGTH))
 
 
-class Event(ModelMixin, Base):
+class Event(Base):
     __tablename__ = 'events'
     collections = ['locations', 'sounds', 'videos', 'images']
     json_includes_id = True
-    id = Column(Integer, primary_key=True)
 
     author_email = default_column()
     author_firstname = default_column()
@@ -153,9 +152,8 @@ class Event(ModelMixin, Base):
         )
 
 
-class Location(ModelMixin, Base):
+class Location(Base):
     __tablename__ = 'locations'
-    id = Column(Integer, primary_key=True)
     collections = ['dates']
 
     name = default_column()
@@ -168,19 +166,17 @@ class Location(ModelMixin, Base):
     dates = relationship('Date')
 
 
-class Date(ModelMixin, Base):
+class Date(Base):
     __tablename__ = 'dates'
-    id = Column(Integer, primary_key=True)
 
     start_time = Column(DateTime(timezone=False))
     end_time = Column(DateTime(timezone=False))
     location_id = Column(Integer, ForeignKey('locations.id'))
 
 
-class Source(ModelMixin, Base):
+class Source(Base):
     __tablename__ = 'sources'
     json_includes_id = True
-    id = Column(Integer, primary_key=True)
     url = default_column()
     active = Column(Boolean())
     provider_id = default_column()
