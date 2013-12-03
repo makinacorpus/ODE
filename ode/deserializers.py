@@ -40,9 +40,10 @@ def data_list_to_dict(data_list):
         if key in result:
             existing_value = result[key]['value']
             if isinstance(existing_value, list):
-                existing_value.append(new_value)
+                existing_value.append({'value': new_value})
             else:
-                result[key]['value'] = [existing_value, new_value]
+                result[key]['value'] = [{'value': existing_value},
+                                        {'value': new_value}]
         else:
             result[key] = {'value': new_value}
     return result

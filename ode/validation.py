@@ -29,10 +29,7 @@ class MediaSchema(MappingSchema):
 
 
 class TagSchema(MappingSchema):
-
-    @instantiate()
-    class name(MappingSchema):
-        value = SchemaNode(String(), validator=Length(1, TAG_MAX_LENGTH))
+    value = SchemaNode(String(), validator=Length(1, TAG_MAX_LENGTH))
 
 
 class LocationSchema(MappingSchema):

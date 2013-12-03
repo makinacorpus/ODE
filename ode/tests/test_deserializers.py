@@ -53,7 +53,11 @@ class TestDeserializers(TestCase):
                     {
                         u'data': {
                             u'category': {
-                                'value': [u'Music', u'Theatre', u'Cinema']
+                                'value': [
+                                    {'value': u'Music'},
+                                    {'value': u'Theatre'},
+                                    {'value': u'Cinema'},
+                                ]
                             }
                         }
                     }

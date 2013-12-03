@@ -58,7 +58,10 @@ class BaseModel(object):
             if isinstance(value, list):
                 klass = collection_classes[key]
                 value = klass.appstruct_list_to_objects(appstruct.get(key, []))
-            setattr(self, key, value)
+            if isinstance(self, Tag):
+                self.name = value
+            else:
+                setattr(self, key, value)
 
 
 Base = declarative_base(cls=BaseModel)

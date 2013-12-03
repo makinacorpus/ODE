@@ -42,6 +42,11 @@ example_data = [
     {'name': "title", 'value': u"Convention des amis des éléphants"},
     {'name': "url",
      'value': u"http://example.com/v1/events/covention-amis-elephant"},
+    {'name': "tags", 'value': u"Jazz"},
+    {'name': "tags", 'value': u"Classical"},
+    {'name': "tags", 'value': u"Bourrée auvergnate"},
+    {'name': "categories", 'value': u"Music"},
+    {'name': "categories", 'value': u"音楽"},
     #{'name': "sounds",
     # 'value': [
     #     {'name': "license", 'value': "CC By"},
@@ -261,7 +266,6 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(event.images[0].url, 'http://example.com/image')
 
     def test_tags_and_categories(self):
-        self.skipTest('todo')
         event_id = self.post_event(example_json)
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(len(event.tags), 3)
