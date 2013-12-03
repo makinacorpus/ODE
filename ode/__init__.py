@@ -3,7 +3,7 @@ from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
 from .models import DBSession, Base
-from ode.deserializers import icalendar_extractor
+from ode.deserializers import icalendar_extractor, json_extractor
 
 
 def main(global_config, **settings):
@@ -21,5 +21,6 @@ def main(global_config, **settings):
     config.add_renderer('ical', 'ode.renderers.IcalRenderer')
     config.add_renderer('json', 'ode.renderers.JsonRenderer')
     config.add_cornice_deserializer('text/calendar', icalendar_extractor)
+    config.add_cornice_deserializer('application/json', json_extractor)
     config.scan(ignore='ode.tests')
     return config.make_wsgi_app()

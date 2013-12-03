@@ -1,3 +1,5 @@
+import json
+
 from icalendar import Calendar
 from ode.models import icalendar_to_model_keys
 
@@ -28,3 +30,37 @@ def icalendar_extractor(request):
         cstruct = icalendar_to_cstruct(icalendar_event)
         events.append({'data': cstruct})
     return {'collection': {'items': events}}
+
+
+def data_list_to_dict(data_list):
+    result = {}
+    for data_field in data_list:
+        key = data_field['name']
+        new_value = data_field['value']
+        if key in result:
+            existing_value = result[key]['value']
+            if isinstance(existing_value, list):
+                existing_value.append(new_value)
+            else:
+                result[key]['value'] = [existing_value, new_value]
+        else:
+            result[key] = {'value': new_value}
+    return result
+
+
+def collection_json_to_cstruct(collection_object):
+    items = collection_object['collection']['items']
+    for item in items:
+        item['data'] = data_list_to_dict(item['data'])
+    return collection_object
+
+
+def json_extractor(request):
+    if request.body:
+        json_data = json.loads(request.body)
+        if 'collection' in json_data:
+            return collection_json_to_cstruct(json_data)
+        else:
+            return json_data
+    else:
+        return {}

@@ -92,13 +92,6 @@ class EventSchema(MappingSchema):
         value = SchemaNode(String(), missing=colander.drop,
                            validator=Length(1, SAFE_MAX_LENGTH))
 
-    @instantiate()
-    class locations(MappingSchema):
-
-        @instantiate()
-        class value(SequenceSchema):
-            location = LocationSchema()
-
     @instantiate(missing={'value': []})
     class sounds(MappingSchema):
 

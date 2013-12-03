@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from ode.models import DBSession, Source
 from ode.tests import BaseTestMixin
+from ode.deserializers import data_list_to_dict
 
 
 class TestSource(BaseTestMixin, TestCase):
@@ -12,8 +13,9 @@ class TestSource(BaseTestMixin, TestCase):
     def test_get_source(self):
         source = self.make_source()
         response = self.app.get('/v1/sources/%s' % source.id)
-        self.assertEqual(response.json['source']['url']['value'],
-                         'http://example.com')
+        self.assertEqual(
+            data_list_to_dict(response.json['source'])['url']['value'],
+            'http://example.com')
 
     def test_delete_source(self):
         source = self.make_source(provider_id=123)
@@ -37,10 +39,11 @@ class TestSource(BaseTestMixin, TestCase):
         sources_info = {
             'collection': {
                 'items': [
-                    {'data': {
-                        'url': {'value': u'http://example.com/mysource'},
-                        'active': {'value': True},
-                    }}
+                    {'data': [
+                        {'name': 'url',
+                         'value': u'http://example.com/mysource'},
+                        {'name': 'active', 'value': True},
+                    ]}
                 ]
             }
         }
@@ -101,8 +104,10 @@ class TestSource(BaseTestMixin, TestCase):
 
         items = response.json['collection']['items']
         self.assertEqual(len(items), 2)
-        self.assertEqual(items[0]['data']['id']['value'], source1.id)
-        self.assertEqual(items[1]['data']['id']['value'], source2.id)
+        self.assertEqual(data_list_to_dict(items[0]['data'])['id']['value'],
+                         source1.id)
+        self.assertEqual(data_list_to_dict(items[1]['data'])['id']['value'],
+                         source2.id)
 
     def test_valid_limit(self):
         for i in range(1, 11):
@@ -122,7 +127,7 @@ class TestSource(BaseTestMixin, TestCase):
         response = self.app.get_json('/v1/sources?offset=5',
                                      headers={'X-ODE-Provider-Id': '123'})
         item = response['collection']['items'][0]
-        self.assertEqual(item['data']['url']['value'],
+        self.assertEqual(data_list_to_dict(item['data'])['url']['value'],
                          'http://example.com/feed6')
 
     def test_invalid_offset(self):
@@ -140,7 +145,7 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertEqual(collection['total_count'], 10)
         self.assertEqual(len(items), 3)
         self.assertEqual(collection['current_count'], 3)
-        self.assertEqual(items[0]['data']['url']['value'],
+        self.assertEqual(data_list_to_dict(items[0]['data'])['url']['value'],
                          'http://example.com/feed6')
-        self.assertEqual(items[-1]['data']['url']['value'],
+        self.assertEqual(data_list_to_dict(items[-1]['data'])['url']['value'],
                          'http://example.com/feed8')

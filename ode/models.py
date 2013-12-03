@@ -27,20 +27,20 @@ class BaseModel(object):
 
     id = Column(Integer, primary_key=True)
 
-    def to_dict(self):
-        result = {}
+    def to_data_list(self):
+        result = []
         for column in self.__class__.__mapper__.columns:
             if column.name in ('provider_id', 'location_id', 'event_id'):
                 continue
             if column.name == 'id' and not self.json_includes_id:
                 continue
-            result[column.name] = {'value': getattr(self, column.name)}
+            result.append({'name': column.name,
+                           'value': getattr(self, column.name)})
         for name in self.collections:
             if hasattr(self, name):
-                result[name] = {'value': []}
                 collection = getattr(self, name)
                 for obj in collection:
-                    result[name]['value'].append(obj.to_dict())
+                    result.append({'name': name, 'value': obj.to_data_list()})
         return result
 
     @classmethod

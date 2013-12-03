@@ -60,7 +60,7 @@ class ResourceMixin(object):
             raise HTTPNotFound()
         return {
             'status': 'success',
-            self.name: resource.to_dict(),
+            self.name: resource.to_data_list(),
         }
 
     @view(validators=[validate_querystring])
@@ -87,7 +87,7 @@ class ResourceMixin(object):
         offset = self.request.validated.get('offset')
         if offset:
             query = query.offset(offset)
-        resources = [{"data": resource.to_dict()} for resource in query.all()]
+        resources = [{"data": resource.to_data_list()} for resource in query.all()]
         return {'collection': {
             'current_count': len(resources),
             'total_count': total_count,
