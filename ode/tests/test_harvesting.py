@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
 from mock import Mock, patch
-from datetime import datetime
 
 from ode.models import Event, DBSession
 from ode.tests.event import TestEventMixin

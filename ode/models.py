@@ -36,6 +36,10 @@ class BaseModel(object):
                 continue
             result.append({'name': column.name,
                            'value': getattr(self, column.name)})
+        if getattr(self, 'location', None):
+            for column in self.location.__class__.__mapper__.columns:
+                result.append({'name': 'location_' + column.name,
+                               'value': getattr(self.location, column.name)})
         for name in self.collections:
             if hasattr(self, name):
                 collection = getattr(self, name)
@@ -61,6 +65,11 @@ class BaseModel(object):
             if isinstance(self, Tag):
                 self.name = value
             else:
+                if key.startswith('location_'):
+                    if self.location is None:
+                        self.location = Location()
+                    key = key.replace('location_', '')
+                    setattr(self.location, key, value)
                 setattr(self, key, value)
 
 
@@ -138,7 +147,7 @@ class Event(Base):
     start_time = Column(DateTime(timezone=False))
     end_time = Column(DateTime(timezone=False))
 
-    locations = relationship('Location')
+    location = relationship('Location', uselist=False)
     sounds = relationship('Sound')
     videos = relationship('Video')
     images = relationship('Image')
@@ -198,6 +207,7 @@ icalendar_to_model_keys = {
     'description': 'description',
     'dtend': 'end_time',
     'dtstart': 'start_time',
+    'location': 'location_name',
 }
 
 

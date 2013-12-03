@@ -32,10 +32,10 @@ class TestGetEvent(TestEventMixin, TestCase):
                             u'DESCRIPTION:%s' % event.description.strip()[:10])
 
     def test_location(self):
-        self.skipTest('todo')
         event, response = self.get_event(location_name='Location Name')
+        self.assertEqual(event.location.name, 'Location Name')
         self.assertContains(response,
-                            u'LOCATION:%s' % event.locations[0].name)
+                            u'LOCATION:%s' % event.location.name)
 
     def test_url(self):
         event, response = self.get_event(url='http://example.com/')

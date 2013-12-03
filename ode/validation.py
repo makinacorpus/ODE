@@ -32,32 +32,6 @@ class TagSchema(MappingSchema):
     value = SchemaNode(String(), validator=Length(1, TAG_MAX_LENGTH))
 
 
-class LocationSchema(MappingSchema):
-    name = default_schema_node()
-    address = default_schema_node()
-    post_code = default_schema_node()
-    town = default_schema_node()
-    capacity = default_schema_node()
-    country = default_schema_node()
-
-    @instantiate()
-    class dates(MappingSchema):
-
-        @instantiate()
-        class value(SequenceSchema):
-
-            @instantiate()
-            class date(MappingSchema):
-
-                @instantiate()
-                class start_time(MappingSchema):
-                    value = SchemaNode(DateTime())
-
-                @instantiate()
-                class end_time(MappingSchema):
-                    value = SchemaNode(DateTime(), missing=None)
-
-
 class EventSchema(MappingSchema):
     @instantiate()
     class title(MappingSchema):
@@ -83,6 +57,13 @@ class EventSchema(MappingSchema):
     target = default_schema_node()
     telephone = default_schema_node()
     url = default_schema_node()
+
+    location_name = default_schema_node()
+    location_address = default_schema_node()
+    location_post_code = default_schema_node()
+    location_town = default_schema_node()
+    location_capacity = default_schema_node()
+    location_country = default_schema_node()
 
     @instantiate(missing=colander.drop)
     class uid(MappingSchema):
