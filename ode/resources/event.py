@@ -1,7 +1,7 @@
 from cornice.resource import resource, view
 
 from ode.models import Event
-from ode.validation import EventSchema, EventCollectionSchema, has_provider_id
+from ode.validation import EventCollectionSchema, has_provider_id
 from ode.resources.base import ResourceMixin
 from ode.validation import validate_querystring
 
@@ -15,7 +15,7 @@ class EventResource(ResourceMixin):
     def collection_post(self):
         return ResourceMixin.collection_post(self)
 
-    @view(validators=[has_provider_id], schema=EventSchema)
+    @view(validators=[has_provider_id], schema=EventCollectionSchema)
     def put(self):
         return ResourceMixin.put(self)
 

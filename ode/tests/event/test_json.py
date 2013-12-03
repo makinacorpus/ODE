@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-from datetime import datetime
 from unittest import TestCase
 from copy import deepcopy
 
@@ -91,8 +90,8 @@ class TestJson(TestEventMixin, TestCase):
         if event_info is None:
             event_info = [{'name': 'title', 'value': u'Titre Événement'}]
         body_data = {
-            'collection': {
-                'items': [{'data': event_info}]
+            'template': {
+                'data': event_info
             }
         }
         response = self.app.post_json('/v1/events', body_data,
@@ -127,23 +126,26 @@ class TestJson(TestEventMixin, TestCase):
     def test_post_title_too_long(self):
         very_long_title = '*' * 1001
         response = self.app.post_json('/v1/events', {
-            'collection': {
-                'items': [
-                    {'data': [{'name': 'title', 'value': very_long_title}]}
+            'template': {
+                'data': [
+                    {'name': 'title', 'value': very_long_title}
                 ]
-            },
+            }
         }, status=400, headers={'X-ODE-Provider-Id': '123'})
         self.assertErrorMessage(response, 'Longer than maximum')
 
     def test_update_event(self):
-        self.skipTest('todo')
         event_id = self.post_event()
         put_data = {
-            'title': {'value': 'EuroPython'},
-            'locations': self.make_locations_data(
-                name=u'Le café des artistes',
-                start_time="2013-12-19T10:00:00"
-            )
+            'template': {
+                'data': [
+                    {'name': 'title', 'value': 'EuroPython'},
+                ]
+            }
+            #'locations': self.make_locations_data(
+            #    name=u'Le café des artistes',
+            #    start_time="2013-12-19T10:00:00"
+            #)
         }
 
         response = self.app.put_json(
@@ -153,7 +155,7 @@ class TestJson(TestEventMixin, TestCase):
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(response.json['status'], 'updated')
         self.assertEqual(event.title, 'EuroPython')
-        self.assertEqual(event.locations[0].name, u"Le café des artistes")
+        #self.assertEqual(event.locations[0].name, u"Le café des artistes")
 
     def test_update_title_too_long(self):
         event_id = self.post_event()
@@ -287,10 +289,13 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(response.json['status'], 404)
 
     def test_put_invalid_id(self):
-        self.skipTest('todo')
-        put_data = [
-            {'name': u'title', 'value': u'Un événement'},
-        ]
+        put_data = {
+            'template': {
+                'data': [
+                    {'name': u'title', 'value': u'Un événement'},
+                ]
+            }
+        }
         #put_data['locations'] = example_json['locations']
         response = self.app.put_json(
             '/v1/events/42', put_data,

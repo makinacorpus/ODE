@@ -32,24 +32,33 @@ class ResourceMixin(object):
 
     def collection_post(self):
         """Add new resources"""
-        collection = self.request.validated['collection']
-        items = collection['items']
-        provider_id = self.request.validated['provider_id']
-        result_items = []
-        for item in items:
-            item['data']['provider_id'] = provider_id
-            resource = self.model(**item['data'])
+        if 'collection' in self.request.validated:
+            collection = self.request.validated['collection']
+            items = collection['items']
+            provider_id = self.request.validated['provider_id']
+            result_items = []
+            for item in items:
+                item['data']['provider_id'] = provider_id
+                resource = self.model(**item['data'])
+                DBSession.add(resource)
+                DBSession.flush()
+                result_items.append({
+                    'data': {'id': {'value': resource.id}},
+                    'status': 'created',
+                })
+            return {
+                'collection': {
+                    'items': result_items
+                }
+            }
+        else:
+            resource = self.model(**self.request.validated)
             DBSession.add(resource)
             DBSession.flush()
-            result_items.append({
-                'data': {'id': {'value': resource.id}},
+            return {
                 'status': 'created',
-            })
-        return {
-            'collection': {
-                'items': result_items
+                'id': resource.id,
             }
-        }
 
     def get(self):
         """Get a specific resource by id"""
@@ -87,7 +96,8 @@ class ResourceMixin(object):
         offset = self.request.validated.get('offset')
         if offset:
             query = query.offset(offset)
-        resources = [{"data": resource.to_data_list()} for resource in query.all()]
+        resources = [{"data": resource.to_data_list()}
+                     for resource in query.all()]
         return {'collection': {
             'current_count': len(resources),
             'total_count': total_count,
@@ -107,5 +117,6 @@ class ResourceMixin(object):
         event = query.first()
         if not event:
             raise HTTPNotFound()
-        event.update_from_appstruct(self.request.validated)
+        event.update_from_appstruct(
+            self.request.validated['collection']['items'][0]['data'])
         return {'status': 'updated'}

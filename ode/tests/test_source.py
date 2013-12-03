@@ -71,8 +71,13 @@ class TestSource(BaseTestMixin, TestCase):
         response = self.app.put_json(
             '/v1/sources/%s' % source.id,
             {
-                'url': {'value': 'http://example.com/myothersource'},
-                'active': {'value': False}
+                'template': {
+                    'data': [
+                        {'name': 'url',
+                         'value': 'http://example.com/myothersource'},
+                        {'name': 'active', 'value': False}
+                    ]
+                }
             },
             headers={'X-ODE-Provider-Id': '123'})
         self.assertEqual(response.json['status'], 'updated')
@@ -88,10 +93,17 @@ class TestSource(BaseTestMixin, TestCase):
 
     def test_cannot_update_other_people_stuff(self):
         source = self.make_source(provider_id='abc')
-        response = self.app.put_json('/v1/sources/%s' % source.id,
-                                     {'url': {'value': 'http://example.com'}},
-                                     status=404,
-                                     headers={'X-ODE-Provider-Id': '123'})
+        response = self.app.put_json(
+            '/v1/sources/%s' % source.id,
+            {
+                'template': {
+                    'data': [
+                        {'name': 'url', 'value': 'http://example.com'}
+                    ]
+                }
+            },
+            status=404,
+            headers={'X-ODE-Provider-Id': '123'})
         self.assertEqual(response.json['status'], 404)
 
     def test_get_source_list(self):
