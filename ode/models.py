@@ -135,6 +135,8 @@ class Event(Base):
     uid = Column(Unicode(SAFE_MAX_LENGTH), unique=True)
     url = default_column()
     provider_id = default_column()
+    start_time = Column(DateTime(timezone=False))
+    end_time = Column(DateTime(timezone=False))
 
     locations = relationship('Location')
     sounds = relationship('Sound')
@@ -194,6 +196,8 @@ icalendar_to_model_keys = {
     'summary': 'title',
     'url': 'url',
     'description': 'description',
+    'dtend': 'end_time',
+    'dtstart': 'start_time',
 }
 
 

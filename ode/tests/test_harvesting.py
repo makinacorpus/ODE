@@ -91,7 +91,6 @@ class TestHarvesting(TestEventMixin, TestCase):
         self.assertEqual(event.title, existing_event.title)
 
     def test_invalid_calendar(self):
-        self.skipTest('todo')
         self.setup_requests_mock(icalendar_data=start_time_missing)
         source = self.make_source()
         harvest()

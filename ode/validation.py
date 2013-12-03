@@ -124,6 +124,14 @@ class EventSchema(MappingSchema):
         class value(SequenceSchema):
             tag = TagSchema()
 
+    @instantiate()
+    class start_time(MappingSchema):
+        value = SchemaNode(DateTime(default_tzinfo=None))
+
+    @instantiate()
+    class end_time(MappingSchema):
+        value = SchemaNode(DateTime(default_tzinfo=None), missing=None)
+
 
 class EventCollectionSchema(MappingSchema):
 

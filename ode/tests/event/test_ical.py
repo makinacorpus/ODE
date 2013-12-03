@@ -42,13 +42,13 @@ class TestGetEvent(TestEventMixin, TestCase):
         self.assertContains(response, u'URL:%s' % event.url)
 
     def test_start_time(self):
-        self.skipTest('todo')
         _, response = self.get_event(start_time=datetime(2013, 12, 25, 15, 0))
         self.assertContains(response, u'DTSTART;VALUE=DATE-TIME:20131225T1500')
 
     def test_end_time(self):
-        self.skipTest('todo')
-        _, response = self.get_event(end_time=datetime(2013, 12, 25, 15, 0))
+        event, response = self.get_event(
+            end_time=datetime(2013, 12, 25, 15, 0))
+        self.assertEqual(event.end_time, datetime(2013, 12, 25, 15, 0))
         self.assertContains(response, u'DTEND;VALUE=DATE-TIME:20131225T1500')
 
 

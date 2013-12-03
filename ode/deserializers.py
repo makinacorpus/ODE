@@ -8,18 +8,14 @@ def icalendar_to_cstruct(icalendar_event):
     result = {}
     for icalendar_key, model_attribute in icalendar_to_model_keys.items():
         if icalendar_key in icalendar_event:
-            result[model_attribute] = {'value': icalendar_event[icalendar_key]}
-    if 'location' in icalendar_event:
-        location = {'name': {'value': icalendar_event['location']}}
-        result['locations'] = {'value': [location]}
-        if 'dtstart' in icalendar_event and 'dtend' in icalendar_event:
-            date = {
-                'start_time': {
-                    'value': icalendar_event['dtstart'].dt.isoformat()
-                },
-                'end_time': {'value': icalendar_event['dtend'].dt.isoformat()},
-            }
-            location['dates'] = {'value': [date]}
+            if icalendar_key in ('dtstart', 'dtend'):
+                result[model_attribute] = {
+                    'value': icalendar_event[icalendar_key].dt.isoformat()
+                }
+            else:
+                result[model_attribute] = {
+                    'value': icalendar_event[icalendar_key]
+                }
     return result
 
 

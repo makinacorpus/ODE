@@ -64,19 +64,6 @@ example_data = [
     #     {'name': "url", 'value': "http://example.com/image"},
     # ]
     # },
-    #{'name': "tags",
-    # 'value': [
-    #     {'name': "name", 'value': u"Jazz"},
-    #     {'name': "name", 'value': u"Classical"},
-    #     {'name': "name", 'value': u"Bourrée auvergnate"},
-    # ]
-    # },
-    #{'name': "categories",
-    # 'value': [
-    #     {'name': "name", 'value': u"Music"},
-    #     {'name': "name", 'value': u"音楽"},
-    # ]
-    # },
 ]
 example_json = deepcopy(example_data)
 
@@ -88,7 +75,16 @@ class TestJson(TestEventMixin, TestCase):
         if headers is None:
             headers = {'X-ODE-Provider-Id': '123'}
         if event_info is None:
-            event_info = [{'name': 'title', 'value': u'Titre Événement'}]
+            event_info = [
+                {'name': 'title', 'value': u'Titre Événement'},
+            ]
+        for mandatory in ('start_time', 'end_time'):
+            if mandatory not in [field['name'] for field in event_info]:
+                event_info.append({
+                    'name': mandatory,
+                    'value': '2014-01-25T15:00',
+                })
+
         body_data = {
             'template': {
                 'data': event_info
@@ -139,7 +135,9 @@ class TestJson(TestEventMixin, TestCase):
         put_data = {
             'template': {
                 'data': [
-                    {'name': 'title', 'value': 'EuroPython'},
+                    {'name': u'title', 'value': 'EuroPython'},
+                    {'name': u'start_time', 'value': u'2014-01-25T15:00'},
+                    {'name': u'end_time', 'value': u'2014-01-25T15:00'},
                 ]
             }
             #'locations': self.make_locations_data(
@@ -259,7 +257,7 @@ class TestJson(TestEventMixin, TestCase):
         self.assertIn('@', event.uid)
 
     def test_media(self):
-        self.skipTest('refactor')
+        self.skipTest('todo')
         event_id = self.post_event(example_json)
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(event.sounds[0].url, 'http://example.com/audio')
@@ -293,6 +291,8 @@ class TestJson(TestEventMixin, TestCase):
             'template': {
                 'data': [
                     {'name': u'title', 'value': u'Un événement'},
+                    {'name': u'start_time', 'value': '2014-01-25T15:00'},
+                    {'name': u'end_time', 'value': '2014-01-25T15:00'},
                 ]
             }
         }

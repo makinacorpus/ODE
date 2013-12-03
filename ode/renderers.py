@@ -31,7 +31,8 @@ class IcalRenderer(object):
     def add_event(calendar, event_data):
         event = Event()
         for icalendar_key, model_attribute in icalendar_to_model_keys.items():
-            event.add(icalendar_key, event_data[model_attribute]['value'])
+            if event_data[model_attribute]['value'] is not None:
+                event.add(icalendar_key, event_data[model_attribute]['value'])
         #location = event_data['locations']['value'][0]
         #event.add('location', location['name']['value'])
         #date = location['dates']['value'][0]
