@@ -231,7 +231,8 @@ class TestJson(TestEventMixin, TestCase):
     def test_delete_event(self):
         id = self.post_event()
         self.app.delete('/v1/events/%s' % id,
-                        headers={'X-ODE-Provider-Id': '123'})
+                        headers={'X-ODE-Provider-Id': '123'},
+                        status=204)
         self.assertEqual(DBSession.query(Event).count(), 0)
 
     def test_post_all_fields(self):

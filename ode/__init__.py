@@ -20,6 +20,7 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_renderer('ical', 'ode.renderers.IcalRenderer')
     config.add_renderer('json', 'ode.renderers.JsonRenderer')
+    config.add_renderer('no_content', 'ode.renderers.NoContentRenderer')
     config.add_cornice_deserializer('text/calendar', icalendar_extractor)
     config.add_cornice_deserializer('application/json', json_extractor)
     config.scan(ignore='ode.tests')

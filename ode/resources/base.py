@@ -16,7 +16,7 @@ class ResourceMixin(object):
     def name(self):
         return self.model.__name__.lower()
 
-    @view(validators=[has_provider_id])
+    @view(validators=[has_provider_id], renderer='no_content')
     def delete(self):
         """Delete a resource by id"""
         id = self.request.matchdict['id']
@@ -28,7 +28,6 @@ class ResourceMixin(object):
         except NoResultFound:
             raise HTTPNotFound()
         DBSession.delete(event)
-        return {'status': 'deleted'}
 
     def collection_post(self):
         """Add new resources"""

@@ -19,9 +19,10 @@ class TestSource(BaseTestMixin, TestCase):
 
     def test_delete_source(self):
         source = self.make_source(provider_id=123)
-        response = self.app.delete_json('/v1/sources/%s' % source.id,
-                                        headers={'X-ODE-Provider-Id': '123'})
-        self.assertEqual(response['status'], 'deleted')
+        self.app.delete('/v1/sources/%s' % source.id,
+                        headers={'X-ODE-Provider-Id': '123'},
+                        status=204)
+        self.assertSourceCount(0)
 
     def test_anonymous_cannot_delete(self):
         source = self.make_source()

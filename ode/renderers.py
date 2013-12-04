@@ -38,6 +38,19 @@ class IcalRenderer(object):
         calendar.add_component(event)
 
 
+class NoContentRenderer(object):
+    def __init__(self, info):
+        pass
+
+    def __call__(self, value, system):
+        request = system.get('request')
+        if request is not None:
+            response = request.response
+            response.content_type = None
+            response.status_code = 204
+        return None
+
+
 def datetime_adapter(obj, request):
     return obj.isoformat()
 
