@@ -56,10 +56,7 @@ def collection_json_to_cstruct(collection_object):
 def json_extractor(request):
     if request.body:
         json_data = json.loads(request.body)
-        if 'collection' in json_data:
-            result = collection_json_to_cstruct(json_data)
-            return result
-        elif 'template' in json_data:
+        if 'template' in json_data:
             result = data_list_to_dict(json_data['template']['data'])
             result = {
                 'collection': {

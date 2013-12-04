@@ -94,14 +94,6 @@ class TestJson(TestEventMixin, TestCase):
                                       headers=headers, status=status)
         return response.json['collection']['items'][0]['data']['id']['value']
 
-    def make_locations_data(self, name, start_time):
-        locations_data = deepcopy(example_json['locations'])
-        location = locations_data['value'][0]
-        location['name'] = {'value': name}
-        date1 = location['dates']['value'][0]
-        date1['start_time']['value'] = start_time
-        return locations_data
-
     def assertEqualIgnoringId(self, result, expected):
         result = remove_ids(result)
         self.assertEqual(dict(result), dict(expected))
@@ -140,10 +132,6 @@ class TestJson(TestEventMixin, TestCase):
                     {'name': u'end_time', 'value': u'2014-01-25T15:00'},
                 ]
             }
-            #'locations': self.make_locations_data(
-            #    name=u'Le café des artistes',
-            #    start_time="2013-12-19T10:00:00"
-            #)
         }
 
         response = self.app.put_json(

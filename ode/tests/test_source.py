@@ -37,13 +37,10 @@ class TestSource(BaseTestMixin, TestCase):
 
     def test_create_source(self):
         sources_info = {
-            'collection': {
-                'items': [
-                    {'data': [
-                        {'name': 'url',
-                         'value': u'http://example.com/mysource'},
-                        {'name': 'active', 'value': True},
-                    ]}
+            'template': {
+                'data': [
+                    {'name': 'url', 'value': u'http://example.com/mysource'},
+                    {'name': 'active', 'value': True},
                 ]
             }
         }

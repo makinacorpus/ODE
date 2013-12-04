@@ -23,7 +23,6 @@ def default_column():
 class BaseModel(object):
 
     collections = []
-    json_includes_id = False
 
     id = Column(Integer, primary_key=True)
 
@@ -32,19 +31,12 @@ class BaseModel(object):
         for column in self.__class__.__mapper__.columns:
             if column.name in ('provider_id', 'location_id', 'event_id'):
                 continue
-            if column.name == 'id' and not self.json_includes_id:
-                continue
             result.append({'name': column.name,
                            'value': getattr(self, column.name)})
         if getattr(self, 'location', None):
             for column in self.location.__class__.__mapper__.columns:
                 result.append({'name': 'location_' + column.name,
                                'value': getattr(self.location, column.name)})
-        for name in self.collections:
-            if hasattr(self, name):
-                collection = getattr(self, name)
-                for obj in collection:
-                    result.append({'name': name, 'value': obj.to_data_list()})
         return result
 
     @classmethod
@@ -119,7 +111,6 @@ class Tag(Base):
 class Event(Base):
     __tablename__ = 'events'
     collections = ['locations', 'sounds', 'videos', 'images']
-    json_includes_id = True
 
     author_email = default_column()
     author_firstname = default_column()
@@ -190,7 +181,6 @@ class Date(Base):
 
 class Source(Base):
     __tablename__ = 'sources'
-    json_includes_id = True
     url = default_column()
     active = Column(Boolean())
     provider_id = default_column()

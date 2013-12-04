@@ -32,33 +32,24 @@ class ResourceMixin(object):
 
     def collection_post(self):
         """Add new resources"""
-        if 'collection' in self.request.validated:
-            collection = self.request.validated['collection']
-            items = collection['items']
-            provider_id = self.request.validated['provider_id']
-            result_items = []
-            for item in items:
-                item['data']['provider_id'] = provider_id
-                resource = self.model(**item['data'])
-                DBSession.add(resource)
-                DBSession.flush()
-                result_items.append({
-                    'data': {'id': {'value': resource.id}},
-                    'status': 'created',
-                })
-            return {
-                'collection': {
-                    'items': result_items
-                }
-            }
-        else:
-            resource = self.model(**self.request.validated)
+        collection = self.request.validated['collection']
+        items = collection['items']
+        provider_id = self.request.validated['provider_id']
+        result_items = []
+        for item in items:
+            item['data']['provider_id'] = provider_id
+            resource = self.model(**item['data'])
             DBSession.add(resource)
             DBSession.flush()
-            return {
+            result_items.append({
+                'data': {'id': {'value': resource.id}},
                 'status': 'created',
-                'id': resource.id,
+            })
+        return {
+            'collection': {
+                'items': result_items
             }
+        }
 
     def get(self):
         """Get a specific resource by id"""
