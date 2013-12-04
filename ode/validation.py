@@ -117,14 +117,11 @@ class EventSchema(MappingSchema):
 class EventCollectionSchema(MappingSchema):
 
     @instantiate()
-    class collection(MappingSchema):
+    class items(SequenceSchema):
 
         @instantiate()
-        class items(SequenceSchema):
-
-            @instantiate()
-            class item(MappingSchema):
-                data = EventSchema()
+        class item(MappingSchema):
+            data = EventSchema()
 
 
 class SourceSchema(MappingSchema):
@@ -140,14 +137,11 @@ class SourceSchema(MappingSchema):
 class SourceCollectionSchema(MappingSchema):
 
     @instantiate()
-    class collection(MappingSchema):
+    class items(SequenceSchema):
 
         @instantiate()
-        class items(SequenceSchema):
-
-            @instantiate()
-            class item(MappingSchema):
-                data = SourceSchema()
+        class item(MappingSchema):
+            data = SourceSchema()
 
 
 class QueryStringSchema(MappingSchema):

@@ -32,8 +32,7 @@ class ResourceMixin(object):
 
     def collection_post(self):
         """Add new resources"""
-        collection = self.request.validated['collection']
-        items = collection['items']
+        items = self.request.validated['items']
         provider_id = self.request.validated['provider_id']
         result_items = []
         for item in items:
@@ -109,5 +108,5 @@ class ResourceMixin(object):
         if not event:
             raise HTTPNotFound()
         event.update_from_appstruct(
-            self.request.validated['collection']['items'][0]['data'])
+            self.request.validated['items'][0]['data'])
         return {'status': 'updated'}

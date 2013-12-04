@@ -25,7 +25,7 @@ def icalendar_extractor(request):
     for icalendar_event in calendar.walk()[1:]:
         cstruct = icalendar_to_cstruct(icalendar_event)
         events.append({'data': cstruct})
-    cstruct = {'collection': {'items': events}}
+    cstruct = {'items': events}
     return cstruct
 
 
@@ -50,15 +50,11 @@ def json_extractor(request):
     if request.body:
         json_data = json.loads(request.body)
         if 'template' in json_data:
-            result = data_list_to_dict(json_data['template']['data'])
-            result = {
-                'collection': {
-                    'items': [
-                        {'data': result},
-                    ]
-                }
+            data_dict = data_list_to_dict(json_data['template']['data'])
+            cstruct = {
+                'items': [{'data': data_dict}]
             }
-            return result
+            return cstruct
         else:
             return json_data
     else:
