@@ -168,15 +168,6 @@ class Location(Base):
     town = default_column()
     country = default_column()
     event_id = Column(Integer, ForeignKey('events.id'))
-    dates = relationship('Date')
-
-
-class Date(Base):
-    __tablename__ = 'dates'
-
-    start_time = Column(DateTime(timezone=False))
-    end_time = Column(DateTime(timezone=False))
-    location_id = Column(Integer, ForeignKey('locations.id'))
 
 
 class Source(Base):
@@ -211,7 +202,6 @@ def flatten_values(mapping):
     return result
 
 collection_classes = {
-    'dates': Date,
     'locations': Location,
     'sounds': Sound,
     'videos': Video,
