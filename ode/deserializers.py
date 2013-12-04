@@ -46,13 +46,6 @@ def data_list_to_dict(data_list):
     return result
 
 
-def collection_json_to_cstruct(collection_object):
-    items = collection_object['collection']['items']
-    for item in items:
-        item['data'] = data_list_to_dict(item['data'])
-    return collection_object
-
-
 def json_extractor(request):
     if request.body:
         json_data = json.loads(request.body)
