@@ -65,8 +65,11 @@ class ResourceMixin(object):
         except NoResultFound:
             raise HTTPNotFound()
         return {
-            'status': 'success',
-            self.name: resource.to_data_list(),
+            'collection': {
+                'items': [
+                    {'data': resource.to_data_list()}
+                ],
+            }
         }
 
     @view(validators=[validate_querystring])

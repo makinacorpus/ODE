@@ -12,16 +12,21 @@ class TestSource(BaseTestMixin, TestCase):
 
     def test_get_source(self):
         source = self.make_source()
+
         response = self.app.get('/v1/sources/%s' % source.id)
-        self.assertEqual(
-            data_list_to_dict(response.json['source'])['url']['value'],
-            'http://example.com')
+
+        source_data = response.json['collection']['items'][0]['data']
+        data_dict = data_list_to_dict(source_data)
+        url = data_dict['url']['value']
+        self.assertEqual(url, 'http://example.com')
 
     def test_delete_source(self):
         source = self.make_source(provider_id=123)
+
         self.app.delete('/v1/sources/%s' % source.id,
                         headers={'X-ODE-Provider-Id': '123'},
                         status=204)
+
         self.assertSourceCount(0)
 
     def test_anonymous_cannot_delete(self):

@@ -224,10 +224,13 @@ class TestJson(TestEventMixin, TestCase):
 
     def test_get_event(self):
         id = self.post_event()
+
         response = self.app.get('/v1/events/%s' % id)
-        self.assertEqual(
-            data_list_to_dict(response.json['event'])['title']['value'],
-            u'Titre Événement')
+
+        event_data = response.json['collection']['items'][0]['data']
+        event_dict = data_list_to_dict(event_data)
+        title = event_dict['title']['value']
+        self.assertEqual(title, u'Titre Événement')
 
     def test_delete_event(self):
         id = self.post_event()
@@ -270,7 +273,8 @@ class TestJson(TestEventMixin, TestCase):
         event_id = self.post_event(example_json)
         DBSession.flush()
         response = self.app.get('/v1/events/%s' % event_id)
-        self.assertEqualIgnoringId(response.json['event'], example_json)
+        event_data = response.json['collection']['items'][0]['data']
+        self.assertEqualIgnoringId(event_data, example_json)
 
     def test_get_invalid_id(self):
         response = self.app.get('/v1/events/42', status=404)
