@@ -22,7 +22,8 @@ class EventResource(ResourceMixin):
 
     @view(accept='text/calendar', renderer='ical',
           validators=[validate_querystring])
-    @view(accept='application/json', renderer='json',
+    @view(accept='text/csv', renderer='csv', validators=[validate_querystring])
+    @view(accept=['', 'application/json'], renderer='json',
           validators=[validate_querystring])
     def collection_get(self):
         return ResourceMixin.collection_get(self)

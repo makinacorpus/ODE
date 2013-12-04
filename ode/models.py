@@ -22,8 +22,6 @@ def default_column():
 
 class BaseModel(object):
 
-    collections = []
-
     id = Column(Integer, primary_key=True)
 
     def to_data_list(self):
@@ -117,7 +115,6 @@ class Tag(Base):
 
 class Event(Base):
     __tablename__ = 'events'
-    collections = ['locations', 'sounds', 'videos', 'images']
 
     author_email = default_column()
     author_firstname = default_column()
@@ -166,7 +163,6 @@ class Event(Base):
 
 class Location(Base):
     __tablename__ = 'locations'
-    collections = ['dates']
 
     name = default_column()
     address = default_column()
