@@ -1,4 +1,6 @@
 import json
+import csv
+from StringIO import StringIO
 
 from icalendar import Calendar
 from ode.models import icalendar_to_model_keys
@@ -57,5 +59,21 @@ def json_extractor(request):
             return cstruct
         else:
             return json_data
+    else:
+        return {}
+
+
+def csv_extractor(request):
+    if request.body:
+        reader = csv.DictReader(StringIO(request.body))
+        items = []
+        for row in reader:
+            data_dict = {
+                key: {'value': value.decode('utf-8')}
+                for key, value in row.items()
+            }
+            items.append({'data': data_dict})
+        cstruct = {'items': items}
+        return cstruct
     else:
         return {}
