@@ -71,7 +71,7 @@ example_json = deepcopy(example_data)
 class TestJson(TestEventMixin, TestCase):
     maxDiff = None
 
-    def post_event(self, event_info=None, headers=None, status=200):
+    def post_event(self, event_info=None, headers=None):
         if headers is None:
             headers = {'X-ODE-Provider-Id': '123'}
         if event_info is None:
@@ -90,8 +90,9 @@ class TestJson(TestEventMixin, TestCase):
                 'data': event_info
             }
         }
+        created = 201
         response = self.app.post_json('/v1/events', body_data,
-                                      headers=headers, status=status)
+                                      headers=headers, status=created)
         return response.json['collection']['items'][0]['data']['id']['value']
 
     def assertEqualIgnoringId(self, result, expected):

@@ -43,6 +43,14 @@ class ResourceMixin(object):
                 'data': {'id': {'value': resource.id}},
                 'status': 'created',
             })
+        response = self.request.response
+        response.status_code = 201
+        if len(result_items) == 1:
+            # POSTed a single item, we can send the Location header
+            source_url = self.request.route_url(
+                'sourceresource',
+                id=result_items[0]['data']['id']['value'])
+            response.headers['location'] = source_url
         return {
             'collection': {
                 'items': result_items

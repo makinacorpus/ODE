@@ -45,10 +45,13 @@ class TestSource(BaseTestMixin, TestCase):
                 ]
             }
         }
-        self.app.post_json('/v1/sources', sources_info, headers={
-            'X-ODE-Provider-Id': '123'
-        })
+        response = self.app.post_json(
+            '/v1/sources',
+            sources_info, headers={'X-ODE-Provider-Id': '123'},
+            status=201)
         source = DBSession.query(Source).one()
+        self.assertEqual(response.headers['location'],
+                         'http://localhost/v1/sources/%s' % source.id)
         self.assertEqual(source.url, u'http://example.com/mysource')
         self.assertEqual(source.active, True)
 
