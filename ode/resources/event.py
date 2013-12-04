@@ -11,7 +11,8 @@ class EventResource(ResourceMixin):
 
     model = Event
 
-    @view(validators=[has_provider_id], schema=EventCollectionSchema)
+    @view(validators=[has_provider_id], schema=EventCollectionSchema,
+          renderer='json')
     def collection_post(self):
         return ResourceMixin.collection_post(self)
 

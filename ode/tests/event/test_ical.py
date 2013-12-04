@@ -84,18 +84,20 @@ class TestPostEvent(TestEventMixin, TestCase):
         return self.app.post('/v1/events', calendar, headers={
             'content-type': 'text/calendar',
             'X-ODE-Provider-Id': '123'
-        })
+        }, status=201)
 
     def test_post_single_event(self):
         calendar = self.make_icalendar(titles=[u'Événement'])
         response = self.post(calendar)
         items = response.json['collection']['items']
-        self.assertEqual(items[0]['status'], 'created')
-        DBSession.query(Event).filter_by(title=u'Événement').one()
+        event = DBSession.query(Event).filter_by(title=u'Événement').one()
+        self.assertEqual(items[0]['href'],
+                         'http://localhost/v1/events/%s' % event.id)
 
     def test_post_multiple_events(self):
         calendar = self.make_icalendar(titles=[u'Événement 1', u'Événement 2'])
         response = self.post(calendar)
         items = response.json['collection']['items']
-        self.assertEqual(items[0]['status'], 'created')
-        DBSession.query(Event).filter_by(title=u'Événement 1').one()
+        event = DBSession.query(Event).filter_by(title=u'Événement 1').one()
+        self.assertEqual(items[0]['href'],
+                         'http://localhost/v1/events/%s' % event.id)

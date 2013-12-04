@@ -64,6 +64,13 @@ class BaseModel(object):
                     setattr(self.location, key, value)
                 setattr(self, key, value)
 
+    def to_item(self, request):
+        route_name = self.__class__.__name__.lower() + 'resource'
+        return {
+            "data": self.to_data_list(),
+            'href': request.route_url(route_name, id=self.id),
+        }
+
 
 Base = declarative_base(cls=BaseModel)
 

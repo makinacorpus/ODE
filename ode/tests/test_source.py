@@ -20,6 +20,10 @@ class TestSource(BaseTestMixin, TestCase):
         url = data_dict['url']['value']
         self.assertEqual(url, 'http://example.com')
 
+        source_href = response.json['collection']['items'][0]['href']
+        self.assertEqual(source_href,
+                         'http://localhost/v1/sources/%s' % source.id)
+
     def test_delete_source(self):
         source = self.make_source(provider_id=123)
 
@@ -120,12 +124,18 @@ class TestSource(BaseTestMixin, TestCase):
         response = self.app.get('/v1/sources',
                                 headers={'X-ODE-Provider-Id': '123'})
 
+        self.assertEqual(response.json['collection']['href'],
+                         'http://localhost/v1/sources')
         items = response.json['collection']['items']
         self.assertEqual(len(items), 2)
         self.assertEqual(data_list_to_dict(items[0]['data'])['id']['value'],
                          source1.id)
+        self.assertEqual(items[0]['href'],
+                         'http://localhost/v1/sources/%s' % source1.id)
         self.assertEqual(data_list_to_dict(items[1]['data'])['id']['value'],
                          source2.id)
+        self.assertEqual(items[1]['href'],
+                         'http://localhost/v1/sources/%s' % source2.id)
 
     def test_valid_limit(self):
         for i in range(1, 11):

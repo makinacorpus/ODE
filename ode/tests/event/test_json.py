@@ -93,7 +93,9 @@ class TestJson(TestEventMixin, TestCase):
         created = 201
         response = self.app.post_json('/v1/events', body_data,
                                       headers=headers, status=created)
-        return response.json['collection']['items'][0]['data']['id']['value']
+        data_dict = data_list_to_dict(
+            response.json['collection']['items'][0]['data'])
+        return data_dict['id']['value']
 
     def assertEqualIgnoringId(self, result, expected):
         result = remove_ids(result)

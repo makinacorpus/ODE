@@ -39,23 +39,13 @@ class ResourceMixin(object):
             resource = self.model(**item['data'])
             DBSession.add(resource)
             DBSession.flush()
-            result_items.append({
-                'data': {'id': {'value': resource.id}},
-                'status': 'created',
-            })
+            result_items.append(resource.to_item(self.request))
         response = self.request.response
         response.status_code = 201
         if len(result_items) == 1:
             # POSTed a single item, we can send the Location header
-            source_url = self.request.route_url(
-                'sourceresource',
-                id=result_items[0]['data']['id']['value'])
-            response.headers['location'] = source_url
-        return {
-            'collection': {
-                'items': result_items
-            }
-        }
+            response.headers['location'] = result_items[0]['href']
+        return self.collection_json(result_items)
 
     def get(self):
         """Get a specific resource by id"""
@@ -64,11 +54,16 @@ class ResourceMixin(object):
             resource = DBSession.query(self.model).filter_by(id=id).one()
         except NoResultFound:
             raise HTTPNotFound()
+        items = [resource.to_item(self.request)]
+        return self.collection_json(items)
+
+    def collection_json(self, items):
+        route_name = 'collection_%sresource' % self.model.__name__.lower()
         return {
             'collection': {
-                'items': [
-                    {'data': resource.to_data_list()}
-                ],
+                'version': "1.0",
+                'href': self.request.route_url(route_name),
+                'items': items,
             }
         }
 
@@ -96,13 +91,11 @@ class ResourceMixin(object):
         offset = self.request.validated.get('offset')
         if offset:
             query = query.offset(offset)
-        resources = [{"data": resource.to_data_list()}
-                     for resource in query.all()]
-        return {'collection': {
-            'current_count': len(resources),
-            'total_count': total_count,
-            'items': resources,
-        }}
+        items = [resource.to_item(self.request) for resource in query.all()]
+        result = self.collection_json(items)
+        result['collection']['current_count'] = len(items)
+        result['collection']['total_count'] = total_count
+        return result
 
     def put(self):
         """Update an existing resource by id"""
