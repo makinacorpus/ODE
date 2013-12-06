@@ -8,6 +8,8 @@ from sqlalchemy import Table
 from uuid import uuid1
 from zope.sqlalchemy import ZopeTransactionExtension
 
+from ode.urls import absolute_url
+
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 
@@ -63,11 +65,14 @@ class BaseModel(object):
                 setattr(self, key, value)
 
     def to_item(self, request):
-        route_name = self.__class__.__name__.lower() + 'resource'
         return {
             "data": self.to_data_list(),
-            'href': request.route_url(route_name, id=self.id),
+            'href': self.absolute_url(request),
         }
+
+    def absolute_url(self, request):
+        route_name = self.__class__.__name__.lower() + 'resource'
+        return absolute_url(request, route_name, id=self.id)
 
 
 Base = declarative_base(cls=BaseModel)

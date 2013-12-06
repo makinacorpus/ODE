@@ -5,6 +5,7 @@ from ode.resources.exceptions import HTTPNotFound, HTTPBadRequest
 from ode.models import DBSession
 from ode.validation import has_provider_id
 from ode.validation import validate_querystring
+from ode.urls import absolute_url
 
 
 class ResourceMixin(object):
@@ -58,14 +59,17 @@ class ResourceMixin(object):
         return self.collection_json(items)
 
     def collection_json(self, items):
-        route_name = 'collection_%sresource' % self.model.__name__.lower()
         return {
             'collection': {
                 'version': "1.0",
-                'href': self.request.route_url(route_name),
+                'href': self.absolute_url(),
                 'items': items,
             }
         }
+
+    def absolute_url(self):
+        route_name = 'collection_%sresource' % self.model.__name__.lower()
+        return absolute_url(self.request, route_name)
 
     @view(validators=[validate_querystring])
     def collection_get(self):
