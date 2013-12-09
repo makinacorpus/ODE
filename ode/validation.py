@@ -66,7 +66,7 @@ class EventSchema(MappingSchema):
     location_country = default_schema_node()
 
     @instantiate(missing=drop)
-    class uid(MappingSchema):
+    class id(MappingSchema):
         value = SchemaNode(String(), missing=drop,
                            validator=Length(1, SAFE_MAX_LENGTH))
 

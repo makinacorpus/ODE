@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
 from datetime import datetime
+from urllib import quote
 
 import icalendar
 
@@ -92,7 +93,7 @@ class TestPostEvent(TestEventMixin, TestCase):
         items = response.json['collection']['items']
         event = DBSession.query(Event).filter_by(title=u'Événement').one()
         self.assertEqual(items[0]['href'],
-                         'http://localhost/v1/events/%s' % event.id)
+                         'http://localhost/v1/events/%s' % quote(event.id))
 
     def test_post_multiple_events(self):
         calendar = self.make_icalendar(titles=[u'Événement 1', u'Événement 2'])
@@ -100,4 +101,4 @@ class TestPostEvent(TestEventMixin, TestCase):
         items = response.json['collection']['items']
         event = DBSession.query(Event).filter_by(title=u'Événement 1').one()
         self.assertEqual(items[0]['href'],
-                         'http://localhost/v1/events/%s' % event.id)
+                         'http://localhost/v1/events/%s' % quote(event.id))

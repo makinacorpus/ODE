@@ -25,7 +25,7 @@ class TestModel(TestEventMixin, TestCase):
         start_time = datetime(2013, 01, 01)
         event = self.create_event(start_time=start_time)
         DBSession.flush()
-        self.assertTrue(event.uid.endswith("@example.com"))
+        self.assertTrue(event.id.endswith("@example.com"))
 
     def test_flatten_values(self):
         input_struct = {

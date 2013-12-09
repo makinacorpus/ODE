@@ -121,12 +121,13 @@ class Tag(Base):
 class Event(Base):
     __tablename__ = 'events'
 
+    id = Column(Unicode(SAFE_MAX_LENGTH), unique=True, primary_key=True)
+
     firstname = default_column()
     lastname = default_column()
     email = default_column()
     telephone = default_column()
     description = Column(UnicodeText(SAFE_MAX_LENGTH))
-    event_id = default_column()
     language = default_column()
     latlong = default_column()
     organiser = default_column()
@@ -137,7 +138,6 @@ class Event(Base):
     source_id = default_column()
     target = default_column()
     title = default_column()
-    uid = Column(Unicode(SAFE_MAX_LENGTH), unique=True)
     url = default_column()
     provider_id = default_column()
     start_time = Column(DateTime(timezone=False))
@@ -151,8 +151,8 @@ class Event(Base):
     categories = relationship('Tag', secondary=category_association)
 
     def __init__(self, *args, **kwargs):
-        if 'uid' not in kwargs:
-            kwargs['uid'] = self.make_uid()
+        if 'id' not in kwargs:
+            kwargs['id'] = self.make_uid()
         self.update_from_appstruct(kwargs)
 
     def make_uid(self):
@@ -186,7 +186,7 @@ class Source(Base):
 
 
 icalendar_to_model_keys = {
-    'uid': 'uid',
+    'uid': 'id',
     'summary': 'title',
     'url': 'url',
     'description': 'description',

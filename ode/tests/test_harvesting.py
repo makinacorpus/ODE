@@ -69,17 +69,11 @@ class TestHarvesting(TestEventMixin, TestCase):
                          u"http://www.agendadulibre.org/showevent.php?id=7064")
         self.assertEqual(event.description,
                          u"Un évènement de l'Agenda du Libre")
-        #self.assertEqual(event.locations[0].name, u"Toulouse")
-        #self.assertEqual(event.locations[0].dates[0].start_time,
-        #                 datetime(2012, 11, 24, 11))
-        #self.assertEqual(event.locations[0].dates[0].end_time,
-        #                 datetime(2012, 11, 25, 17))
-        self.assertEqual(event.uid, u"1234@example.com")
+        self.assertEqual(event.id, u"1234@example.com")
 
     def test_duplicate_is_ignored(self):
         existing_event = self.create_event(
-            title=u'Existing event',
-            uid=u'1234@example.com',
+            title=u'Existing event', id=u'1234@example.com',
         )
         DBSession.flush()
         self.setup_requests_mock()

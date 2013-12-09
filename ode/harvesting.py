@@ -8,7 +8,7 @@ from deserializers import icalendar_to_cstruct
 
 
 def exists(uid):
-    return DBSession.query(Event).filter_by(uid=uid).count() > 0
+    return DBSession.query(Event).filter_by(id=uid).count() > 0
 
 
 def validate(icalendar_event):

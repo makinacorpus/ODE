@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
 from copy import deepcopy
+from urllib import quote
 
 from ode.models import DBSession, Event
 from ode.tests.event import TestEventMixin
@@ -9,8 +10,7 @@ from ode.deserializers import data_list_to_dict
 
 def remove_ids(fields):
     return [field for field in fields
-            if field['name'] != 'id' and field['name'] != 'uid'
-            and field['name'] != 'event_id']
+            if field['name'] != 'id' and field['name'] != 'event_id']
 
 
 example_data = [
@@ -162,8 +162,9 @@ class TestJson(TestEventMixin, TestCase):
         events = collection['items']
         self.assertEqual(len(events), 2)
         self.assertEqual(self.get_item_title(events[0]), u'Événement 1')
-        self.assertEqual(events[0]['href'],
-                         'http://example.com/api/v1/events/%s' % event1.id)
+        self.assertEqual(
+            events[0]['href'],
+            'http://example.com/api/v1/events/%s' % quote(event1.id))
         self.assertEqual(collection['href'],
                          'http://example.com/api/v1/events')
 
@@ -262,7 +263,7 @@ class TestJson(TestEventMixin, TestCase):
     def test_uid(self):
         event_id = self.post_event(example_json)
         event = DBSession.query(Event).filter_by(id=event_id).first()
-        self.assertIn('@', event.uid)
+        self.assertIn(event_id, event.id)
 
     def test_media(self):
         self.skipTest('todo')
