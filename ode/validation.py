@@ -1,6 +1,6 @@
 from colander import MappingSchema, SchemaNode, String, Integer, Boolean
 from colander import Length, DateTime, instantiate
-from colander import SequenceSchema, OneOf
+from colander import SequenceSchema, OneOf, drop
 import colander
 
 from models import TAG_MAX_LENGTH, SAFE_MAX_LENGTH
@@ -65,9 +65,9 @@ class EventSchema(MappingSchema):
     location_capacity = default_schema_node()
     location_country = default_schema_node()
 
-    @instantiate(missing=colander.drop)
+    @instantiate(missing=drop)
     class uid(MappingSchema):
-        value = SchemaNode(String(), missing=colander.drop,
+        value = SchemaNode(String(), missing=drop,
                            validator=Length(1, SAFE_MAX_LENGTH))
 
     @instantiate(missing={'value': []})
@@ -150,6 +150,7 @@ class QueryStringSchema(MappingSchema):
     sort_by = SchemaNode(String(), missing=None)
     sort_direction = SchemaNode(String(), missing='asc',
                                 validator=OneOf(['asc', 'desc']))
+    provider_id = SchemaNode(Integer(), missing=drop)
 
 
 def validate_querystring(request):

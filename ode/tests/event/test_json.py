@@ -154,7 +154,7 @@ class TestJson(TestEventMixin, TestCase):
         }, headers={'X-ODE-Provider-Id': '123'}, status=400)
         self.assertEqual(response.json['status'], 'error')
 
-    def test_list_events(self):
+    def test_list_all_events(self):
         event1 = self.create_event(title=u'Événement 1')
         self.create_event(title=u'Événement 2')
         response = self.app.get(
@@ -170,6 +170,14 @@ class TestJson(TestEventMixin, TestCase):
                          'http://example.com/api/v1/events/%s' % event1.id)
         self.assertEqual(collection['href'],
                          'http://example.com/api/v1/events')
+
+    def test_list_provider_events(self):
+        self.create_event(title=u'Événement 1', provider_id=42)
+        self.create_event(title=u'Événement 2')
+        response = self.app.get('/v1/events?provider_id=42')
+        events = response.json['collection']['items']
+        self.assertEqual(len(events), 1)
+        self.assertEqual(self.get_item_title(events[0]), u'Événement 1')
 
     def test_list_limit(self):
         for i in range(1, 6):
