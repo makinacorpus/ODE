@@ -3,8 +3,8 @@ from cornice.resource import view
 
 from ode.resources.exceptions import HTTPNotFound, HTTPBadRequest
 from ode.models import DBSession
-from ode.validation import has_provider_id
-from ode.validation import validate_querystring
+from ode.validation.validators import has_provider_id
+from ode.validation.validators import validate_querystring
 from ode.urls import absolute_url
 
 

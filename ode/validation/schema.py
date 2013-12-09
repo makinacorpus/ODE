@@ -3,17 +3,7 @@ from colander import Length, DateTime, instantiate
 from colander import SequenceSchema, OneOf, drop
 import colander
 
-from models import TAG_MAX_LENGTH, SAFE_MAX_LENGTH
-
-
-def has_provider_id(request):
-    provider_id = request.headers.get('X-ODE-Provider-Id', '').strip()
-    if provider_id:
-        request.validated['provider_id'] = provider_id
-    else:
-        request.errors.add('body', 'provider_id',
-                           'This request requires an X-ODE-Provider-Id header')
-        request.errors.status = 403
+from ode.models import TAG_MAX_LENGTH, SAFE_MAX_LENGTH
 
 
 def default_schema_node():
@@ -125,14 +115,3 @@ class QueryStringSchema(MappingSchema):
     sort_direction = SchemaNode(String(), missing='asc',
                                 validator=OneOf(['asc', 'desc']))
     provider_id = SchemaNode(Integer(), missing=drop)
-
-
-def validate_querystring(request):
-    schema = QueryStringSchema()
-    try:
-        request.validated.update(schema.deserialize(request.GET))
-    except colander.Invalid, e:
-        errors = e.asdict()
-        for field, message in errors.items():
-            request.errors.add('body', field, message)
-        request.errors.status = 400

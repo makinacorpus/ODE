@@ -3,7 +3,7 @@ import requests
 from colander import Invalid
 
 from ode.models import DBSession, Source, Event
-from ode.validation import EventSchema
+from ode.validation.schema import EventSchema
 from deserializers import icalendar_to_cstruct
 
 

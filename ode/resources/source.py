@@ -2,9 +2,9 @@ from cornice.resource import resource, view
 
 from ode.models import Source
 from ode.resources.base import ResourceMixin
-from ode.validation import SourceCollectionSchema
-from ode.validation import has_provider_id
-from ode.validation import validate_querystring
+from ode.validation.schema import SourceCollectionSchema
+from ode.validation.validators import has_provider_id
+from ode.validation.validators import validate_querystring
 
 
 @resource(collection_path='/v1/sources', path='/v1/sources/{id}')

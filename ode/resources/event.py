@@ -1,9 +1,9 @@
 from cornice.resource import resource, view
 
 from ode.models import Event
-from ode.validation import EventCollectionSchema, has_provider_id
+from ode.validation.schema import EventCollectionSchema
+from ode.validation.validators import validate_querystring, has_provider_id
 from ode.resources.base import ResourceMixin
-from ode.validation import validate_querystring
 
 
 @resource(collection_path='/v1/events', path='/v1/events/{id}')
