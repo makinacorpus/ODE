@@ -14,10 +14,6 @@ def remove_ids(fields):
 
 
 example_data = [
-    {'name': "author_email", 'value': "bob@example.com"},
-    {'name': "author_firstname", 'value': u"François"},
-    {'name': "author_lastname", 'value': u"Vittsjö"},
-    {'name': "author_telephone", 'value': "000-999-23-30"},
     {'name': "description", 'value': u"""
      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a
      diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac
