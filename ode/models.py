@@ -33,10 +33,6 @@ class BaseModel(object):
                 continue
             result.append({'name': column.name,
                            'value': getattr(self, column.name)})
-        if getattr(self, 'location', None):
-            for column in self.location.__class__.__mapper__.columns:
-                result.append({'name': 'location_' + column.name,
-                               'value': getattr(self.location, column.name)})
         return result
 
     @classmethod
@@ -160,6 +156,27 @@ class Event(Base):
             uuid1().hex,
             pyramid.threadlocal.get_current_registry().settings['domain'],
         )
+
+    def to_data_list(self):
+        result = []
+        for column in self.__class__.__mapper__.columns:
+            if column.name == 'provider_id':
+                continue
+            result.append({'name': column.name,
+                           'value': getattr(self, column.name)})
+        if getattr(self, 'location', None):
+            location_fields = ('name', 'address', 'post_code', 'capacity',
+                               'town', 'country')
+            for name in location_fields:
+                result.append({'name': 'location_' + name,
+                               'value': getattr(self.location, name)})
+        if getattr(self, 'tags', None):
+            for tag in self.tags:
+                result.append({'name': 'tags', 'value': tag.name})
+        if getattr(self, 'categories', None):
+            for tag in self.categories:
+                result.append({'name': 'categories', 'value': tag.name})
+        return result
 
 
 class Location(Base):

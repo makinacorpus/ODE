@@ -2,7 +2,7 @@
 from unittest import TestCase
 from urllib import quote
 
-from ode.models import DBSession, Event
+from ode.models import DBSession, Event, Tag
 from ode.tests.event import TestEventMixin
 from ode.deserializers import data_list_to_dict
 
@@ -34,13 +34,7 @@ example_data = [
     {'name': "target", 'value': u"all"},
     {'name': "telephone", 'value': u"1234567890"},
     {'name': "title", 'value': u"Convention des amis des éléphants"},
-    {'name': "url",
-     'value': u"http://example.com/v1/events/covention-amis-elephant"},
-    #{'name': "tags", 'value': u"Jazz"},
-    #{'name': "tags", 'value': u"Classical"},
-    #{'name': "tags", 'value': u"Bourrée auvergnate"},
-    #{'name': "categories", 'value': u"Music"},
-    #{'name': "categories", 'value': u"音楽"},
+    {'name': "url", 'value': u"http://example.com/foo/bar"},
     {'name': 'location_address', 'value': ''},
     {'name': 'location_capacity', 'value': ''},
     {'name': 'location_country', 'value': ''},
@@ -263,14 +257,16 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(event.videos[0].url, 'http://example.com/video')
         self.assertEqual(event.images[0].url, 'http://example.com/image')
 
-    def test_tags_and_categories(self):
-        event_id = self.post_event(example_data + [
+    def test_post_tags_and_categories(self):
+        event_id = self.post_event([
+            {'name': u'title', 'value': 'EuroPython'},
             {'name': "tags", 'value': u"Jazz"},
             {'name': "tags", 'value': u"Classical"},
             {'name': "tags", 'value': u"Bourrée auvergnate"},
             {'name': "categories", 'value': u"Music"},
             {'name': "categories", 'value': u"音楽"},
         ])
+
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(len(event.tags), 3)
         self.assertEqual(event.tags[0].name, u"Jazz")
@@ -279,6 +275,24 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(len(event.categories), 2)
         self.assertEqual(event.categories[0].name, u"Music")
         self.assertEqual(event.categories[1].name, u"音楽")
+
+    def test_get_tags(self):
+        event = self.create_event()
+        event.tags = [Tag(name=u'Music'), Tag(name=u"音楽")]
+        DBSession.flush()
+        response = self.app.get('/v1/events/%s' % event.id)
+        event_data = response.json['collection']['items'][0]['data']
+        self.assertIn({'name': "tags", 'value': u"音楽"},
+                      event_data)
+
+    def test_get_categories(self):
+        event = self.create_event()
+        event.categories = [Tag(name=u'Music'), Tag(name=u"音楽")]
+        DBSession.flush()
+        response = self.app.get('/v1/events/%s' % event.id)
+        event_data = response.json['collection']['items'][0]['data']
+        self.assertIn({'name': "categories", 'value': u"音楽"},
+                      event_data)
 
     def test_get_invalid_id(self):
         response = self.app.get('/v1/events/42', status=404)
