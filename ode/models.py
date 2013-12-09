@@ -1,6 +1,6 @@
 import pyramid
 from sqlalchemy import (Column, Integer, Unicode, UnicodeText,
-                        DateTime, ForeignKey, Boolean)
+                        DateTime, ForeignKey, Boolean, String)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm import relationship
@@ -75,25 +75,35 @@ class BaseModel(object):
 Base = declarative_base(cls=BaseModel)
 
 
-class Sound(Base):
-    __tablename__ = 'sounds'
+class Media(Base):
+    __tablename__ = 'media'
     event_id = Column(Integer, ForeignKey('events.id'))
     license = Column(UnicodeText(20))
     url = default_column()
+    type = Column(String(20))
+
+    __mapper_args__ = {
+        'polymorphic_on': type,
+        'polymorphic_identity': 'media'
+    }
 
 
-class Video(Base):
-    __tablename__ = 'videos'
-    event_id = Column(Integer, ForeignKey('events.id'))
-    license = Column(UnicodeText(20))
-    url = default_column()
+class Sound(Media):
+    __mapper_args__ = {
+        'polymorphic_identity': 'sound'
+    }
 
 
-class Image(Base):
-    __tablename__ = 'images'
-    event_id = Column(Integer, ForeignKey('events.id'))
-    license = Column(UnicodeText(20))
-    url = default_column()
+class Video(Media):
+    __mapper_args__ = {
+        'polymorphic_identity': 'video'
+    }
+
+
+class Image(Media):
+    __mapper_args__ = {
+        'polymorphic_identity': 'image'
+    }
 
 
 tag_association = Table(
@@ -112,7 +122,7 @@ category_association = Table(
 
 class Tag(Base):
     __tablename__ = 'tags'
-    name = Column(UnicodeText(TAG_MAX_LENGTH))
+    name = Column(UnicodeText(TAG_MAX_LENGTH), unique=True)
 
 
 class Event(Base):
@@ -160,22 +170,26 @@ class Event(Base):
 
     def to_data_list(self):
         result = []
+
         for column in self.__class__.__mapper__.columns:
             if column.name == 'provider_id':
                 continue
             result.append({'name': column.name,
                            'value': getattr(self, column.name)})
+
         if getattr(self, 'location', None):
             location_fields = ('name', 'address', 'post_code', 'capacity',
                                'town', 'country')
             for name in location_fields:
                 result.append({'name': 'location_' + name,
                                'value': getattr(self.location, name)})
+
         for attrname in ('tags', 'categories'):
             objects = getattr(self, attrname, None)
             if objects:
                 values = [obj.name for obj in objects]
                 result.append({'name': attrname, 'value': values})
+
         for attrname in ('images', 'videos', 'sounds'):
             objects = getattr(self, attrname, None)
             if objects:
