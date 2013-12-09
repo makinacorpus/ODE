@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
-from copy import deepcopy
 from urllib import quote
 
 from ode.models import DBSession, Event
@@ -10,7 +9,8 @@ from ode.deserializers import data_list_to_dict
 
 def remove_ids(fields):
     return [field for field in fields
-            if field['name'] != 'id' and field['name'] != 'event_id']
+            if field['name']
+            not in ('id', 'event_id', 'location_id', 'location_event_id')]
 
 
 example_data = [
@@ -20,7 +20,6 @@ example_data = [
      quam viverra nec consectetur ante hendrerit. Donec et mollis dolor.
      Praesent et diam eget libero egestas mattis sit amet vitae
      augue."""},
-    {'name': "event_id", 'value': "abc123"},
     {'name': "email", 'value': "alice@example.com"},
     {'name': "latlong", 'value': "1;3"},
     {'name': "firstname", 'value': "Alice"},
@@ -37,31 +36,18 @@ example_data = [
     {'name': "title", 'value': u"Convention des amis des éléphants"},
     {'name': "url",
      'value': u"http://example.com/v1/events/covention-amis-elephant"},
-    {'name': "tags", 'value': u"Jazz"},
-    {'name': "tags", 'value': u"Classical"},
-    {'name': "tags", 'value': u"Bourrée auvergnate"},
-    {'name': "categories", 'value': u"Music"},
-    {'name': "categories", 'value': u"音楽"},
-    #{'name': "sounds",
-    # 'value': [
-    #     {'name': "license", 'value': "CC By"},
-    #     {'name': "url", 'value': "http://example.com/audio"},
-    # ]
-    # },
-    #{'name': "videos",
-    # 'value': [
-    #     {'name': "license", 'value': "CC By"},
-    #     {'name': "url", 'value': "http://example.com/video"},
-    # ]
-    # },
-    #{'name': "images",
-    # 'value': [
-    #     {'name': "license", 'value': "CC By"},
-    #     {'name': "url", 'value': "http://example.com/image"},
-    # ]
-    # },
+    #{'name': "tags", 'value': u"Jazz"},
+    #{'name': "tags", 'value': u"Classical"},
+    #{'name': "tags", 'value': u"Bourrée auvergnate"},
+    #{'name': "categories", 'value': u"Music"},
+    #{'name': "categories", 'value': u"音楽"},
+    {'name': 'location_address', 'value': ''},
+    {'name': 'location_capacity', 'value': ''},
+    {'name': 'location_country', 'value': ''},
+    {'name': 'location_name', 'value': ''},
+    {'name': 'location_post_code', 'value': ''},
+    {'name': 'location_town', 'value': ''},
 ]
-example_json = deepcopy(example_data)
 
 
 class TestJson(TestEventMixin, TestCase):
@@ -78,7 +64,7 @@ class TestJson(TestEventMixin, TestCase):
             if mandatory not in [field['name'] for field in event_info]:
                 event_info.append({
                     'name': mandatory,
-                    'value': '2014-01-25T15:00',
+                    'value': '2014-01-25T15:00:00',
                 })
 
         body_data = {
@@ -95,7 +81,8 @@ class TestJson(TestEventMixin, TestCase):
 
     def assertEqualIgnoringId(self, result, expected):
         result = remove_ids(result)
-        self.assertEqual(dict(result), dict(expected))
+        self.assertEqual(data_list_to_dict(result),
+                         data_list_to_dict(expected))
 
     def test_root(self):
         response = self.app.get('/', status=302)
@@ -255,19 +242,21 @@ class TestJson(TestEventMixin, TestCase):
                         status=204)
         self.assertEqual(DBSession.query(Event).count(), 0)
 
-    def test_post_all_fields(self):
-        event_id = self.post_event(example_json)
-        event = DBSession.query(Event).filter_by(id=event_id).first()
-        self.assertEqualIgnoringId(event.to_data_list(), example_data)
+    def test_all_fields(self):
+        event_id = self.post_event(example_data)
+        DBSession.flush()
+        response = self.app.get('/v1/events/%s' % event_id)
+        event_data = response.json['collection']['items'][0]['data']
+        self.assertEqualIgnoringId(event_data, example_data)
 
     def test_uid(self):
-        event_id = self.post_event(example_json)
+        event_id = self.post_event(example_data)
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertIn(event_id, event.id)
 
     def test_media(self):
         self.skipTest('todo')
-        event_id = self.post_event(example_json)
+        event_id = self.post_event(example_data)
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(event.sounds[0].url, 'http://example.com/audio')
         self.assertEqual(event.sounds[0].license, 'CC By')
@@ -275,7 +264,13 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(event.images[0].url, 'http://example.com/image')
 
     def test_tags_and_categories(self):
-        event_id = self.post_event(example_json)
+        event_id = self.post_event(example_data + [
+            {'name': "tags", 'value': u"Jazz"},
+            {'name': "tags", 'value': u"Classical"},
+            {'name': "tags", 'value': u"Bourrée auvergnate"},
+            {'name': "categories", 'value': u"Music"},
+            {'name': "categories", 'value': u"音楽"},
+        ])
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(len(event.tags), 3)
         self.assertEqual(event.tags[0].name, u"Jazz")
@@ -284,13 +279,6 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(len(event.categories), 2)
         self.assertEqual(event.categories[0].name, u"Music")
         self.assertEqual(event.categories[1].name, u"音楽")
-
-    def test_get_all_fields(self):
-        event_id = self.post_event(example_json)
-        DBSession.flush()
-        response = self.app.get('/v1/events/%s' % event_id)
-        event_data = response.json['collection']['items'][0]['data']
-        self.assertEqualIgnoringId(event_data, example_json)
 
     def test_get_invalid_id(self):
         response = self.app.get('/v1/events/42', status=404)
@@ -306,7 +294,6 @@ class TestJson(TestEventMixin, TestCase):
                 ]
             }
         }
-        #put_data['locations'] = example_json['locations']
         response = self.app.put_json(
             '/v1/events/42', put_data,
             headers={'X-ODE-Provider-Id': '123'}, status=404)
