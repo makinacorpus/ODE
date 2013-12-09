@@ -36,20 +36,18 @@ class BaseModel(object):
         return result
 
     @classmethod
-    def appstruct_list_to_objects(cls, appstruct_list):
+    def list_to_objects(cls, appstruct_list):
         objects = []
         for appstruct in appstruct_list:
-            obj = cls()
-            obj.update_from_appstruct(appstruct)
+            obj = cls(name=appstruct)
             objects.append(obj)
         return objects
 
     def update_from_appstruct(self, appstruct):
-        appstruct = flatten_values(appstruct)
         for key, value in appstruct.items():
             if isinstance(value, list):
                 klass = collection_classes[key]
-                value = klass.appstruct_list_to_objects(appstruct.get(key, []))
+                value = klass.list_to_objects(appstruct.get(key, []))
             if isinstance(self, Tag):
                 self.name = value
             else:
@@ -197,10 +195,6 @@ class Source(Base):
     active = Column(Boolean())
     provider_id = default_column()
 
-    def __init__(self, *args, **kwargs):
-        kwargs = flatten_values(kwargs)
-        super(Source, self).__init__(*args, **kwargs)
-
 
 icalendar_to_model_keys = {
     'uid': 'id',
@@ -212,15 +206,6 @@ icalendar_to_model_keys = {
     'location': 'location_name',
 }
 
-
-def flatten_values(mapping):
-    result = {}
-    for key, field in mapping.items():
-        if isinstance(field, dict):
-            result[key] = field['value']
-        else:
-            result[key] = field
-    return result
 
 collection_classes = {
     'locations': Location,

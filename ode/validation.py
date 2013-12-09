@@ -17,10 +17,8 @@ def has_provider_id(request):
 
 
 def default_schema_node():
-    class _DefaultFieldSchema(MappingSchema):
-        value = SchemaNode(String(), missing='',
-                           validator=Length(1, SAFE_MAX_LENGTH))
-    return _DefaultFieldSchema(missing=None)
+    return SchemaNode(String(), missing='',
+                      validator=Length(1, SAFE_MAX_LENGTH))
 
 
 class MediaSchema(MappingSchema):
@@ -28,14 +26,8 @@ class MediaSchema(MappingSchema):
     url = default_schema_node()
 
 
-class TagSchema(MappingSchema):
-    value = SchemaNode(String(), validator=Length(1, TAG_MAX_LENGTH))
-
-
 class EventSchema(MappingSchema):
-    @instantiate()
-    class title(MappingSchema):
-        value = SchemaNode(String(), validator=Length(1, SAFE_MAX_LENGTH))
+    title = SchemaNode(String(), validator=Length(1, SAFE_MAX_LENGTH))
     author_email = default_schema_node()
     author_firstname = default_schema_node()
     author_lastname = default_schema_node()
@@ -65,53 +57,40 @@ class EventSchema(MappingSchema):
     location_capacity = default_schema_node()
     location_country = default_schema_node()
 
-    @instantiate(missing=drop)
-    class id(MappingSchema):
-        value = SchemaNode(String(), missing=drop,
-                           validator=Length(1, SAFE_MAX_LENGTH))
+    id = SchemaNode(String(), missing=drop,
+                    validator=Length(1, SAFE_MAX_LENGTH))
 
-    @instantiate(missing={'value': []})
-    class sounds(MappingSchema):
+    #@instantiate(missing={'value': []})
+    #class sounds(MappingSchema):
 
-        @instantiate()
-        class value(SequenceSchema):
-            sound = MediaSchema()
+    #    @instantiate()
+    #    class value(SequenceSchema):
+    #        sound = MediaSchema()
 
-    @instantiate(missing={'value': []})
-    class videos(MappingSchema):
+    #@instantiate(missing={'value': []})
+    #class videos(MappingSchema):
 
-        @instantiate()
-        class value(SequenceSchema):
-            video = MediaSchema()
+    #    @instantiate()
+    #    class value(SequenceSchema):
+    #        video = MediaSchema()
 
-    @instantiate(missing={'value': []})
-    class images(MappingSchema):
+    #@instantiate(missing={'value': []})
+    #class images(MappingSchema):
 
-        @instantiate()
-        class value(SequenceSchema):
-            image = MediaSchema()
+    #    @instantiate()
+    #    class value(SequenceSchema):
+    #        image = MediaSchema()
 
-    @instantiate(missing={'value': []})
-    class tags(MappingSchema):
+    @instantiate(missing=[])
+    class tags(SequenceSchema):
+        name = SchemaNode(String(), validator=Length(1, TAG_MAX_LENGTH))
 
-        @instantiate()
-        class value(SequenceSchema):
-            tag = TagSchema()
+    @instantiate(missing=[])
+    class categories(SequenceSchema):
+        name = SchemaNode(String(), validator=Length(1, TAG_MAX_LENGTH))
 
-    @instantiate(missing={'value': []})
-    class categories(MappingSchema):
-
-        @instantiate()
-        class value(SequenceSchema):
-            tag = TagSchema()
-
-    @instantiate()
-    class start_time(MappingSchema):
-        value = SchemaNode(DateTime(default_tzinfo=None))
-
-    @instantiate()
-    class end_time(MappingSchema):
-        value = SchemaNode(DateTime(default_tzinfo=None), missing=None)
+    start_time = SchemaNode(DateTime(default_tzinfo=None))
+    end_time = SchemaNode(DateTime(default_tzinfo=None), missing=None)
 
 
 class EventCollectionSchema(MappingSchema):
@@ -125,13 +104,8 @@ class EventCollectionSchema(MappingSchema):
 
 
 class SourceSchema(MappingSchema):
-    @instantiate()
-    class url(MappingSchema):
-        value = SchemaNode(String(), validator=colander.url)
-
-    @instantiate(missing=False)
-    class active(MappingSchema):
-        value = SchemaNode(Boolean())
+    url = SchemaNode(String(), validator=colander.url)
+    active = SchemaNode(Boolean(), missing=False)
 
 
 class SourceCollectionSchema(MappingSchema):

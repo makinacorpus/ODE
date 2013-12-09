@@ -71,7 +71,7 @@ class TestJson(TestEventMixin, TestCase):
                                       headers=headers, status=created)
         data_dict = data_list_to_dict(
             response.json['collection']['items'][0]['data'])
-        return data_dict['id']['value']
+        return data_dict['id']
 
     def assertEqualIgnoringId(self, result, expected):
         result = remove_ids(result)
@@ -121,7 +121,6 @@ class TestJson(TestEventMixin, TestCase):
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertEqual(response.json['status'], 'updated')
         self.assertEqual(event.title, 'EuroPython')
-        #self.assertEqual(event.locations[0].name, u"Le café des artistes")
 
     def test_update_title_too_long(self):
         event_id = self.post_event()
@@ -175,7 +174,7 @@ class TestJson(TestEventMixin, TestCase):
 
     @staticmethod
     def get_item_title(item):
-        return data_list_to_dict(item['data'])['title']['value']
+        return data_list_to_dict(item['data'])['title']
 
     def test_default_order(self):
         self.create_sortable_events()
@@ -226,7 +225,7 @@ class TestJson(TestEventMixin, TestCase):
 
         event_data = response.json['collection']['items'][0]['data']
         event_dict = data_list_to_dict(event_data)
-        title = event_dict['title']['value']
+        title = event_dict['title']
         self.assertEqual(title, u'Titre Événement')
 
     def test_delete_event(self):
@@ -284,6 +283,20 @@ class TestJson(TestEventMixin, TestCase):
         event_data = response.json['collection']['items'][0]['data']
         self.assertIn({'name': "tags", 'value': u"音楽"},
                       event_data)
+
+    def test_post_images(self):
+        self.skipTest('todo')
+        event_id = self.post_event([
+            {'name': u'title', 'value': 'EuroPython'},
+            {'name': "images.0.url", 'value': u"http://example.com/abc"},
+            {'name': "images.0.license", 'value': u"CC By"},
+            {'name': "images.1.url", 'value': u"http://example.com/123"},
+            {'name': "images.1.license", 'value': u"Art libre"},
+        ])
+        event = DBSession.query(Event).filter_by(id=event_id).first()
+        self.assertEqual(len(event.images), 2)
+        self.assertEqual(event.images[0].url, u"http://example.com/abc")
+        self.assertEqual(event.images[1].license, u"CC By")
 
     def test_get_categories(self):
         event = self.create_event()

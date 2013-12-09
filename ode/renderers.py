@@ -6,7 +6,7 @@ from icalendar import Calendar, Event
 from pyramid.renderers import JSON
 
 
-from ode.models import icalendar_to_model_keys, flatten_values
+from ode.models import icalendar_to_model_keys
 from ode.deserializers import data_list_to_dict
 
 
@@ -34,9 +34,8 @@ class IcalRenderer(object):
         event = Event()
         for icalendar_key, model_attribute in icalendar_to_model_keys.items():
             if model_attribute in event_data:
-                if event_data[model_attribute]['value'] is not None:
-                    event.add(icalendar_key,
-                              event_data[model_attribute]['value'])
+                if event_data[model_attribute] is not None:
+                    event.add(icalendar_key, event_data[model_attribute])
         calendar.add_component(event)
 
 
@@ -65,7 +64,7 @@ class CsvRenderer(object):
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
         for item in items:
-            data_dict = flatten_values(data_list_to_dict(item['data']))
+            data_dict = data_list_to_dict(item['data'])
             for key, value in data_dict.items():
                 if value is not None and isinstance(value, basestring):
                     data_dict[key] = value.encode('utf-8')

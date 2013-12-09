@@ -17,8 +17,7 @@ class TestSource(BaseTestMixin, TestCase):
 
         source_data = response.json['collection']['items'][0]['data']
         data_dict = data_list_to_dict(source_data)
-        url = data_dict['url']['value']
-        self.assertEqual(url, 'http://example.com')
+        self.assertEqual(data_dict['url'], 'http://example.com')
 
         source_href = response.json['collection']['items'][0]['href']
         self.assertEqual(source_href,
@@ -128,11 +127,11 @@ class TestSource(BaseTestMixin, TestCase):
                          'http://localhost/v1/sources')
         items = response.json['collection']['items']
         self.assertEqual(len(items), 2)
-        self.assertEqual(data_list_to_dict(items[0]['data'])['id']['value'],
+        self.assertEqual(data_list_to_dict(items[0]['data'])['id'],
                          source1.id)
         self.assertEqual(items[0]['href'],
                          'http://localhost/v1/sources/%s' % source1.id)
-        self.assertEqual(data_list_to_dict(items[1]['data'])['id']['value'],
+        self.assertEqual(data_list_to_dict(items[1]['data'])['id'],
                          source2.id)
         self.assertEqual(items[1]['href'],
                          'http://localhost/v1/sources/%s' % source2.id)
@@ -155,7 +154,7 @@ class TestSource(BaseTestMixin, TestCase):
         response = self.app.get_json('/v1/sources?offset=5',
                                      headers={'X-ODE-Provider-Id': '123'})
         item = response['collection']['items'][0]
-        self.assertEqual(data_list_to_dict(item['data'])['url']['value'],
+        self.assertEqual(data_list_to_dict(item['data'])['url'],
                          'http://example.com/feed6')
 
     def test_invalid_offset(self):
@@ -173,7 +172,7 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertEqual(collection['total_count'], 10)
         self.assertEqual(len(items), 3)
         self.assertEqual(collection['current_count'], 3)
-        self.assertEqual(data_list_to_dict(items[0]['data'])['url']['value'],
+        self.assertEqual(data_list_to_dict(items[0]['data'])['url'],
                          'http://example.com/feed6')
-        self.assertEqual(data_list_to_dict(items[-1]['data'])['url']['value'],
+        self.assertEqual(data_list_to_dict(items[-1]['data'])['url'],
                          'http://example.com/feed8')

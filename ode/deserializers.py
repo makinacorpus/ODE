@@ -11,13 +11,10 @@ def icalendar_to_cstruct(icalendar_event):
     for icalendar_key, model_attribute in icalendar_to_model_keys.items():
         if icalendar_key in icalendar_event:
             if icalendar_key in ('dtstart', 'dtend'):
-                result[model_attribute] = {
-                    'value': icalendar_event[icalendar_key].dt.isoformat()
-                }
+                result[model_attribute] = \
+                    icalendar_event[icalendar_key].dt.isoformat()
             else:
-                result[model_attribute] = {
-                    'value': icalendar_event[icalendar_key]
-                }
+                result[model_attribute] = icalendar_event[icalendar_key]
     return result
 
 
@@ -37,14 +34,13 @@ def data_list_to_dict(data_list):
         key = data_field['name']
         new_value = data_field['value']
         if key in result:
-            existing_value = result[key]['value']
+            existing_value = result[key]
             if isinstance(existing_value, list):
-                existing_value.append({'value': new_value})
+                existing_value.append(new_value)
             else:
-                result[key]['value'] = [{'value': existing_value},
-                                        {'value': new_value}]
+                result[key] = [existing_value, new_value]
         else:
-            result[key] = {'value': new_value}
+            result[key] = new_value
     return result
 
 
@@ -69,7 +65,7 @@ def csv_extractor(request):
         items = []
         for row in reader:
             data_dict = {
-                key: {'value': value.decode('utf-8')}
+                key: value.decode('utf-8')
                 for key, value in row.items()
             }
             items.append({'data': data_dict})
