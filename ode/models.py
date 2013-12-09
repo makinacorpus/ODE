@@ -39,7 +39,10 @@ class BaseModel(object):
     def list_to_objects(cls, appstruct_list):
         objects = []
         for appstruct in appstruct_list:
-            obj = cls(name=appstruct)
+            if cls is Tag:
+                obj = cls(name=appstruct)
+            else:
+                obj = cls(**appstruct)
             objects.append(obj)
         return objects
 
@@ -168,12 +171,17 @@ class Event(Base):
             for name in location_fields:
                 result.append({'name': 'location_' + name,
                                'value': getattr(self.location, name)})
-        if getattr(self, 'tags', None):
-            for tag in self.tags:
-                result.append({'name': 'tags', 'value': tag.name})
-        if getattr(self, 'categories', None):
-            for tag in self.categories:
-                result.append({'name': 'categories', 'value': tag.name})
+        for attrname in ('tags', 'categories'):
+            objects = getattr(self, attrname, None)
+            if objects:
+                values = [obj.name for obj in objects]
+                result.append({'name': attrname, 'value': values})
+        for attrname in ('images', 'videos', 'sounds'):
+            objects = getattr(self, attrname, None)
+            if objects:
+                values = [{'url': obj.url, 'license': obj.license}
+                          for obj in objects]
+                result.append({'name': attrname, 'value': values})
         return result
 
 

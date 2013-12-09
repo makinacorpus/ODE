@@ -2,7 +2,7 @@
 from unittest import TestCase
 from urllib import quote
 
-from ode.models import DBSession, Event, Tag
+from ode.models import DBSession, Event, Tag, Image, Video, Sound
 from ode.tests.event import TestEventMixin
 from ode.deserializers import data_list_to_dict
 
@@ -247,23 +247,12 @@ class TestJson(TestEventMixin, TestCase):
         event = DBSession.query(Event).filter_by(id=event_id).first()
         self.assertIn(event_id, event.id)
 
-    def test_media(self):
-        self.skipTest('todo')
-        event_id = self.post_event(example_data)
-        event = DBSession.query(Event).filter_by(id=event_id).first()
-        self.assertEqual(event.sounds[0].url, 'http://example.com/audio')
-        self.assertEqual(event.sounds[0].license, 'CC By')
-        self.assertEqual(event.videos[0].url, 'http://example.com/video')
-        self.assertEqual(event.images[0].url, 'http://example.com/image')
-
     def test_post_tags_and_categories(self):
         event_id = self.post_event([
             {'name': u'title', 'value': 'EuroPython'},
-            {'name': "tags", 'value': u"Jazz"},
-            {'name': "tags", 'value': u"Classical"},
-            {'name': "tags", 'value': u"Bourrée auvergnate"},
-            {'name': "categories", 'value': u"Music"},
-            {'name': "categories", 'value': u"音楽"},
+            {'name': "tags",
+             'value': [u"Jazz", u"Classical", u"Bourrée auvergnate"]},
+            {'name': "categories", 'value': [u"Music", u"音楽"]},
         ])
 
         event = DBSession.query(Event).filter_by(id=event_id).first()
@@ -281,22 +270,8 @@ class TestJson(TestEventMixin, TestCase):
         DBSession.flush()
         response = self.app.get('/v1/events/%s' % event.id)
         event_data = response.json['collection']['items'][0]['data']
-        self.assertIn({'name': "tags", 'value': u"音楽"},
+        self.assertIn({'name': "tags", 'value': [u'Music', u"音楽"]},
                       event_data)
-
-    def test_post_images(self):
-        self.skipTest('todo')
-        event_id = self.post_event([
-            {'name': u'title', 'value': 'EuroPython'},
-            {'name': "images.0.url", 'value': u"http://example.com/abc"},
-            {'name': "images.0.license", 'value': u"CC By"},
-            {'name': "images.1.url", 'value': u"http://example.com/123"},
-            {'name': "images.1.license", 'value': u"Art libre"},
-        ])
-        event = DBSession.query(Event).filter_by(id=event_id).first()
-        self.assertEqual(len(event.images), 2)
-        self.assertEqual(event.images[0].url, u"http://example.com/abc")
-        self.assertEqual(event.images[1].license, u"CC By")
 
     def test_get_categories(self):
         event = self.create_event()
@@ -304,8 +279,71 @@ class TestJson(TestEventMixin, TestCase):
         DBSession.flush()
         response = self.app.get('/v1/events/%s' % event.id)
         event_data = response.json['collection']['items'][0]['data']
-        self.assertIn({'name': "categories", 'value': u"音楽"},
+        self.assertIn({'name': "categories", 'value': [u'Music', u"音楽"]},
                       event_data)
+
+    def _test_post_media(self, attrname):
+        event_id = self.post_event([
+            {'name': u'title', 'value': 'EuroPython'},
+            {'name': attrname, "value": [
+                {
+                    "url": u"http://example.com/abc",
+                    "license": u"CC By"
+                },
+                {
+                    "url": u"http://example.com/123",
+                    "license": u"Art Libre"
+                }
+            ]},
+        ])
+        event = DBSession.query(Event).filter_by(id=event_id).first()
+        objects = getattr(event, attrname)
+        self.assertEqual(len(objects), 2)
+        self.assertEqual(objects[0].url, u"http://example.com/abc")
+        self.assertEqual(objects[1].license, u"Art Libre")
+
+    def test_post_images(self):
+        self._test_post_media('images')
+
+    def test_post_sounds(self):
+        self._test_post_media('sounds')
+
+    def test_post_videos(self):
+        self._test_post_media('videos')
+
+    def _test_get_media(self, klass):
+        attrname = klass.__name__.lower() + 's'
+        event = self.create_event()
+        setattr(event, attrname, [
+            klass(url=u'http://example.com/abc',
+                  license=u'CC By'),
+            klass(url=u'http://example.com/123',
+                  license=u'Art Libre'),
+        ])
+        DBSession.flush()
+        response = self.app.get('/v1/events/%s' % event.id)
+        event_data = response.json['collection']['items'][0]['data']
+        self.assertIn(
+            {'name': attrname, "value": [
+                {
+                    "url": u"http://example.com/abc",
+                    "license": u"CC By"
+                },
+                {
+                    "url": u"http://example.com/123",
+                    "license": u"Art Libre"
+                }
+            ]},
+            event_data)
+
+    def test_get_images(self):
+        self._test_get_media(Image)
+
+    def test_get_videos(self):
+        self._test_get_media(Video)
+
+    def test_get_sounds(self):
+        self._test_get_media(Sound)
 
     def test_get_invalid_id(self):
         response = self.app.get('/v1/events/42', status=404)
