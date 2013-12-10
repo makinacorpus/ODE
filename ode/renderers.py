@@ -62,7 +62,8 @@ class CsvRenderer(object):
     def build_csv(items):
         fieldnames = [column.name for column in EventModel.__mapper__.columns]
         fieldnames += ['location_' + column.name
-                       for column in Location.__mapper__.columns]
+                       for column in Location.__mapper__.columns
+                       if column.name != 'event_id']
         output = StringIO()
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()

@@ -59,6 +59,7 @@ class TestGetEvents(TestEventMixin, TestCase):
         reader = csv.DictReader(StringIO(response.body))
         row = reader.next()
         self.assertEqual(row['location_name'].decode('utf-8'), u'Évian')
+        self.assertNotIn('location_event_id', row)
 
 
 class TestPostEvents(TestEventMixin, TestCase):
