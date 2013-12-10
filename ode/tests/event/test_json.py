@@ -36,18 +36,6 @@ example_data = [
     {'name': "telephone", 'value': u"1234567890"},
     {'name': "title", 'value': u"Convention des amis des éléphants"},
     {'name': "url", 'value': u"http://example.com/foo/bar"},
-    {'name': 'location_address', 'value': ''},
-    {'name': 'location_capacity', 'value': ''},
-    {'name': 'location_country', 'value': ''},
-    {'name': 'location_name', 'value': ''},
-    {'name': 'location_post_code', 'value': ''},
-    {'name': 'location_town', 'value': ''},
-    {'name': 'press_contact_email', 'value': ''},
-    {'name': 'press_contact_name', 'value': ''},
-    {'name': 'press_contact_phone_number', 'value': ''},
-    {'name': 'ticket_contact_email', 'value': ''},
-    {'name': 'ticket_contact_name', 'value': ''},
-    {'name': 'ticket_contact_phone_number', 'value': ''},
 ]
 
 

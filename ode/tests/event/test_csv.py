@@ -2,7 +2,7 @@
 from unittest import TestCase
 from StringIO import StringIO
 import csv
-from ode.models import DBSession, Event
+from ode.models import DBSession, Event, Location
 
 from ode.tests.event import TestEventMixin
 
@@ -35,6 +35,30 @@ class TestGetEvents(TestEventMixin, TestCase):
         row = reader.next()
         self.assertIn('title', row)
         self.assertEqual(row['title'].decode('utf-8'), u'Événement 1')
+
+    def test_events_with_different_fields(self):
+        self.create_event(title=u'Événement 1', press_contact_name=u'Émile')
+        self.create_event(title=u'Événement 2', description=u'Foo bar')
+        DBSession.flush()
+
+        response = self.app.get('/v1/events', headers={'Accept': 'text/csv'})
+
+        reader = csv.DictReader(StringIO(response.body))
+        row = reader.next()
+        self.assertEqual(row['press_contact_name'].decode('utf-8'), u'Émile')
+        row = reader.next()
+        self.assertEqual(row['description'].decode('utf-8'), u'Foo bar')
+
+    def test_event_with_location(self):
+        self.create_event(title=u'Événement 1',
+                          location=Location(name=u'Évian'))
+        DBSession.flush()
+
+        response = self.app.get('/v1/events', headers={'Accept': 'text/csv'})
+
+        reader = csv.DictReader(StringIO(response.body))
+        row = reader.next()
+        self.assertEqual(row['location_name'].decode('utf-8'), u'Évian')
 
 
 class TestPostEvents(TestEventMixin, TestCase):

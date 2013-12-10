@@ -187,15 +187,18 @@ class Event(Base):
         for column in self.__class__.__mapper__.columns:
             if column.name == 'provider_id':
                 continue
-            result.append({'name': column.name,
-                           'value': getattr(self, column.name)})
+            value = getattr(self, column.name)
+            if value:
+                result.append({'name': column.name, 'value': value})
 
         if getattr(self, 'location', None):
             location_fields = ('name', 'address', 'post_code', 'capacity',
                                'town', 'country')
             for name in location_fields:
-                result.append({'name': 'location_' + name,
-                               'value': getattr(self.location, name)})
+                value = getattr(self.location, name)
+                if value:
+                    result.append({'name': 'location_' + name,
+                                   'value': getattr(self.location, name)})
 
         for attrname in ('tags', 'categories'):
             objects = getattr(self, attrname, None)

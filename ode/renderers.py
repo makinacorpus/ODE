@@ -8,6 +8,7 @@ from pyramid.renderers import JSON
 
 from ode.models import icalendar_to_model_keys
 from ode.deserializers import data_list_to_dict
+from ode.models import Event as EventModel, Location
 
 
 class IcalRenderer(object):
@@ -59,7 +60,9 @@ class CsvRenderer(object):
 
     @staticmethod
     def build_csv(items):
-        fieldnames = [field['name'] for field in items[0]['data']]
+        fieldnames = [column.name for column in EventModel.__mapper__.columns]
+        fieldnames += ['location_' + column.name
+                       for column in Location.__mapper__.columns]
         output = StringIO()
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
