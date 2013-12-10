@@ -5,7 +5,6 @@ fanstatic==0.16
 pyramid_formalchemy
 pyramid_fanstatic
 fa.jquery
-pyramid
 pyramid_chameleon
 pyramid_debugtoolbar
 pyramid_tm
