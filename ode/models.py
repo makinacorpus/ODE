@@ -71,6 +71,10 @@ class BaseModel(object):
         route_name = self.__class__.__name__.lower() + 'resource'
         return absolute_url(request, route_name, id=self.id)
 
+    @classmethod
+    def get_by_id(cls, id):
+        return DBSession.query(cls).filter_by(id=id).first()
+
 
 Base = declarative_base(cls=BaseModel)
 
@@ -158,6 +162,13 @@ class Event(Base):
     images = relationship('Image')
     tags = relationship('Tag', secondary=tag_association)
     categories = relationship('Tag', secondary=category_association)
+
+    press_contact_email = default_column()
+    press_contact_name = default_column()
+    press_contact_phone_number = default_column()
+    ticket_contact_email = default_column()
+    ticket_contact_name = default_column()
+    ticket_contact_phone_number = default_column()
 
     def __init__(self, *args, **kwargs):
         if 'id' not in kwargs:

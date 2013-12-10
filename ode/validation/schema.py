@@ -54,6 +54,13 @@ class EventSchema(MappingSchema):
     publication_start = SchemaNode(DateTime(default_tzinfo=None), missing=None)
     publication_end = SchemaNode(DateTime(default_tzinfo=None), missing=None)
 
+    press_contact_email = default_schema_node()
+    press_contact_name = default_schema_node()
+    press_contact_phone_number = default_schema_node()
+    ticket_contact_email = default_schema_node()
+    ticket_contact_name = default_schema_node()
+    ticket_contact_phone_number = default_schema_node()
+
     @instantiate(missing=[])
     class videos(SequenceSchema):
         video = MediaSchema()

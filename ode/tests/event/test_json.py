@@ -42,6 +42,12 @@ example_data = [
     {'name': 'location_name', 'value': ''},
     {'name': 'location_post_code', 'value': ''},
     {'name': 'location_town', 'value': ''},
+    {'name': 'press_contact_email', 'value': ''},
+    {'name': 'press_contact_name', 'value': ''},
+    {'name': 'press_contact_phone_number', 'value': ''},
+    {'name': 'ticket_contact_email', 'value': ''},
+    {'name': 'ticket_contact_name', 'value': ''},
+    {'name': 'ticket_contact_phone_number', 'value': ''},
 ]
 
 
@@ -120,7 +126,7 @@ class TestJson(TestEventMixin, TestCase):
             '/v1/events/%s' % event_id, put_data,
             headers={'X-ODE-Provider-Id': '123'})
 
-        event = DBSession.query(Event).filter_by(id=event_id).first()
+        event = Event.get_by_id(event_id)
         self.assertEqual(response.json['status'], 'updated')
         self.assertEqual(event.title, 'EuroPython')
 
@@ -148,9 +154,28 @@ class TestJson(TestEventMixin, TestCase):
         event_data = data_list_to_dict(
             response.json['collection']['items'][0]['data'])
         event_id = event_data['id']
-        event = DBSession.query(Event).filter_by(id=event_id).first()
+        event = Event.get_by_id(event_id)
         self.assertEqual(event.publication_start, datetime(2014, 1, 25, 16))
         self.assertEqual(event.publication_end, datetime(2014, 1, 25, 17))
+
+    def test_post_contact_info(self):
+        event_data = [
+            {'name': 'title', 'value': u'Événement'},
+            {'name': u'start_time', 'value': u'2014-01-25T15:00'},
+            {'name': u'end_time', 'value': u'2014-01-25T15:00'},
+            {'name': 'press_contact_name', 'value': u'Éléonore'},
+            {'name': 'press_contact_email', 'value': u'foo@example.com'},
+            {'name': 'press_contact_phone_number', 'value': u'123456789'},
+            {'name': 'ticket_contact_name', 'value': u'Éléonore'},
+            {'name': 'ticket_contact_email', 'value': u'bar@example.com'},
+            {'name': 'ticket_contact_phone_number',
+             'value': u'00000000'},
+        ]
+        event_id = self.post_event(event_data)
+        event = Event.get_by_id(event_id)
+        self.assertEqual(event.press_contact_name, u'Éléonore')
+        self.assertEqual(event.press_contact_email, u'foo@example.com')
+        self.assertEqual(event.ticket_contact_phone_number, u'00000000')
 
     def test_list_all_events(self):
         event1 = self.create_event(title=u'Événement 1')
@@ -266,7 +291,7 @@ class TestJson(TestEventMixin, TestCase):
 
     def test_uid(self):
         event_id = self.post_event(example_data)
-        event = DBSession.query(Event).filter_by(id=event_id).first()
+        event = Event.get_by_id(event_id)
         self.assertIn(event_id, event.id)
 
     def test_post_tags_and_categories(self):
@@ -277,7 +302,7 @@ class TestJson(TestEventMixin, TestCase):
             {'name': "categories", 'value': [u"Music", u"音楽"]},
         ])
 
-        event = DBSession.query(Event).filter_by(id=event_id).first()
+        event = Event.get_by_id(event_id)
         self.assertEqual(len(event.tags), 3)
         self.assertEqual(event.tags[0].name, u"Jazz")
         self.assertEqual(event.tags[1].name, u"Classical")
@@ -318,7 +343,7 @@ class TestJson(TestEventMixin, TestCase):
                 }
             ]},
         ])
-        event = DBSession.query(Event).filter_by(id=event_id).first()
+        event = Event.get_by_id(event_id)
         objects = getattr(event, attrname)
         self.assertEqual(len(objects), 2)
         self.assertEqual(objects[0].url, u"http://example.com/abc")
