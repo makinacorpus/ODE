@@ -51,6 +51,8 @@ class EventSchema(MappingSchema):
 
     start_time = SchemaNode(DateTime(default_tzinfo=None))
     end_time = SchemaNode(DateTime(default_tzinfo=None), missing=None)
+    publication_start = SchemaNode(DateTime(default_tzinfo=None), missing=None)
+    publication_end = SchemaNode(DateTime(default_tzinfo=None), missing=None)
 
     @instantiate(missing=[])
     class videos(SequenceSchema):

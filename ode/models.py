@@ -149,6 +149,8 @@ class Event(Base):
     provider_id = default_column()
     start_time = Column(DateTime(timezone=False))
     end_time = Column(DateTime(timezone=False))
+    publication_start = Column(DateTime(timezone=False))
+    publication_end = Column(DateTime(timezone=False))
 
     location = relationship('Location', uselist=False)
     sounds = relationship('Sound')

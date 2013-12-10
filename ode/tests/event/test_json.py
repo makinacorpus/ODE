@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
 from urllib import quote
+from datetime import datetime
 
 from ode.models import DBSession, Event, Tag, Image, Video, Sound
 from ode.tests.event import TestEventMixin
@@ -54,7 +55,8 @@ class TestJson(TestEventMixin, TestCase):
             event_info = [
                 {'name': 'title', 'value': u'Titre Événement'},
             ]
-        for mandatory in ('start_time', 'end_time'):
+        for mandatory in ('start_time', 'end_time', 'publication_start',
+                          'publication_end'):
             if mandatory not in [field['name'] for field in event_info]:
                 event_info.append({
                     'name': mandatory,
@@ -129,6 +131,26 @@ class TestJson(TestEventMixin, TestCase):
             'title': very_long_title
         }, headers={'X-ODE-Provider-Id': '123'}, status=400)
         self.assertEqual(response.json['status'], 'error')
+
+    def test_post_publication_times(self):
+        response = self.app.post_json('/v1/events', {
+            'template': {
+                'data': [
+                    {'name': 'title', 'value': u'Événement'},
+                    {'name': u'start_time', 'value': u'2014-01-25T15:00'},
+                    {'name': u'end_time', 'value': u'2014-01-25T15:00'},
+                    {'name': 'publication_start',
+                     'value': u'2014-01-25T16:00'},
+                    {'name': 'publication_end', 'value': u'2014-01-25T17:00'},
+                ]
+            }
+        }, headers={'X-ODE-Provider-Id': '123'})
+        event_data = data_list_to_dict(
+            response.json['collection']['items'][0]['data'])
+        event_id = event_data['id']
+        event = DBSession.query(Event).filter_by(id=event_id).first()
+        self.assertEqual(event.publication_start, datetime(2014, 1, 25, 16))
+        self.assertEqual(event.publication_end, datetime(2014, 1, 25, 17))
 
     def test_list_all_events(self):
         event1 = self.create_event(title=u'Événement 1')
