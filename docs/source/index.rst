@@ -50,13 +50,3 @@ For example, if you'd like to retrive events 20 to 30 sorted by start time in de
 
 .. toctree::
    :maxdepth: 2
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
