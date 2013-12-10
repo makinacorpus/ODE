@@ -107,8 +107,12 @@ class SourceCollectionSchema(MappingSchema):
             data = SourceSchema()
 
 
+COLLECTION_MAX_LENGTH = 50
+
+
 class QueryStringSchema(MappingSchema):
-    limit = SchemaNode(Integer(), missing=drop)
+    limit = SchemaNode(Integer(), missing=drop,
+                       validator=colander.Range(0, COLLECTION_MAX_LENGTH))
     offset = SchemaNode(Integer(), missing=drop)
     sort_by = SchemaNode(String(), missing=drop)
     sort_direction = SchemaNode(String(), missing='asc',

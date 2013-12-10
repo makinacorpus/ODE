@@ -6,7 +6,7 @@ from datetime import datetime
 from ode.models import DBSession, Event, Tag, Image, Video, Sound
 from ode.tests.event import TestEventMixin
 from ode.deserializers import data_list_to_dict
-from ode.resources.base import COLLECTION_MAX_LENGTH
+from ode.validation.schema import COLLECTION_MAX_LENGTH
 
 
 def remove_ids(fields):
@@ -192,7 +192,7 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(len(events), 1)
         self.assertEqual(self.get_item_title(events[0]), u'Événement 1')
 
-    def test_default_list_limit(self):
+    def test_default_limit(self):
         for i in range(0, COLLECTION_MAX_LENGTH + 1):
             self.create_event(title=u'Événement %s' % i)
 
@@ -203,7 +203,7 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(collection['current_count'], COLLECTION_MAX_LENGTH)
         self.assertEqual(collection['total_count'], COLLECTION_MAX_LENGTH + 1)
 
-    def test_custom_list_limit(self):
+    def test_client_limit(self):
         for i in range(1, 6):
             self.create_event(title=u'Événement %s' % i)
 
@@ -213,6 +213,15 @@ class TestJson(TestEventMixin, TestCase):
         self.assertEqual(collection['total_count'], 5)
         events = collection['items']
         self.assertEqual(len(events), 3)
+
+    def test_invalid_limit(self):
+        for i in range(0, COLLECTION_MAX_LENGTH + 1):
+            self.create_event(title=u'Événement %s' % i)
+
+        url = '/v1/events?limit={}'.format(COLLECTION_MAX_LENGTH + 1)
+        response = self.app.get(url, status=400)
+
+        self.assertErrorMessage(response, 'greater than maximum')
 
     def create_sortable_events(self):
         self.create_event(title=u'BBB')
