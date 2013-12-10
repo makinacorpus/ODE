@@ -14,7 +14,7 @@ class JsonException(exc.HTTPError):
         }
         Response.__init__(self, json.dumps(body))
         self.status = status_code
-        self.content_type = 'application/json'
+        self.content_type = 'application/vnd.collection+json'
 
 
 class HTTPNotFound(JsonException):

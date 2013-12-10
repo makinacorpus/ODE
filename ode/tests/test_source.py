@@ -55,7 +55,10 @@ class TestSource(BaseTestMixin, TestCase):
         }
         response = self.app.post_json(
             '/v1/sources',
-            sources_info, headers={'X-ODE-Provider-Id': '123'},
+            sources_info, headers={
+                'X-ODE-Provider-Id': '123',
+                'Content-Type': 'application/vnd.collection+json',
+            },
             status=201)
         source = DBSession.query(Source).one()
         self.assertEqual(response.headers['location'],
@@ -88,7 +91,8 @@ class TestSource(BaseTestMixin, TestCase):
                     ]
                 }
             },
-            headers={'X-ODE-Provider-Id': '123'})
+            headers={'X-ODE-Provider-Id': '123',
+                     'Content-Type': 'application/vnd.collection+json'})
         self.assertEqual(response.json['status'], 'updated')
         source = DBSession.query(Source).one()
         self.assertEqual(source.url, u'http://example.com/myothersource')
@@ -112,7 +116,8 @@ class TestSource(BaseTestMixin, TestCase):
                 }
             },
             status=404,
-            headers={'X-ODE-Provider-Id': '123'})
+            headers={'X-ODE-Provider-Id': '123',
+                     'Content-Type': 'application/vnd.collection+json'})
         self.assertEqual(response.json['status'], 404)
 
     def test_get_source_list(self):
