@@ -8,6 +8,9 @@ from ode.validation.validators import validate_querystring
 from ode.urls import absolute_url
 
 
+COLLECTION_MAX_LENGTH = 50
+
+
 class ResourceMixin(object):
 
     def __init__(self, request):
@@ -89,9 +92,8 @@ class ResourceMixin(object):
                 message = "{} is not a valid sorting criterion"
                 raise HTTPBadRequest(message.format(sort_by))
         total_count = query.count()
-        limit = self.request.validated.get('limit')
-        if limit:
-            query = query.limit(limit)
+        limit = self.request.validated.get('limit', COLLECTION_MAX_LENGTH)
+        query = query.limit(limit)
         offset = self.request.validated.get('offset')
         if offset:
             query = query.offset(offset)

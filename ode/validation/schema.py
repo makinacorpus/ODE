@@ -108,9 +108,9 @@ class SourceCollectionSchema(MappingSchema):
 
 
 class QueryStringSchema(MappingSchema):
-    limit = SchemaNode(Integer(), missing=None)
-    offset = SchemaNode(Integer(), missing=None)
-    sort_by = SchemaNode(String(), missing=None)
+    limit = SchemaNode(Integer(), missing=drop)
+    offset = SchemaNode(Integer(), missing=drop)
+    sort_by = SchemaNode(String(), missing=drop)
     sort_direction = SchemaNode(String(), missing='asc',
                                 validator=OneOf(['asc', 'desc']))
     provider_id = SchemaNode(Integer(), missing=drop)
