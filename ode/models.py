@@ -1,6 +1,6 @@
 import pyramid
-from sqlalchemy import (Column, Integer, Unicode, UnicodeText,
-                        DateTime, ForeignKey, Boolean, String)
+from sqlalchemy import (Column, Integer, Unicode, DateTime, ForeignKey,
+                        Boolean, String)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm import relationship
@@ -85,8 +85,8 @@ Base = declarative_base(cls=BaseModel)
 
 class Media(Base):
     __tablename__ = 'media'
-    event_id = Column(Integer, ForeignKey('events.id'))
-    license = Column(UnicodeText(20))
+    event_id = Column(Unicode(SAFE_MAX_LENGTH), ForeignKey('events.id'))
+    license = Column(Unicode(20))
     url = default_column()
     type = Column(String(20))
 
@@ -117,20 +117,20 @@ class Image(Media):
 tag_association = Table(
     'tag_association', Base.metadata,
     Column('tag_id', Integer, ForeignKey('tags.id')),
-    Column('event_id', Integer, ForeignKey('events.id'))
+    Column('event_id', Unicode(SAFE_MAX_LENGTH), ForeignKey('events.id'))
 )
 
 
 category_association = Table(
     'category_association', Base.metadata,
     Column('tag_id', Integer, ForeignKey('tags.id')),
-    Column('event_id', Integer, ForeignKey('events.id'))
+    Column('event_id', Unicode(SAFE_MAX_LENGTH), ForeignKey('events.id'))
 )
 
 
 class Tag(Base):
     __tablename__ = 'tags'
-    name = Column(UnicodeText(TAG_MAX_LENGTH), unique=True)
+    name = Column(Unicode(TAG_MAX_LENGTH), unique=True)
 
 
 class Event(Base):
@@ -142,7 +142,7 @@ class Event(Base):
     lastname = default_column()
     email = default_column()
     telephone = default_column()
-    description = Column(UnicodeText(SAFE_MAX_LENGTH))
+    description = Column(Unicode(SAFE_MAX_LENGTH))
     language = default_column()
     latlong = default_column()
     organiser = default_column()
@@ -229,7 +229,7 @@ class Location(Base):
     capacity = default_column()
     town = default_column()
     country = default_column()
-    event_id = Column(Integer, ForeignKey('events.id'))
+    event_id = Column(Unicode(SAFE_MAX_LENGTH), ForeignKey('events.id'))
 
 
 class Source(Base):

@@ -15,3 +15,4 @@ waitress
 colander==1.0b1
 requests
 webtest
+psycopg2
