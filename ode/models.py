@@ -116,6 +116,7 @@ class Image(Media):
 
 tag_association = Table(
     'tag_association', Base.metadata,
+    Column('id', Integer, primary_key=True),
     Column('tag_id', Integer, ForeignKey('tags.id')),
     Column('event_id', Unicode(SAFE_MAX_LENGTH), ForeignKey('events.id'))
 )
@@ -123,6 +124,7 @@ tag_association = Table(
 
 category_association = Table(
     'category_association', Base.metadata,
+    Column('id', Integer, primary_key=True),
     Column('tag_id', Integer, ForeignKey('tags.id')),
     Column('event_id', Unicode(SAFE_MAX_LENGTH), ForeignKey('events.id'))
 )
