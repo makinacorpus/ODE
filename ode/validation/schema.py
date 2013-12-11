@@ -13,20 +13,20 @@ def default_schema_node():
 
 class MediaSchema(MappingSchema):
     license = default_schema_node()
-    url = default_schema_node()
+    url = SchemaNode(String(), validator=colander.url)
 
 
 class EventSchema(MappingSchema):
     id = SchemaNode(String(), missing=drop,
                     validator=Length(1, SAFE_MAX_LENGTH))
     title = SchemaNode(String(), validator=Length(1, SAFE_MAX_LENGTH))
-    author_email = default_schema_node()
-    author_firstname = default_schema_node()
-    author_lastname = default_schema_node()
-    author_telephone = default_schema_node()
+    email = SchemaNode(String(), validator=colander.Email())
+    firstname = default_schema_node()
+    lastname = default_schema_node()
+    telephone = default_schema_node()
     description = default_schema_node()
     event_id = default_schema_node()
-    email = default_schema_node()
+    email = SchemaNode(String(), missing='', validator=colander.Email())
     firstname = default_schema_node()
     language = default_schema_node()
     lastname = default_schema_node()
@@ -34,12 +34,12 @@ class EventSchema(MappingSchema):
     price_information = default_schema_node()
     organiser = default_schema_node()
     performers = default_schema_node()
-    press_url = default_schema_node()
+    press_url = SchemaNode(String(), missing='', validator=colander.url)
     source_id = default_schema_node()
     source = default_schema_node()
     target = default_schema_node()
     telephone = default_schema_node()
-    url = default_schema_node()
+    url = SchemaNode(String(), missing='', validator=colander.url)
 
     location_name = default_schema_node()
     location_address = default_schema_node()
@@ -53,10 +53,12 @@ class EventSchema(MappingSchema):
     publication_start = SchemaNode(DateTime(default_tzinfo=None), missing=None)
     publication_end = SchemaNode(DateTime(default_tzinfo=None), missing=None)
 
-    press_contact_email = default_schema_node()
+    press_contact_email = SchemaNode(String(), missing='',
+                                     validator=colander.Email())
     press_contact_name = default_schema_node()
     press_contact_phone_number = default_schema_node()
-    ticket_contact_email = default_schema_node()
+    ticket_contact_email = SchemaNode(String(), missing='',
+                                      validator=colander.Email())
     ticket_contact_name = default_schema_node()
     ticket_contact_phone_number = default_schema_node()
 

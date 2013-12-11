@@ -43,6 +43,8 @@ class BaseModel(object):
                 obj = DBSession.query(cls).filter_by(name=appstruct).first()
                 if obj is None:
                     obj = cls(name=appstruct)
+            elif cls is Sound or cls is Image or cls is Video:
+                obj = cls(url=appstruct['url'], license=appstruct['license'])
             else:
                 obj = cls(**appstruct)
             objects.append(obj)
