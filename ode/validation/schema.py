@@ -33,7 +33,6 @@ class EventSchema(MappingSchema):
     latlong = default_schema_node()
     price_information = default_schema_node()
     organiser = default_schema_node()
-    price_information = default_schema_node()
     performers = default_schema_node()
     press_url = default_schema_node()
     source_id = default_schema_node()

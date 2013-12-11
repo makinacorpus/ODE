@@ -4,4 +4,5 @@ webtest
 Sphinx
 autopep8
 coverage
+flake8
 -e git+https://github.com/makinacorpus/cornice.git@request-data-extractors#egg=cornice

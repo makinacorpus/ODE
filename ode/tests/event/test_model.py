@@ -25,3 +25,16 @@ class TestModel(TestEventMixin, TestCase):
         event = self.create_event(start_time=start_time)
         DBSession.flush()
         self.assertTrue(event.id.endswith("@example.com"))
+
+    def test_tags(self):
+        tags = ['tag1', 'tag2']
+        event1 = self.create_event(tags=tags)
+        DBSession.flush()
+        self.assertTrue(event1.id.endswith("@example.com"))
+        self.assertEqual(event1.tags[0].name, 'tag1')
+        tag = event1.tags[0]
+        event2 = self.create_event(tags=tags)
+        DBSession.flush()
+        self.assertTrue(event2.id.endswith("@example.com"))
+        self.assertEqual(event2.tags[0].name, 'tag1')
+        self.assertEqual(tag, event2.tags[0])

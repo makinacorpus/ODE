@@ -40,7 +40,9 @@ class BaseModel(object):
         objects = []
         for appstruct in appstruct_list:
             if cls is Tag:
-                obj = cls(name=appstruct)
+                obj = DBSession.query(cls).filter_by(name=appstruct).first()
+                if obj is None:
+                    obj = cls(name=appstruct)
             else:
                 obj = cls(**appstruct)
             objects.append(obj)
@@ -160,8 +162,9 @@ class Event(Base):
     sounds = relationship('Sound')
     videos = relationship('Video')
     images = relationship('Image')
-    tags = relationship('Tag', secondary=tag_association)
-    categories = relationship('Tag', secondary=category_association)
+    tags = relationship('Tag', secondary=tag_association, backref="events_tag")
+    categories = relationship('Tag', secondary=category_association,
+                              backref="events_category")
 
     press_contact_email = default_column()
     press_contact_name = default_column()
