@@ -51,15 +51,10 @@ class BaseModel(object):
             if isinstance(value, list):
                 klass = collection_classes[key]
                 value = klass.list_to_objects(appstruct.get(key, []))
-            if isinstance(self, Tag):
-                self.name = value
-            else:
-                if key.startswith('location_'):
-                    if self.location is None:
-                        self.location = Location()
-                    key = key.replace('location_', '')
-                    setattr(self.location, key, value)
-                setattr(self, key, value)
+            self.update_from_appstruct_item(key, value)
+
+    def update_from_appstruct_item(self, key, value):
+        setattr(self, key, value)
 
     def to_item(self, request):
         return {
@@ -140,6 +135,9 @@ class Tag(Base):
         if obj is None:
             obj = cls(name=appstruct)
         return obj
+
+    def update_from_appstruct_item(self, key, value):
+        self.name = value
 
 
 class Event(Base):
@@ -227,6 +225,14 @@ class Event(Base):
                           for obj in objects]
                 result.append({'name': attrname, 'value': values})
         return result
+
+    def update_from_appstruct_item(self, key, value):
+        if key.startswith('location_'):
+            if self.location is None:
+                self.location = Location()
+            key = key.replace('location_', '')
+            setattr(self.location, key, value)
+        setattr(self, key, value)
 
 
 class Location(Base):
