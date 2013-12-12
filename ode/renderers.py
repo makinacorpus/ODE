@@ -64,14 +64,25 @@ class CsvRenderer(object):
         fieldnames += ['location_' + column.name
                        for column in Location.__mapper__.columns
                        if column.name != 'event_id']
+        fieldnames += ['tags', 'categories', 'videos', 'images', 'sounds']
         output = StringIO()
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
         for item in items:
             data_dict = data_list_to_dict(item['data'])
             for key, value in data_dict.items():
-                if value is not None and isinstance(value, basestring):
-                    data_dict[key] = value.encode('utf-8')
+                if value is not None:
+                    if isinstance(value, basestring):
+                        data_dict[key] = value.encode('utf-8')
+                    elif isinstance(value, list):
+                        if key in ('images', 'sounds', 'videos'):
+                            medias = ['%s (%s)' % (v['url'], v['license'])
+                                      for v in value]
+                            data_dict[key] = u', '.join(medias).encode('utf-8')
+                        else:
+                            data_dict[key] = u', '.join(value).encode('utf-8')
+                    elif isinstance(value, datetime.datetime):
+                        data_dict[key] = value.isoformat()
             writer.writerow(data_dict)
         return output.getvalue()
 

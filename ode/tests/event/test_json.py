@@ -444,3 +444,49 @@ class TestJson(TestEventMixin, TestCase):
         response = self.app.delete('/v1/events/42', status=404,
                                    headers={'X-ODE-Provider-Id': '123'})
         self.assertEqual(response.json['status'], 404)
+
+    def test_start_time(self):
+        self.post_event([
+            {'name': u'title', 'value': u'Un événement'},
+            {'name': u'start_time', 'value': '2014-01-25T15:00'},
+            {'name': u'end_time', 'value': '2014-01-30T15:00'},
+            ])
+        response = self.app.get(
+            '/v1/events?start_time=2014-01-27T15:00',
+            headers={
+                'X-ODE-API-Mount-Point': 'http://example.com/api',
+            })
+        collection = response.json['collection']
+        events = collection['items']
+        self.assertEqual(len(events), 1)
+        response = self.app.get(
+            '/v1/events?start_time=2014-02-01T15:00',
+            headers={
+                'X-ODE-API-Mount-Point': 'http://example.com/api',
+            })
+        collection = response.json['collection']
+        events = collection['items']
+        self.assertEqual(len(events), 0)
+
+    def test_end_time(self):
+        self.post_event([
+            {'name': u'title', 'value': u'Un événement'},
+            {'name': u'start_time', 'value': '2014-01-25T15:00'},
+            {'name': u'end_time', 'value': '2014-01-30T15:00'},
+            ])
+        response = self.app.get(
+            '/v1/events?end_time=2014-01-27T15:00',
+            headers={
+                'X-ODE-API-Mount-Point': 'http://example.com/api',
+            })
+        collection = response.json['collection']
+        events = collection['items']
+        self.assertEqual(len(events), 1)
+        response = self.app.get(
+            '/v1/events?end_time=2014-01-01T15:00',
+            headers={
+                'X-ODE-API-Mount-Point': 'http://example.com/api',
+            })
+        collection = response.json['collection']
+        events = collection['items']
+        self.assertEqual(len(events), 0)

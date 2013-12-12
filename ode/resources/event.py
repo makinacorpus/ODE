@@ -26,6 +26,16 @@ class EventResource(ResourceMixin):
     def put(self):
         return ResourceMixin.put(self)
 
+    def collection_get_filter_query(self, query):
+        query = super(EventResource, self).collection_get_filter_query(query)
+        start_time = self.request.validated.get('start_time')
+        end_time = self.request.validated.get('end_time')
+        if start_time:
+            query = query.filter(Event.end_time > start_time)
+        if end_time:
+            query = query.filter(Event.start_time < end_time)
+        return query
+
     @view(accept='text/calendar', renderer='ical',
           validators=[validate_querystring])
     @view(accept='text/csv', renderer='csv', validators=[validate_querystring])

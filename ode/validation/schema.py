@@ -119,3 +119,5 @@ class QueryStringSchema(MappingSchema):
     sort_direction = SchemaNode(String(), missing='asc',
                                 validator=OneOf(['asc', 'desc']))
     provider_id = SchemaNode(Integer(), missing=drop)
+    start_time = SchemaNode(DateTime(default_tzinfo=None), missing=drop)
+    end_time = SchemaNode(DateTime(default_tzinfo=None), missing=drop)

@@ -72,13 +72,15 @@ class ResourceMixin(object):
         route_name = 'collection_%sresource' % self.model.__name__.lower()
         return absolute_url(self.request, route_name)
 
-    @view(validators=[validate_querystring])
-    def collection_get(self):
-        """Get list of resources"""
-        query = DBSession.query(self.model)
+    def collection_get_filter_query(self, query):
         if 'provider_id' in self.request.validated:
             query = query.filter_by(
                 provider_id=self.request.validated['provider_id'])
+        return query
+
+    def collection_get_query(self):
+        query = DBSession.query(self.model)
+        query = self.collection_get_filter_query(query)
         sort_by = self.request.validated.get('sort_by')
         if sort_by:
             order_criterion = getattr(self.model, sort_by, None)
@@ -95,6 +97,12 @@ class ResourceMixin(object):
         offset = self.request.validated.get('offset')
         if offset:
             query = query.offset(offset)
+        return (query, total_count)
+
+    @view(validators=[validate_querystring])
+    def collection_get(self):
+        """Get list of resources"""
+        query, total_count = self.collection_get_query()
         items = [resource.to_item(self.request) for resource in query.all()]
         result = self.collection_json(items)
         result['collection']['current_count'] = len(items)

@@ -2,7 +2,7 @@
 from unittest import TestCase
 from StringIO import StringIO
 import csv
-from ode.models import DBSession, Event, Location
+from ode.models import DBSession, Event, Location, Tag
 
 from ode.tests.event import TestEventMixin
 
@@ -60,6 +60,16 @@ class TestGetEvents(TestEventMixin, TestCase):
         row = reader.next()
         self.assertEqual(row['location_name'].decode('utf-8'), u'Évian')
         self.assertNotIn('location_event_id', row)
+
+    def test_event_with_tags(self):
+        event = self.create_event()
+        event.tags = [Tag(name=u'Tag1'), Tag(name=u'Tag2')]
+        DBSession.flush()
+
+        response = self.app.get('/v1/events', headers={'Accept': 'text/csv'})
+        reader = csv.DictReader(StringIO(response.body))
+        row = reader.next()
+        self.assertEqual(row['tags'].decode('utf-8'), u'Tag1, Tag2')
 
 
 class TestPostEvents(TestEventMixin, TestCase):
