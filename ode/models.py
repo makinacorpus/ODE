@@ -37,33 +37,24 @@ class BaseModel(object):
 
     @classmethod
     def list_to_objects(cls, appstruct_list):
-        objects = []
-        for appstruct in appstruct_list:
-            if cls is Tag:
-                obj = DBSession.query(cls).filter_by(name=appstruct).first()
-                if obj is None:
-                    obj = cls(name=appstruct)
-            elif cls is Sound or cls is Image or cls is Video:
-                obj = cls(url=appstruct['url'], license=appstruct['license'])
-            else:
-                obj = cls(**appstruct)
-            objects.append(obj)
-        return objects
+        """
+        Instanciate model objects from a deserialized Python list.
+        """
+        return [cls.from_appstruct(appstruct) for appstruct in appstruct_list]
+
+    @classmethod
+    def from_appstruct(cls, appstruct):
+        return cls(**appstruct)
 
     def update_from_appstruct(self, appstruct):
         for key, value in appstruct.items():
             if isinstance(value, list):
                 klass = collection_classes[key]
                 value = klass.list_to_objects(appstruct.get(key, []))
-            if isinstance(self, Tag):
-                self.name = value
-            else:
-                if key.startswith('location_'):
-                    if self.location is None:
-                        self.location = Location()
-                    key = key.replace('location_', '')
-                    setattr(self.location, key, value)
-                setattr(self, key, value)
+            self.update_from_appstruct_item(key, value)
+
+    def update_from_appstruct_item(self, key, value):
+        setattr(self, key, value)
 
     def to_item(self, request):
         return {
@@ -94,6 +85,10 @@ class Media(Base):
         'polymorphic_on': type,
         'polymorphic_identity': 'media'
     }
+
+    @classmethod
+    def from_appstruct(cls, appstruct):
+        return cls(url=appstruct['url'], license=appstruct['license'])
 
 
 class Sound(Media):
@@ -133,6 +128,16 @@ category_association = Table(
 class Tag(Base):
     __tablename__ = 'tags'
     name = Column(Unicode(TAG_MAX_LENGTH), unique=True)
+
+    @classmethod
+    def from_appstruct(cls, appstruct):
+        obj = DBSession.query(cls).filter_by(name=appstruct).first()
+        if obj is None:
+            obj = cls(name=appstruct)
+        return obj
+
+    def update_from_appstruct_item(self, key, value):
+        self.name = value
 
 
 class Event(Base):
@@ -220,6 +225,14 @@ class Event(Base):
                           for obj in objects]
                 result.append({'name': attrname, 'value': values})
         return result
+
+    def update_from_appstruct_item(self, key, value):
+        if key.startswith('location_'):
+            if self.location is None:
+                self.location = Location()
+            key = key.replace('location_', '')
+            setattr(self.location, key, value)
+        setattr(self, key, value)
 
 
 class Location(Base):
