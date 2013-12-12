@@ -37,18 +37,14 @@ class BaseModel(object):
 
     @classmethod
     def list_to_objects(cls, appstruct_list):
-        objects = []
-        for appstruct in appstruct_list:
-            if cls is Tag:
-                obj = DBSession.query(cls).filter_by(name=appstruct).first()
-                if obj is None:
-                    obj = cls(name=appstruct)
-            elif cls is Sound or cls is Image or cls is Video:
-                obj = cls(url=appstruct['url'], license=appstruct['license'])
-            else:
-                obj = cls(**appstruct)
-            objects.append(obj)
-        return objects
+        """
+        Instanciate model objects from a deserialized Python list.
+        """
+        return [cls.from_appstruct(appstruct) for appstruct in appstruct_list]
+
+    @classmethod
+    def from_appstruct(cls, appstruct):
+        return cls(**appstruct)
 
     def update_from_appstruct(self, appstruct):
         for key, value in appstruct.items():
@@ -95,6 +91,10 @@ class Media(Base):
         'polymorphic_identity': 'media'
     }
 
+    @classmethod
+    def from_appstruct(cls, appstruct):
+        return cls(url=appstruct['url'], license=appstruct['license'])
+
 
 class Sound(Media):
     __mapper_args__ = {
@@ -133,6 +133,13 @@ category_association = Table(
 class Tag(Base):
     __tablename__ = 'tags'
     name = Column(Unicode(TAG_MAX_LENGTH), unique=True)
+
+    @classmethod
+    def from_appstruct(cls, appstruct):
+        obj = DBSession.query(cls).filter_by(name=appstruct).first()
+        if obj is None:
+            obj = cls(name=appstruct)
+        return obj
 
 
 class Event(Base):
