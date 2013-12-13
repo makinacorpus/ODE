@@ -98,10 +98,7 @@ class TestJson(TestEventMixin, TestCase):
                     {'name': 'title', 'value': very_long_title}
                 ]
             }
-        }, status=400, headers={
-            'X-ODE-Provider-Id': '123',
-            'Content-Type': 'application/vnd.collection+json',
-        })
+        }, status=400, headers=self.WRITE_HEADERS)
         self.assertErrorMessage(response, 'Longer than maximum')
 
     def test_update_event(self):
@@ -116,12 +113,9 @@ class TestJson(TestEventMixin, TestCase):
             }
         }
 
-        response = self.app.put_json(
-            '/v1/events/%s' % event_id, put_data,
-            headers={
-                'X-ODE-Provider-Id': '123',
-                'Content-Type': 'application/vnd.collection+json',
-            })
+        response = self.app.put_json('/v1/events/%s' % event_id,
+                                     put_data,
+                                     headers=self.WRITE_HEADERS)
 
         event = Event.get_by_id(event_id)
         self.assertEqual(response.json['status'], 'updated')
@@ -132,10 +126,7 @@ class TestJson(TestEventMixin, TestCase):
         very_long_title = '*' * 1001
         response = self.app.put_json('/v1/events/%s' % event_id, {
             'title': very_long_title
-        }, headers={
-            'Content-Type': 'application/vnd.collection+json',
-            'X-ODE-Provider-Id': '123'
-        }, status=400)
+        }, headers=self.WRITE_HEADERS, status=400)
         self.assertEqual(response.json['status'], 'error')
 
     def test_post_publication_times(self):
@@ -150,10 +141,7 @@ class TestJson(TestEventMixin, TestCase):
                     {'name': 'publication_end', 'value': u'2014-01-25T17:00'},
                 ]
             }
-        }, headers={
-            'X-ODE-Provider-Id': '123',
-            'Content-Type': 'application/vnd.collection+json',
-        })
+        }, headers=self.WRITE_HEADERS)
         event_data = data_list_to_dict(
             response.json['collection']['items'][0]['data'])
         event_id = event_data['id']
@@ -303,7 +291,7 @@ class TestJson(TestEventMixin, TestCase):
     def test_delete_event(self):
         id = self.post_event()
         self.app.delete('/v1/events/%s' % id,
-                        headers={'X-ODE-Provider-Id': '123'},
+                        headers=self.PROVIDER_ID_HEADER,
                         status=204)
         self.assertEqual(DBSession.query(Event).count(), 0)
 
@@ -431,12 +419,8 @@ class TestJson(TestEventMixin, TestCase):
                 ]
             }
         }
-        response = self.app.put_json(
-            '/v1/events/42', put_data,
-            headers={
-                'X-ODE-Provider-Id': '123',
-                'Content-Type': 'application/vnd.collection+json',
-            }, status=404)
+        response = self.app.put_json('/v1/events/42', put_data,
+                                     headers=self.WRITE_HEADERS, status=404)
         self.assertEqual(response.json['status'], 404)
 
     def test_delete_invalid_id(self):

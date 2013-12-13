@@ -20,6 +20,12 @@ class TestApp(BaseTestApp):
 
 class BaseTestMixin(object):
 
+    PROVIDER_ID_HEADER = {'X-ODE-Provider-Id': '123'}
+    WRITE_HEADERS = {
+        'X-ODE-Provider-Id': '123',
+        'Content-Type': 'application/vnd.collection+json',
+    }
+
     def setUp(self):
         settings = {
             'sqlalchemy.url': 'sqlite://',

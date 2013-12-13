@@ -28,7 +28,7 @@ class TestSource(BaseTestMixin, TestCase):
         source = self.make_source(provider_id=123)
 
         self.app.delete('/v1/sources/%s' % source.id,
-                        headers={'X-ODE-Provider-Id': '123'},
+                        headers=self.PROVIDER_ID_HEADER,
                         status=204)
 
         self.assertSourceCount(0)
@@ -41,7 +41,7 @@ class TestSource(BaseTestMixin, TestCase):
     def test_other_people_stuff(self):
         source = self.make_source(provider_id='abc')
         self.app.delete('/v1/sources/%s' % source.id,
-                        headers={'X-ODE-Provider-Id': '123'},
+                        headers=self.PROVIDER_ID_HEADER,
                         status=404)
         self.assertSourceCount(1)
 
@@ -54,13 +54,8 @@ class TestSource(BaseTestMixin, TestCase):
                 ]
             }
         }
-        response = self.app.post_json(
-            '/v1/sources',
-            sources_info, headers={
-                'X-ODE-Provider-Id': '123',
-                'Content-Type': 'application/vnd.collection+json',
-            },
-            status=201)
+        response = self.app.post_json('/v1/sources', sources_info,
+                                      headers=self.WRITE_HEADERS, status=201)
         source = DBSession.query(Source).one()
         self.assertEqual(response.headers['location'],
                          'http://localhost/v1/sources/%s' % source.id)
@@ -69,9 +64,8 @@ class TestSource(BaseTestMixin, TestCase):
 
     def test_url_is_required(self):
         sources_info = {'sources': [{'url': u'\t  \r '}]}
-        self.app.post_json('/v1/sources', sources_info, headers={
-            'X-ODE-Provider-Id': '123'
-        }, status=400)
+        self.app.post_json('/v1/sources', sources_info,
+                           headers=self.PROVIDER_ID_HEADER, status=400)
         self.assertSourceCount(0)
 
     def test_anonymous_cannot_create(self):
@@ -92,8 +86,7 @@ class TestSource(BaseTestMixin, TestCase):
                     ]
                 }
             },
-            headers={'X-ODE-Provider-Id': '123',
-                     'Content-Type': 'application/vnd.collection+json'})
+            headers=self.WRITE_HEADERS)
         self.assertEqual(response.json['status'], 'updated')
         source = DBSession.query(Source).one()
         self.assertEqual(source.url, u'http://example.com/myothersource')
@@ -117,8 +110,7 @@ class TestSource(BaseTestMixin, TestCase):
                 }
             },
             status=404,
-            headers={'X-ODE-Provider-Id': '123',
-                     'Content-Type': 'application/vnd.collection+json'})
+            headers=self.WRITE_HEADERS)
         self.assertEqual(response.json['status'], 404)
 
     def test_get_source_list(self):
@@ -126,8 +118,7 @@ class TestSource(BaseTestMixin, TestCase):
         source2 = self.make_source(u"http://example.com/myothersource")
         self.make_source(u"http://example.com/hersource", provider_id='456')
 
-        response = self.app.get('/v1/sources',
-                                headers={'X-ODE-Provider-Id': '123'})
+        response = self.app.get('/v1/sources', headers=self.PROVIDER_ID_HEADER)
         self.assertContentType(response, 'application/vnd.collection+json')
 
         self.assertEqual(response.json['collection']['href'],
@@ -147,26 +138,26 @@ class TestSource(BaseTestMixin, TestCase):
         for i in range(1, 11):
             self.make_source(u"http://example.com/feed%s" % i)
         response = self.app.get_json('/v1/sources?limit=5',
-                                     headers={'X-ODE-Provider-Id': '123'})
+                                     headers=self.PROVIDER_ID_HEADER)
         self.assertEqual(len(response['collection']['items']), 5)
 
     def test_invalid_limit(self):
         response = self.app.get('/v1/sources?limit=BOGUS', status=400,
-                                headers={'X-ODE-Provider-Id': '123'})
+                                headers=self.PROVIDER_ID_HEADER)
         self.assertErrorMessage(response, '"BOGUS" is not a number')
 
     def test_valid_offset(self):
         for i in range(1, 11):
             self.make_source(u"http://example.com/feed%s" % i)
         response = self.app.get_json('/v1/sources?offset=5',
-                                     headers={'X-ODE-Provider-Id': '123'})
+                                     headers=self.PROVIDER_ID_HEADER)
         item = response['collection']['items'][0]
         self.assertEqual(data_list_to_dict(item['data'])['url'],
                          'http://example.com/feed6')
 
     def test_invalid_offset(self):
         response = self.app.get('/v1/sources?offset=BOGUS', status=400,
-                                headers={'X-ODE-Provider-Id': '123'})
+                                headers=self.PROVIDER_ID_HEADER)
         self.assertContentType(response, 'application/json')
         self.assertErrorMessage(response, '"BOGUS" is not a number')
 
@@ -174,7 +165,7 @@ class TestSource(BaseTestMixin, TestCase):
         for i in range(1, 11):
             self.make_source(u"http://example.com/feed%s" % i)
         response = self.app.get_json('/v1/sources?offset=5&limit=3',
-                                     headers={'X-ODE-Provider-Id': '123'})
+                                     headers=self.PROVIDER_ID_HEADER)
         collection = response['collection']
         items = collection['items']
         self.assertEqual(collection['total_count'], 10)
