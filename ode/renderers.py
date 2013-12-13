@@ -22,12 +22,8 @@ class IcalRenderer(object):
             response = request.response
             response.content_type = 'text/calendar'
         calendar = Calendar()
-        if 'collection' in value:
-            for item in value['collection']['items']:
-                self.add_event(calendar, data_list_to_dict(item['data']))
-        else:
-            event_data = value['event']
-            self.add_event(calendar, data_list_to_dict(event_data))
+        for item in value['collection']['items']:
+            self.add_event(calendar, data_list_to_dict(item['data']))
         return calendar.to_ical()
 
     @staticmethod
