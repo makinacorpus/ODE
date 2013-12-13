@@ -51,34 +51,51 @@ class NoContentRenderer(object):
 
 class CsvRenderer(object):
 
+    MEDIA_ATTRIBUTES = ['images', 'sounds', 'videos']
+
     def __init__(self, info):
         pass
 
+    @classmethod
+    def format_media(cls, items):
+        parts = [
+            u'{} ({})'.format(item['url'], item['license'])
+            for item in items
+        ]
+        return cls.format_list(parts)
+
     @staticmethod
-    def build_csv(items):
+    def format_list(parts):
+        return u', '.join(parts).encode('utf-8')
+
+    @classmethod
+    def format_value(cls, key, value):
+        if isinstance(value, basestring):
+            return value.encode('utf-8')
+        elif isinstance(value, list):
+            if key in cls.MEDIA_ATTRIBUTES:
+                return cls.format_media(value)
+            else:
+                return cls.format_list(value)
+        elif isinstance(value, datetime.datetime):
+            return value.isoformat()
+        else:
+            return value
+
+    @classmethod
+    def build_csv(cls, items):
         fieldnames = [column.name for column in EventModel.__mapper__.columns]
         fieldnames += ['location_' + column.name
                        for column in Location.__mapper__.columns
                        if column.name != 'event_id']
-        fieldnames += ['tags', 'categories', 'videos', 'images', 'sounds']
+        fieldnames += ['tags', 'categories'] + cls.MEDIA_ATTRIBUTES
         output = StringIO()
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
         for item in items:
             data_dict = data_list_to_dict(item['data'])
             for key, value in data_dict.items():
-                if value is not None:
-                    if isinstance(value, basestring):
-                        data_dict[key] = value.encode('utf-8')
-                    elif isinstance(value, list):
-                        if key in ('images', 'sounds', 'videos'):
-                            medias = ['%s (%s)' % (v['url'], v['license'])
-                                      for v in value]
-                            data_dict[key] = u', '.join(medias).encode('utf-8')
-                        else:
-                            data_dict[key] = u', '.join(value).encode('utf-8')
-                    elif isinstance(value, datetime.datetime):
-                        data_dict[key] = value.isoformat()
+                data_dict[key] = cls.format_value(key, value)
             writer.writerow(data_dict)
         return output.getvalue()
 
