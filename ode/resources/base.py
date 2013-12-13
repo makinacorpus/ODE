@@ -9,6 +9,11 @@ from ode.validation.validators import validate_querystring
 from ode.urls import absolute_url
 
 
+def set_content_type(response, request):
+    if response.content_type == 'application/json':
+        response.content_type = 'application/vnd.collection+json'
+
+
 class ResourceMixin(object):
 
     def __init__(self, request):

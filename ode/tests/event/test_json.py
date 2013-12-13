@@ -235,7 +235,7 @@ class TestJson(TestEventMixin, TestCase):
         url = '/v1/events?limit={}'.format(COLLECTION_MAX_LENGTH + 1)
         response = self.app.get(url, status=400)
 
-        self.assertIn('application/json', response.headers['content-type'])
+        self.assertContentType(response, 'application/json')
         self.assertErrorMessage(response, 'greater than maximum')
 
     def create_sortable_events(self):
@@ -298,8 +298,7 @@ class TestJson(TestEventMixin, TestCase):
         event_dict = data_list_to_dict(event_data)
         title = event_dict['title']
         self.assertEqual(title, u'Titre Événement')
-        self.assertIn('application/vnd.collection+json',
-                      response.headers['content-type'])
+        self.assertContentType(response, 'application/vnd.collection+json')
 
     def test_delete_event(self):
         id = self.post_event()

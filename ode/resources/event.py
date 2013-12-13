@@ -3,12 +3,7 @@ from cornice.resource import resource, view
 from ode.models import Event
 from ode.validation.schema import EventCollectionSchema
 from ode.validation.validators import validate_querystring, has_provider_id
-from ode.resources.base import ResourceMixin
-
-
-def set_content_type(response, request):
-    if response.content_type == 'application/json':
-        response.content_type = 'application/vnd.collection+json'
+from ode.resources.base import ResourceMixin, set_content_type
 
 
 @resource(collection_path='/v1/events', path='/v1/events/{id}',

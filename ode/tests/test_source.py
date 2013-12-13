@@ -14,6 +14,7 @@ class TestSource(BaseTestMixin, TestCase):
         source = self.make_source()
 
         response = self.app.get('/v1/sources/%s' % source.id)
+        self.assertContentType(response, 'application/vnd.collection+json')
 
         source_data = response.json['collection']['items'][0]['data']
         data_dict = data_list_to_dict(source_data)
@@ -127,6 +128,7 @@ class TestSource(BaseTestMixin, TestCase):
 
         response = self.app.get('/v1/sources',
                                 headers={'X-ODE-Provider-Id': '123'})
+        self.assertContentType(response, 'application/vnd.collection+json')
 
         self.assertEqual(response.json['collection']['href'],
                          'http://localhost/v1/sources')
@@ -165,6 +167,7 @@ class TestSource(BaseTestMixin, TestCase):
     def test_invalid_offset(self):
         response = self.app.get('/v1/sources?offset=BOGUS', status=400,
                                 headers={'X-ODE-Provider-Id': '123'})
+        self.assertContentType(response, 'application/json')
         self.assertErrorMessage(response, '"BOGUS" is not a number')
 
     def test_offset_and_limit(self):

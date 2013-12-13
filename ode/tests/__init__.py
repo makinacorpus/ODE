@@ -50,3 +50,6 @@ class BaseTestMixin(object):
                 return
         raise AssertionError("Cannot find expected error message '%s'" %
                              message)
+
+    def assertContentType(self, response, content_type):
+        self.assertIn(content_type, response.headers['Content-Type'])
