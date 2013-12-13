@@ -34,4 +34,7 @@ setup(name='ode',
       initialize_ode_db = ode.scripts.initializedb:main
       harvest = ode.scripts.harvest:main
       """,
+      message_extractors = { '.': [
+          ('**.py',   'lingua_python', None ),
+      ]},
       )

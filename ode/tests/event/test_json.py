@@ -262,6 +262,14 @@ class TestJson(TestEventMixin, TestCase):
             status=400)
         self.assertErrorMessage(response, 'not one of asc, desc')
 
+    def test_ode_error_message_localization(self):
+        response = self.app.get(
+            '/v1/events?sort_by=BOGUS',
+            status=400, headers={
+                'Accept-Language': 'fr',
+            })
+        self.assertErrorMessage(response, u'pas un critère de tri valide')
+
     def test_invalid_order_field(self):
         response = self.app.get('/v1/events?sort_by=BOGUS',
                                 status=400)

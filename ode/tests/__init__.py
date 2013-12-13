@@ -50,8 +50,10 @@ class BaseTestMixin(object):
         for error in response.json['errors']:
             if message in error['description']:
                 return
-        raise AssertionError("Cannot find expected error message '%s'" %
-                             message)
+        exception_message = u"Cannot find string '{}' in response '{}'"
+        raise AssertionError(exception_message.format(
+            message,
+            response.json['errors']))
 
     def assertContentType(self, response, content_type):
         self.assertIn(content_type, response.headers['Content-Type'])

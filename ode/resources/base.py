@@ -18,6 +18,7 @@ class ResourceMixin(object):
 
     def __init__(self, request):
         self.request = request
+        self._ = self.request.translate
 
     @property
     def name(self):
@@ -94,8 +95,10 @@ class ResourceMixin(object):
                     order_criterion = order_criterion.desc()
                 query = query.order_by(order_criterion)
             else:
-                message = "{} is not a valid sorting criterion"
-                raise HTTPBadRequest(message.format(sort_by))
+                message = self._(
+                    u"${sort_by} is not a valid sorting criterion",
+                    mapping={'sort_by': sort_by})
+                raise HTTPBadRequest(message)
         total_count = query.count()
         limit = self.request.validated.get('limit', COLLECTION_MAX_LENGTH)
         query = query.limit(limit)
