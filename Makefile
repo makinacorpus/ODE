@@ -39,4 +39,4 @@ harvest:
 
 database:
 	sudo su postgres -c 'createuser --pwprompt --no-superuser --no-createrole --no-createdb ode'
-	sudo su postgres -c 'createdb --owner ode ode'
+	sudo su postgres -c 'createdb --owner ode --encoding=utf8 --template=template0 ode'
