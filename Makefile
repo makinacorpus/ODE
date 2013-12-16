@@ -4,12 +4,15 @@ dev_requirements:
 requirements:
 	pip install -r requirements.txt
 
-develop: requirements
+localization:
+	python setup.py compile_catalog -l fr
+
+develop: localization requirements
 	pip install -r dev_requirements.txt
 	python setup.py develop
 	initialize_ode_db development.ini
 
-test: requirements dev_requirements flake8
+test: localization requirements dev_requirements flake8
 	nosetests -v
 
 coverage: dev_requirements
