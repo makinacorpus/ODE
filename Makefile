@@ -1,13 +1,15 @@
 dev_requirements:
 	pip install -r dev_requirements.txt
 
-develop:
+requirements:
 	pip install -r requirements.txt
+
+develop: requirements
 	pip install -r dev_requirements.txt
 	python setup.py develop
 	initialize_ode_db development.ini
 
-test: dev_requirements flake8
+test: requirements dev_requirements flake8
 	nosetests -v
 
 coverage: dev_requirements

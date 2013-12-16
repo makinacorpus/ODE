@@ -1,4 +1,5 @@
--e git+https://github.com/makinacorpus/cornice.git@request-data-extractors#egg=cornice
+-e git+https://github.com/makinacorpus/colander.git@asdict-i18n#egg=colander
+-e git+https://github.com/makinacorpus/cornice.git@colander-i18n#egg=cornice
 pyramid==1.5a2
 icalendar
 fanstatic==0.16
@@ -12,7 +13,6 @@ SQLAlchemy
 transaction
 zope.sqlalchemy
 waitress
-colander==1.0b1
 requests
 webtest
 psycopg2

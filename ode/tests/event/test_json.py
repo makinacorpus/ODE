@@ -270,6 +270,27 @@ class TestJson(TestEventMixin, TestCase):
             })
         self.assertErrorMessage(response, u'pas un critère de tri valide')
 
+    def test_colander_error_message_localization(self):
+        response = self.app.get(
+            '/v1/events?sort_by=title&sort_direction=BOGUS',
+            status=400, headers={
+                'Accept-Language': 'fr',
+            })
+        self.assertErrorMessage(response, u'ne fait pas partie des choix')
+
+    def test_cornice_error_message_localization(self):
+        very_long_title = '*' * 1001
+        headers = dict(self.WRITE_HEADERS)
+        headers['Accept-Language'] = 'fr'
+        response = self.app.post_json('/v1/events', {
+            'template': {
+                'data': [
+                    {'name': 'title', 'value': very_long_title}
+                ]
+            }
+        }, status=400, headers=headers)
+        self.assertErrorMessage(response, u'La longueur dépasse')
+
     def test_invalid_order_field(self):
         response = self.app.get('/v1/events?sort_by=BOGUS',
                                 status=400)
