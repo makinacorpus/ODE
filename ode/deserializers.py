@@ -1,5 +1,6 @@
-import json
 import csv
+import json
+import re
 from StringIO import StringIO
 
 from icalendar import Calendar
@@ -13,6 +14,8 @@ def icalendar_to_cstruct(icalendar_event):
             if icalendar_key in ('dtstart', 'dtend'):
                 result[model_attribute] = \
                     icalendar_event[icalendar_key].dt.isoformat()
+            elif icalendar_key == 'uid':
+                continue
             else:
                 result[model_attribute] = icalendar_event[icalendar_key]
     return result
@@ -59,6 +62,31 @@ def json_extractor(request):
         return {}
 
 
+def csv_format_data_dict(data_dict):
+    media_type_csv = ['sounds', 'images', 'videos']
+    list_type_csv = ['tags', 'categories']
+    separator = ', '
+
+    if 'id' in data_dict.keys():
+        del data_dict['id']
+    for list_type in list_type_csv:
+        if list_type in data_dict.keys():
+            data_dict[list_type] = data_dict[list_type].split(separator)
+    for media_type in media_type_csv:
+        if media_type in data_dict.keys():
+            medias = data_dict[media_type].split(separator)
+            formatted_medias = []
+            for media in medias:
+                m = re.match('(.+) \((.+)\)', media)
+                if m:
+                    formatted_medias.append({
+                            'url': m.group(1),
+                            'license': m.group(2)
+                            })
+            data_dict[media_type] = formatted_medias
+    return data_dict
+
+
 def csv_extractor(request):
     if request.body:
         reader = csv.DictReader(StringIO(request.body))
@@ -68,6 +96,7 @@ def csv_extractor(request):
                 key: value.decode('utf-8')
                 for key, value in row.items()
             }
+            data_dict = csv_format_data_dict(data_dict)
             items.append({'data': data_dict})
         cstruct = {'items': items}
         return cstruct
