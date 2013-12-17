@@ -52,6 +52,8 @@ def json_extractor(request):
         json_data = json.loads(request.body)
         if 'template' in json_data:
             data_dict = data_list_to_dict(json_data['template']['data'])
+            if 'id' in data_dict.keys():
+                del data_dict['id']
             cstruct = {
                 'items': [{'data': data_dict}]
             }
