@@ -18,3 +18,5 @@ webtest
 psycopg2
 Babel
 lingua
+chaussette==1.0
+circus==0.10.0
