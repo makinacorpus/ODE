@@ -69,7 +69,6 @@ class TestHarvesting(TestEventMixin, TestCase):
                          u"http://www.agendadulibre.org/showevent.php?id=7064")
         self.assertEqual(event.description,
                          u"Un évènement de l'Agenda du Libre")
-        self.assertEqual(event.id, u"1234@example.com")
 
     def test_duplicate_is_ignored(self):
         existing_event = self.create_event(

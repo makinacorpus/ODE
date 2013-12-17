@@ -80,9 +80,9 @@ def csv_format_data_dict(data_dict):
                 m = re.match('(.+) \((.+)\)', media)
                 if m:
                     formatted_medias.append({
-                            'url': m.group(1),
-                            'license': m.group(2)
-                            })
+                        'url': m.group(1),
+                        'license': m.group(2)
+                        })
             data_dict[media_type] = formatted_medias
     return data_dict
 
