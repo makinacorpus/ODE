@@ -3,6 +3,7 @@
 pyramid==1.5a3
 icalendar
 fanstatic==0.16
+pyramid_exclog
 pyramid_formalchemy
 pyramid_fanstatic
 fa.jquery
