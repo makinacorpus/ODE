@@ -29,7 +29,7 @@ class BaseModel(object):
     def to_data_list(self):
         result = []
         for column in self.__class__.__mapper__.columns:
-            if column.name in ('provider_id', 'location_id', 'event_id'):
+            if column.name in ('location_id', 'event_id'):
                 continue
             result.append({'name': column.name,
                            'value': getattr(self, column.name)})
@@ -197,8 +197,8 @@ class Event(Base):
         result = []
 
         for column in self.__class__.__mapper__.columns:
-            if column.name == 'provider_id':
-                continue
+#            if column.name == 'provider_id':
+#                continue
             value = getattr(self, column.name)
             if value:
                 result.append({'name': column.name, 'value': value})

@@ -12,7 +12,8 @@ from ode.validation.schema import COLLECTION_MAX_LENGTH
 def remove_ids(fields):
     return [field for field in fields
             if field['name']
-            not in ('id', 'event_id', 'location_id', 'location_event_id')]
+            not in ('id', 'provider_id', 'event_id',
+                    'location_id', 'location_event_id')]
 
 
 example_data = [
