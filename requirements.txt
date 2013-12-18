@@ -1,6 +1,6 @@
 -e git+https://github.com/makinacorpus/colander.git@asdict-i18n#egg=colander
 -e git+https://github.com/makinacorpus/cornice.git@colander-i18n#egg=cornice
-pyramid==1.5a2
+pyramid==1.5a3
 icalendar
 fanstatic==0.16
 pyramid_formalchemy
