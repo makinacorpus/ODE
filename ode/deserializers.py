@@ -14,8 +14,6 @@ def icalendar_to_cstruct(icalendar_event):
             if icalendar_key in ('dtstart', 'dtend'):
                 result[model_attribute] = \
                     icalendar_event[icalendar_key].dt.isoformat()
-            elif icalendar_key == 'uid':
-                continue
             else:
                 result[model_attribute] = icalendar_event[icalendar_key]
     return result
@@ -52,8 +50,6 @@ def json_extractor(request):
         json_data = json.loads(request.body)
         if 'template' in json_data:
             data_dict = data_list_to_dict(json_data['template']['data'])
-            if 'id' in data_dict.keys():
-                del data_dict['id']
             cstruct = {
                 'items': [{'data': data_dict}]
             }
@@ -69,8 +65,6 @@ def csv_format_data_dict(data_dict):
     list_type_csv = ['tags', 'categories']
     separator = ', '
 
-    if 'id' in data_dict.keys():
-        del data_dict['id']
     for list_type in list_type_csv:
         if list_type in data_dict.keys():
             data_dict[list_type] = data_dict[list_type].split(separator)

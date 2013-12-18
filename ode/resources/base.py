@@ -44,8 +44,20 @@ class ResourceMixin(object):
         result_items = []
         for item in items:
             item['data']['provider_id'] = provider_id
-            resource = self.model(**item['data'])
-            DBSession.add(resource)
+            resource = None
+            if 'id' in item['data'].keys():
+                resource = self.model.get_by_id(item['data']['id'])
+                if resource is not None:
+                    if provider_id != resource.provider_id:
+                        self.request.response.status_code = 403
+                        return self.collection_json(
+                            [resource.to_item(self.request)]
+                            )
+                    resource.update_from_appstruct(item['data'])
+                    DBSession.merge(resource)
+            if resource is None:
+                resource = self.model(**item['data'])
+                DBSession.add(resource)
             DBSession.flush()
             result_items.append(resource.to_item(self.request))
         response = self.request.response

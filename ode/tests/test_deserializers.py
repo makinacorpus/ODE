@@ -74,6 +74,7 @@ class TestExtractor(TestCase):
         'items': [
             {
                 'data': {
+                    'id': '4c81f072630e11e3953c5c260a0e691e@example.com',
                     'videos': [{'url': u'http://video', 'license': u'CC BY'}],
                     'images': [{'url': u'http://photo', 'license': u'CC BY'},
                                {'url': u'http://photo2', 'license': u'CC BY'}],
@@ -111,6 +112,7 @@ class TestExtractor(TestCase):
         'items': [
             {
                 'data': {
+                    'id': '4c81f072630e11e3953c5c260a0e691e@example.com',
                     'provider_id': u'',
                     'videos': [{'url': u'http://video', 'license': u'CC BY'}],
                     'telephone': u'',
@@ -159,6 +161,7 @@ class TestExtractor(TestCase):
         'items': [
             {
                 'data': {
+                    'id': '4c81f072630e11e3953c5c260a0e691e@example.com',
                     'location_name': u'Nom du lieu',
                     'title': u'Test medias',
                     'description': u'Description',
