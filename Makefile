@@ -16,7 +16,7 @@ test: localization requirements dev_requirements flake8
 	nosetests -v
 
 coverage: dev_requirements
-	nosetests --cover-package=ode --cover-inclusive --cover-erase --with-coverage --cover-branches --cover-tests
+	nosetests --cover-package=ode --cover-inclusive --cover-erase --with-coverage --cover-branches --cover-tests ode
 
 start: $(PROC) .env
 	$(PROC) start -f $(PROCFILE)
