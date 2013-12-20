@@ -108,8 +108,14 @@ class TestJson(TestEventMixin, TestCase):
             'template': {
                 'data': [
                     {'name': u'title', 'value': 'EuroPython'},
-                    {'name': u'start_time', 'value': u'2014-01-25T15:00'},
-                    {'name': u'end_time', 'value': u'2014-01-25T15:00'},
+                    # Note we pass timezone aware datetimes to test
+                    # that we'll drop the timezone properly
+                    {'name': u'start_time', 'value': u'2014-01-25T09:00Z'},
+                    {'name': u'end_time', 'value': u'2014-01-25T18:00Z'},
+                    {'name': u'publication_start',
+                     'value': u'2014-01-25T09:00Z'},
+                    {'name': u'publication_end',
+                     'value': u'2014-01-25T18:00Z'},
                 ]
             }
         }
