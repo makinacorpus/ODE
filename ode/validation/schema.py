@@ -16,6 +16,13 @@ class MediaSchema(MappingSchema):
     url = SchemaNode(String(), validator=colander.url)
 
 
+def remove_timezone(dt):
+    if dt is colander.null:
+        return dt
+    else:
+        return dt.replace(tzinfo=None)
+
+
 class EventSchema(MappingSchema):
     id = SchemaNode(String(), missing=drop,
                     validator=Length(1, SAFE_MAX_LENGTH))
@@ -48,10 +55,14 @@ class EventSchema(MappingSchema):
     location_capacity = default_schema_node()
     location_country = default_schema_node()
 
-    start_time = SchemaNode(DateTime(default_tzinfo=None))
-    end_time = SchemaNode(DateTime(default_tzinfo=None), missing=None)
-    publication_start = SchemaNode(DateTime(default_tzinfo=None), missing=None)
-    publication_end = SchemaNode(DateTime(default_tzinfo=None), missing=None)
+    start_time = SchemaNode(DateTime(default_tzinfo=None),
+                            preparer=remove_timezone)
+    end_time = SchemaNode(DateTime(default_tzinfo=None), missing=None,
+                          preparer=remove_timezone)
+    publication_start = SchemaNode(DateTime(default_tzinfo=None), missing=None,
+                                   preparer=remove_timezone)
+    publication_end = SchemaNode(DateTime(default_tzinfo=None), missing=None,
+                                 preparer=remove_timezone)
 
     press_contact_email = SchemaNode(String(), missing='',
                                      validator=colander.Email())
