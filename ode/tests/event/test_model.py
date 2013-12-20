@@ -38,3 +38,23 @@ class TestModel(TestEventMixin, TestCase):
         self.assertTrue(event2.id.endswith("@example.com"))
         self.assertEqual(event2.tags[0].name, 'tag1')
         self.assertEqual(tag, event2.tags[0])
+
+    def test_categories(self):
+        categories = ['category1', 'category2']
+        event1 = self.create_event(categories=categories)
+        DBSession.flush()
+        self.assertTrue(event1.id.endswith("@example.com"))
+        self.assertEqual(event1.categories[0].name, 'category1')
+        category = event1.categories[0]
+        event2 = self.create_event(categories=categories)
+        DBSession.flush()
+        self.assertTrue(event2.id.endswith("@example.com"))
+        self.assertEqual(event2.categories[0].name, 'category1')
+        self.assertEqual(category, event2.categories[0])
+
+    def test_same_tag_and_category(self):
+        event = self.create_event(tags=['tag'], categories=['tag'])
+        DBSession.flush()
+        self.assertTrue(event.id.endswith("@example.com"))
+        self.assertEqual(event.tags[0].name, 'tag')
+        self.assertEqual(event.categories[0].name, 'tag')

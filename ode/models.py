@@ -134,6 +134,7 @@ class Tag(Base):
         obj = DBSession.query(cls).filter_by(name=appstruct).first()
         if obj is None:
             obj = cls(name=appstruct)
+            DBSession.add(obj)
         return obj
 
     def update_from_appstruct_item(self, key, value):
