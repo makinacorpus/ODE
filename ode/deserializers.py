@@ -54,6 +54,15 @@ def json_extractor(request):
                 'items': [{'data': data_dict}]
             }
             return cstruct
+        elif 'collection' in json_data.keys():
+            items = []
+            for item in json_data['collection']['items']:
+                data_dict = data_list_to_dict(item['data'])
+                items.append({'data': data_dict})
+            cstruct = {
+                'items': items
+            }
+            return cstruct
         else:
             return json_data
     else:
