@@ -1,7 +1,11 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
 from datetime import datetime
-from urllib import quote
+import six
+if six.PY3:
+    from urllib.parse import quote
+else:
+    from urllib import quote
 
 import icalendar
 

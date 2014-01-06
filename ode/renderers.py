@@ -1,7 +1,10 @@
 import datetime
 import csv
 import six
-from StringIO import StringIO
+if six.PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 from icalendar import Calendar, Event
 from pyramid.renderers import JSON
@@ -67,11 +70,14 @@ class CsvRenderer(object):
 
     @staticmethod
     def format_list(parts):
-        return u', '.join(parts).encode('utf-8')
+        result = u', '.join(parts)
+        if six.PY2:
+            result = result.encode('utf-8')
+        return result
 
     @classmethod
     def format_value(cls, key, value):
-        if isinstance(value, six.string_types):
+        if six.PY2 and isinstance(value, six.string_types):
             return value.encode('utf-8')
         elif isinstance(value, list):
             if key in cls.MEDIA_ATTRIBUTES:

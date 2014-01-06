@@ -1,7 +1,11 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
-from urllib import quote
 from datetime import datetime
+import six
+if six.PY3:
+    from urllib.parse import quote
+else:
+    from urllib import quote
 
 from ode.models import DBSession, Event, Tag, Image, Video, Sound
 from ode.tests.event import TestEventMixin
@@ -80,7 +84,7 @@ class TestJson(TestEventMixin, TestCase):
 
     def test_root(self):
         response = self.app.get('/', status=302)
-        self.assertTrue('ode' in response.body)
+        self.assertTrue(u'ode' in response.text)
 
     def test_post_event(self):
         event_id = self.post_event()
@@ -316,13 +320,15 @@ class TestJson(TestEventMixin, TestCase):
     def test_get_event(self):
         id = self.post_event()
 
-        response = self.app.get('/v1/events/%s' % id)
+        response = self.app.get(
+            '/v1/events/%s' % id,
+            headers={'Accept': 'application/vnd.collection+json'})
 
+        self.assertContentType(response, 'application/vnd.collection+json')
         event_data = response.json['collection']['items'][0]['data']
         event_dict = data_list_to_dict(event_data)
         title = event_dict['title']
         self.assertEqual(title, u'Titre Événement')
-        self.assertContentType(response, 'application/vnd.collection+json')
 
     def test_delete_event(self):
         id = self.post_event()
@@ -334,7 +340,9 @@ class TestJson(TestEventMixin, TestCase):
     def test_all_fields(self):
         event_id = self.post_event(example_data)
         DBSession.flush()
-        response = self.app.get('/v1/events/%s' % event_id)
+        response = self.app.get(
+            '/v1/events/%s' % event_id,
+            headers={'Accept': 'application/vnd.collection+json'})
         event_data = response.json['collection']['items'][0]['data']
         self.assertEqualIgnoringId(event_data, example_data)
 
@@ -364,7 +372,9 @@ class TestJson(TestEventMixin, TestCase):
         event = self.create_event()
         event.tags = [Tag(name=u'Music'), Tag(name=u"音楽")]
         DBSession.flush()
-        response = self.app.get('/v1/events/%s' % event.id)
+        response = self.app.get(
+            '/v1/events/%s' % event.id,
+            headers={'Accept': 'application/vnd.collection+json'})
         event_data = response.json['collection']['items'][0]['data']
         self.assertIn({'name': "tags", 'value': [u'Music', u"音楽"]},
                       event_data)
@@ -373,7 +383,9 @@ class TestJson(TestEventMixin, TestCase):
         event = self.create_event()
         event.categories = [Tag(name=u'Music'), Tag(name=u"音楽")]
         DBSession.flush()
-        response = self.app.get('/v1/events/%s' % event.id)
+        response = self.app.get(
+            '/v1/events/%s' % event.id,
+            headers={'Accept': 'application/vnd.collection+json'})
         event_data = response.json['collection']['items'][0]['data']
         self.assertIn({'name': "categories", 'value': [u'Music', u"音楽"]},
                       event_data)
@@ -417,7 +429,9 @@ class TestJson(TestEventMixin, TestCase):
                   license=u'Art Libre'),
         ])
         DBSession.flush()
-        response = self.app.get('/v1/events/%s' % event.id)
+        response = self.app.get(
+            '/v1/events/%s' % event.id,
+            headers={'Accept': 'application/vnd.collection+json'})
         event_data = response.json['collection']['items'][0]['data']
         self.assertIn(
             {'name': attrname, "value": [

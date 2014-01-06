@@ -174,8 +174,8 @@ class TestExtractor(TestCase):
 
     class DummyRequest(object):
 
-        def __init__(self, body):
-            self.body = body
+        def __init__(self, text):
+            self.text = text
 
     def test_ics(self):
         request = self.DummyRequest(ics_sample)

@@ -1,7 +1,11 @@
 # -*- encoding: utf-8 -*-
 from datetime import datetime
 from unittest import TestCase
-from StringIO import StringIO
+import six
+if six.PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 import csv
 from ode.models import DBSession, Event, Location, Tag, Sound
 
@@ -21,7 +25,7 @@ class TestGetEvents(TestEventMixin, TestCase):
 
         response = self.app.get('/v1/events', headers={'Accept': 'text/csv'})
 
-        reader = csv.DictReader(StringIO(response.body))
+        reader = csv.DictReader(StringIO(response.text))
 
         self.assertIn('title', reader.fieldnames)
 
@@ -32,10 +36,10 @@ class TestGetEvents(TestEventMixin, TestCase):
 
         response = self.app.get('/v1/events', headers={'Accept': 'text/csv'})
 
-        reader = csv.DictReader(StringIO(response.body))
-        row = reader.next()
+        reader = csv.DictReader(StringIO(response.text))
+        row = next(reader)
         self.assertIn('title', row)
-        self.assertEqual(row['title'].decode('utf-8'), u'Événement 1')
+        self.assertEqual(row['title'], u'Événement 1')
 
     def test_random_fields(self):
         self.create_event(title=u'Événement 1', press_contact_name=u'Émile')
@@ -44,11 +48,11 @@ class TestGetEvents(TestEventMixin, TestCase):
 
         response = self.app.get('/v1/events', headers={'Accept': 'text/csv'})
 
-        reader = csv.DictReader(StringIO(response.body))
-        row = reader.next()
-        self.assertEqual(row['press_contact_name'].decode('utf-8'), u'Émile')
-        row = reader.next()
-        self.assertEqual(row['description'].decode('utf-8'), u'Foo bar')
+        reader = csv.DictReader(StringIO(response.text))
+        row = next(reader)
+        self.assertEqual(row['press_contact_name'], u'Émile')
+        row = next(reader)
+        self.assertEqual(row['description'], u'Foo bar')
 
     def test_location(self):
         self.create_event(title=u'Événement 1',
@@ -57,9 +61,9 @@ class TestGetEvents(TestEventMixin, TestCase):
 
         response = self.app.get('/v1/events', headers={'Accept': 'text/csv'})
 
-        reader = csv.DictReader(StringIO(response.body))
-        row = reader.next()
-        self.assertEqual(row['location_name'].decode('utf-8'), u'Évian')
+        reader = csv.DictReader(StringIO(response.text))
+        row = next(reader)
+        self.assertEqual(row['location_name'], u'Évian')
         self.assertNotIn('location_event_id', row)
 
     def test_tags(self):
@@ -68,9 +72,9 @@ class TestGetEvents(TestEventMixin, TestCase):
         DBSession.flush()
 
         response = self.app.get('/v1/events', headers={'Accept': 'text/csv'})
-        reader = csv.DictReader(StringIO(response.body))
-        row = reader.next()
-        self.assertEqual(row['tags'].decode('utf-8'), u'Tag1, Tag2')
+        reader = csv.DictReader(StringIO(response.text))
+        row = next(reader)
+        self.assertEqual(row['tags'], u'Tag1, Tag2')
 
     def test_sounds(self):
         event = self.create_event()
@@ -80,9 +84,9 @@ class TestGetEvents(TestEventMixin, TestCase):
         ]
         DBSession.flush()
         response = self.app.get('/v1/events', headers={'Accept': 'text/csv'})
-        reader = csv.DictReader(StringIO(response.body))
-        row = reader.next()
-        self.assertEqual(row['sounds'].decode('utf-8'),
+        reader = csv.DictReader(StringIO(response.text))
+        row = next(reader)
+        self.assertEqual(row['sounds'],
                          u'http://example.com/sound1 (CC BY), '
                          + 'http://example.com/sound2 (Whatever)')
 
@@ -91,8 +95,8 @@ class TestGetEvents(TestEventMixin, TestCase):
         event.start_time = datetime(2014, 1, 25, 16)
         DBSession.flush()
         response = self.app.get('/v1/events', headers={'Accept': 'text/csv'})
-        reader = csv.DictReader(StringIO(response.body))
-        row = reader.next()
+        reader = csv.DictReader(StringIO(response.text))
+        row = next(reader)
         self.assertEqual(row['start_time'], '2014-01-25T16:00:00')
 
 

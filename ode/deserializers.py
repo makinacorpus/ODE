@@ -2,7 +2,6 @@ import csv
 import json
 import re
 import six
-
 if six.PY3:
     from io import StringIO
 else:
@@ -25,7 +24,7 @@ def icalendar_to_cstruct(icalendar_event):
 
 
 def icalendar_extractor(request):
-    calendar = Calendar.from_ical(request.body)
+    calendar = Calendar.from_ical(request.text)
     events = []
     for icalendar_event in calendar.walk()[1:]:
         cstruct = icalendar_to_cstruct(icalendar_event)
@@ -51,8 +50,8 @@ def data_list_to_dict(data_list):
 
 
 def json_extractor(request):
-    if request.body:
-        json_data = json.loads(request.body)
+    if request.text:
+        json_data = json.loads(request.text)
         if 'template' in json_data:
             data_dict = data_list_to_dict(json_data['template']['data'])
             cstruct = {
@@ -98,12 +97,12 @@ def csv_format_data_dict(data_dict):
 
 
 def csv_extractor(request):
-    if request.body:
-        reader = csv.DictReader(StringIO(request.body))
+    if request.text:
+        reader = csv.DictReader(StringIO(request.text))
         items = []
         for row in reader:
             data_dict = {
-                key: value.decode('utf-8')
+                key: value.decode('utf-8') if six.PY2 else value
                 for key, value in row.items()
             }
             data_dict = csv_format_data_dict(data_dict)

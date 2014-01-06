@@ -1,13 +1,17 @@
 import dateutil.parser
 import json
 import requests
-from urlparse import urlparse
+import six
+if six.PY3:
+    from urllib.parse import urlparse
+else:
+    from urlparse import urlparse
 
 from colander import Invalid
 
 from ode.models import DBSession, Source, Event
 from ode.validation.schema import EventSchema
-from deserializers import icalendar_extractor, json_extractor
+from ode.deserializers import icalendar_extractor, json_extractor
 
 
 def exists(uid):
@@ -21,8 +25,8 @@ def validate(cstruct):
 
 class HarvestRequest(object):
 
-    def __init__(self, body):
-        self.body = body
+    def __init__(self, text):
+        self.text = text
 
 
 def harvest_cstruct(cstruct, source):
