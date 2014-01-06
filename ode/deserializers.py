@@ -1,7 +1,12 @@
 import csv
 import json
 import re
-from StringIO import StringIO
+import six
+
+if six.PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 from icalendar import Calendar
 from ode.models import icalendar_to_model_keys

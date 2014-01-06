@@ -16,7 +16,7 @@ def validate_querystring(request):
     schema = QueryStringSchema()
     try:
         request.validated.update(schema.deserialize(request.GET))
-    except Invalid, e:
+    except Invalid as e:
         errors = e.asdict(translate=request.localizer.translate)
         for field, message in errors.items():
             request.errors.add('body', field, message)

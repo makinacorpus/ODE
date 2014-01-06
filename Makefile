@@ -1,3 +1,4 @@
+COMPILE_TRANSLATIONS=python setup.py compile_catalog -l fr
 dev_requirements:
 	pip install -r dev_requirements.txt
 
@@ -5,12 +6,14 @@ requirements:
 	pip install -r requirements.txt
 
 localization:
-	python setup.py compile_catalog -l fr
+	${COMPILE_TRANSLATIONS}
 
-develop: localization requirements
+develop: requirements
 	pip install -r dev_requirements.txt
 	python setup.py develop
 	initialize_ode_db development.ini
+	${COMPILE_TRANSLATIONS}
+
 
 test: localization requirements dev_requirements flake8
 	nosetests -v

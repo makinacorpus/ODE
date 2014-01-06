@@ -1,5 +1,6 @@
 import datetime
 import csv
+import six
 from StringIO import StringIO
 
 from icalendar import Calendar, Event
@@ -70,7 +71,7 @@ class CsvRenderer(object):
 
     @classmethod
     def format_value(cls, key, value):
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             return value.encode('utf-8')
         elif isinstance(value, list):
             if key in cls.MEDIA_ATTRIBUTES:
