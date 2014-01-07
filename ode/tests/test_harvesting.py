@@ -46,6 +46,26 @@ END:VEVENT
 END:VCALENDAR
 """
 
+icalendar_with_timezone = u"""
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AgendaDuLibre.org
+X-WR-CALNAME:Agenda du Libre - tag toulibre
+X-WR-TIMEZONE:Europe/Paris
+CALSCALE:GREGORIAN
+X-WR-CALDESC:Whatever
+BEGIN:VEVENT
+DTSTART:20140120T180000Z
+DTEND:20140120T210000Z
+UID:1234
+SUMMARY:Capitole du Libre
+URL:http://www.exemple.org/foo
+DESCRIPTION:Whatever
+LOCATION:Toulouse
+END:VEVENT
+END:VCALENDAR
+"""
+
 
 valid_json = (
     u'{"collection": {"href": "http://localhost:6543/v1/events", "items": [{"h'
@@ -130,3 +150,9 @@ class TestHarvesting(TestEventMixin, TestCase):
         harvest()
         self.mock_requests.get.assert_called_with(source.url)
         self.assertEqual(DBSession.query(Event).count(), 0)
+
+    def test_fix_calendar_with_timezone_aware_datetimes(self):
+        self.setup_requests_mock(icalendar_data=icalendar_with_timezone)
+        self.make_source()
+        harvest()
+        harvest()  # Second call was crashing

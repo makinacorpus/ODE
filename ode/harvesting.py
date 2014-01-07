@@ -1,4 +1,3 @@
-import dateutil.parser
 import json
 import requests
 from urlparse import urlparse
@@ -31,11 +30,8 @@ def harvest_cstruct(cstruct, source):
             item['data']['id'] += '@' + urlparse(source.url).hostname
         if exists(item['data']['id']):
             event = Event.get_by_id(item['data']['id'])
-            for time_attr in ('start_time', 'end_time'):
-                if time_attr in item['data'].keys():
-                    item['data'][time_attr] = \
-                        dateutil.parser.parse(item['data'][time_attr])
-            event.update_from_appstruct(item['data'])
+            appstruct = validate(item['data'])
+            event.update_from_appstruct(appstruct)
             DBSession.merge(event)
         else:
             try:
