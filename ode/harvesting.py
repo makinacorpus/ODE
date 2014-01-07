@@ -1,6 +1,9 @@
 import json
 import requests
 from urlparse import urlparse
+import logging
+
+log = logging.getLogger(__name__)
 
 from colander import Invalid
 
@@ -45,19 +48,26 @@ def harvest_cstruct(cstruct, source):
 def harvest():
     query = DBSession.query(Source)
     for source in query:
-        response = requests.get(source.url)
-        if response.status_code != 200:
-            continue
-        content = response.text
         try:
-            json.loads(content)
-            is_json = True
-        except ValueError:
-            is_json = False
-        request = HarvestRequest(content)
-        if is_json:
-            cstruct = json_extractor(request)
-        else:
-            cstruct = icalendar_extractor(request)
-        harvest_cstruct(cstruct, source)
+            response = requests.get(source.url)
+            if response.status_code != 200:
+                continue
+            content = response.text
+            try:
+                json.loads(content)
+                is_json = True
+            except ValueError:
+                is_json = False
+            request = HarvestRequest(content)
+            if is_json:
+                cstruct = json_extractor(request)
+            else:
+                cstruct = icalendar_extractor(request)
+            harvest_cstruct(cstruct, source)
+        except Exception:
+            log.warning(
+                u"Failed to harvest source {id} with URL {url}".format(
+                    id=source.id,
+                    url=source.url,
+                ), exc_info=True)
     DBSession.flush()

@@ -5,6 +5,7 @@ import textwrap
 import transaction
 from pyramid.paster import bootstrap
 from ode.harvesting import harvest
+import pyramid.paster
 
 
 def main():
@@ -23,6 +24,7 @@ def main():
         print('You must provide one argument')
         return 2
     config_uri = args[0]
+    pyramid.paster.setup_logging(config_uri)
     env = bootstrap(config_uri)
     settings, closer = env['registry'].settings, env['closer']
     try:

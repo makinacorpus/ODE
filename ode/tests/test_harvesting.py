@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
-from mock import Mock, patch
+from mock import Mock
 
 from ode.models import Event, DBSession
 from ode.tests.event import TestEventMixin
@@ -102,9 +102,7 @@ class TestHarvesting(TestEventMixin, TestCase):
 
     def setup_requests_mock(self, content_type='text/calendar',
                             icalendar_data=valid_icalendar):
-        requests_patcher = patch('ode.harvesting.requests')
-        self.mock_requests = requests_patcher.start()
-        self.addCleanup(requests_patcher.stop)
+        self.mock_requests = self.patch('ode.harvesting.requests')
         self.mock_requests.get.return_value = Mock(
             status_code=200,
             content_type=content_type,
@@ -156,3 +154,28 @@ class TestHarvesting(TestEventMixin, TestCase):
         self.make_source()
         harvest()
         harvest()  # Second call was crashing
+
+    def test_bogus_data_does_not_crash_harvesting(self):
+        log_mock = self.patch('ode.harvesting.log')
+        source1 = self.make_source(url=u"http://example.com/a",
+                                   provider_id='123')
+        self.make_source(url=u"http://example.com/b", provider_id='456')
+        self.setup_requests_mock()
+        self.mock_requests.get.side_effect = [
+            Mock(
+                status_code=200,
+                content_type='text/calendar',
+                text='*** BOGUS DATA ***',
+            ),
+            Mock(
+                status_code=200,
+                content_type='text/calendar',
+                text=valid_icalendar,
+            ),
+        ]
+        harvest()
+        self.assertEqual(DBSession.query(Event).count(), 1)
+        log_mock.warning.assert_called_with(
+            u"Failed to harvest source {} with URL {}".format(
+                source1.id, source1.url),
+            exc_info=True)

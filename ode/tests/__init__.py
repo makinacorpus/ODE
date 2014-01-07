@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from pyramid import testing
 from webtest import TestApp as BaseTestApp
+from mock import patch
 
 from ode import main
 from ode.tests.support import initTestingDB
@@ -57,3 +58,8 @@ class BaseTestMixin(object):
 
     def assertContentType(self, response, content_type):
         self.assertIn(content_type, response.headers['Content-Type'])
+
+    def patch(self, *args, **kwargs):
+        patcher = patch(*args, **kwargs)
+        self.addCleanup(patcher.stop)
+        return patcher.start()
