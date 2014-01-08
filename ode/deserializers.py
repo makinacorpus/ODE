@@ -20,12 +20,15 @@ def icalendar_to_cstruct(icalendar_event):
 
 
 def icalendar_extractor(request):
-    calendar = Calendar.from_ical(request.body)
-    events = []
-    for icalendar_event in calendar.walk()[1:]:
-        cstruct = icalendar_to_cstruct(icalendar_event)
-        events.append({'data': cstruct})
-    cstruct = {'items': events}
+    items = []
+    try:
+        calendar = Calendar.from_ical(request.body)
+        for icalendar_event in calendar.walk()[1:]:
+            cstruct = icalendar_to_cstruct(icalendar_event)
+            items.append({'data': cstruct})
+    except ValueError as exc:
+        request.errors.add('body', None, "Invalid iCalendar data")
+    cstruct = {'items': items}
     return cstruct
 
 
