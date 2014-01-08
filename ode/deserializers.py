@@ -27,7 +27,8 @@ def icalendar_extractor(request):
             cstruct = icalendar_to_cstruct(icalendar_event)
             items.append({'data': cstruct})
     except ValueError as exc:
-        request.errors.add('body', None, "Invalid iCalendar data")
+        request.errors.add('body', None,
+                           "Invalid iCalendar request body: %s " % exc)
     cstruct = {'items': items}
     return cstruct
 
@@ -100,9 +101,9 @@ def csv_format_data_dict(data_dict):
 
 
 def csv_extractor(request):
+    items = []
     if request.body:
         reader = csv.DictReader(StringIO(request.body))
-        items = []
         for row in reader:
             data_dict = {
                 key: value.decode('utf-8')
@@ -110,7 +111,9 @@ def csv_extractor(request):
             }
             data_dict = csv_format_data_dict(data_dict)
             items.append({'data': data_dict})
-        cstruct = {'items': items}
-        return cstruct
+        if not items:
+            request.errors.add('body', None, "Invalid CSV request body")
     else:
-        return {}
+        request.errors.add('body', None, "Empty CSV request body")
+    cstruct = {'items': items}
+    return cstruct

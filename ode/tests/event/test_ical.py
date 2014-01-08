@@ -105,4 +105,4 @@ class TestPostEvent(TestEventMixin, TestCase):
 
     def test_post_malformed_calendar(self):
         response = self.post('*** BOGUS ***', status=400)
-        self.assertErrorMessage(response, 'Invalid iCalendar data')
+        self.assertErrorMessage(response, 'Invalid iCalendar request body')
