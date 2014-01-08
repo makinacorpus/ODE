@@ -107,6 +107,11 @@ class TestJson(TestEventMixin, TestCase):
                                  status=400, headers=self.WRITE_HEADERS)
         self.assertErrorMessage(response, 'Invalid JSON request body')
 
+    def test_empty_json(self):
+        response = self.app.post('/v1/events', status=400,
+                                 headers=self.WRITE_HEADERS)
+        self.assertErrorMessage(response, 'Empty JSON request body')
+
     def test_update_event(self):
         event_id = self.post_event()
         put_data = {
@@ -137,9 +142,22 @@ class TestJson(TestEventMixin, TestCase):
         event_id = self.post_event()
         very_long_title = '*' * 1001
         response = self.app.put_json('/v1/events/%s' % event_id, {
-            'title': very_long_title
+            'template': {
+                'data': [
+                    {'name': 'title', 'value': very_long_title},
+                ],
+            },
         }, headers=self.WRITE_HEADERS, status=400)
         self.assertEqual(response.json['status'], 'error')
+        self.assertErrorMessage(response, 'Longer than maximum')
+
+    def test_update_invalid_collecton_json(self):
+        event_id = self.post_event()
+        response = self.app.put_json('/v1/events/%s' % event_id, {
+            'foo': 'bar',
+        }, headers=self.WRITE_HEADERS, status=400)
+        self.assertEqual(response.json['status'], 'error')
+        self.assertErrorMessage(response, 'Invalid Collection+JSON input')
 
     def test_post_publication_times(self):
         response = self.app.post_json('/v1/events', {
