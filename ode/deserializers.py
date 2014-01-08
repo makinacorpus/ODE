@@ -47,7 +47,13 @@ def data_list_to_dict(data_list):
 
 def json_extractor(request):
     if request.body:
-        json_data = json.loads(request.body)
+        try:
+            json_data = json.loads(request.body)
+        except ValueError as e:
+            request.errors.add(
+                'body', None,
+                "Invalid JSON request body: %s" % (e.message))
+            return {'items': []}
         if 'template' in json_data:
             data_dict = data_list_to_dict(json_data['template']['data'])
             cstruct = {

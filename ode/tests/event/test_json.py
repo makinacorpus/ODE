@@ -102,6 +102,11 @@ class TestJson(TestEventMixin, TestCase):
         }, status=400, headers=self.WRITE_HEADERS)
         self.assertErrorMessage(response, 'Longer than maximum')
 
+    def test_post_malformed_json(self):
+        response = self.app.post('/v1/events', '*** MALFORMED JSON ***',
+                                 status=400, headers=self.WRITE_HEADERS)
+        self.assertErrorMessage(response, 'Invalid JSON request body')
+
     def test_update_event(self):
         event_id = self.post_event()
         put_data = {
