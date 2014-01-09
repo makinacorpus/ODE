@@ -7,6 +7,7 @@ from ode.models import DBSession, Event, Tag, Image, Video, Sound
 from ode.tests.event import TestEventMixin
 from ode.deserializers import data_list_to_dict
 from ode.validation.schema import COLLECTION_MAX_LENGTH
+from ode.resources.base import COLLECTION_JSON_MIMETYPE
 
 
 def remove_ids(fields):
@@ -44,35 +45,6 @@ example_data = [
 class TestJson(TestEventMixin, TestCase):
     maxDiff = None
 
-    def post_event(self, event_info=None, headers=None):
-        if headers is None:
-            headers = {'X-ODE-Provider-Id': '123'}
-        if event_info is None:
-            event_info = [
-                {'name': 'title', 'value': u'Titre Événement'},
-            ]
-        for mandatory in ('start_time', 'end_time', 'publication_start',
-                          'publication_end'):
-            if mandatory not in [field['name'] for field in event_info]:
-                event_info.append({
-                    'name': mandatory,
-                    'value': '2014-01-25T15:00:00',
-                })
-
-        body_data = {
-            'template': {
-                'data': event_info
-            }
-        }
-        created = 201
-        headers['content-type'] = 'application/vnd.collection+json'
-        response = self.app.post_json('/v1/events', body_data,
-                                      headers=headers,
-                                      status=created)
-        data_dict = data_list_to_dict(
-            response.json['collection']['items'][0]['data'])
-        return data_dict['id']
-
     def assertEqualIgnoringId(self, result, expected):
         result = remove_ids(result)
         self.assertEqual(data_list_to_dict(result),
@@ -88,7 +60,10 @@ class TestJson(TestEventMixin, TestCase):
 
     def test_post_event_with_invalid_provider_id(self):
         self.app.post_json('/v1/events',
-                           headers={'X-ODE-Provider-Id': '\n'},
+                           headers={
+                               'X-ODE-Provider-Id': '\n',
+                               'Content-Type': COLLECTION_JSON_MIMETYPE,
+                           },
                            status=403)
 
     def test_post_title_too_long(self):
