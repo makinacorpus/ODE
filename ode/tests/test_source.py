@@ -22,6 +22,8 @@ class TestSource(BaseTestMixin, TestCase):
         source_data = response.json['collection']['items'][0]['data']
         data_dict = data_list_to_dict(source_data)
         self.assertEqual(data_dict['url'], 'http://example.com')
+        self.assertNotIn('active', data_dict)
+        self.assertNotIn('provider_id', data_dict)
 
         source_href = response.json['collection']['items'][0]['href']
         self.assertEqual(source_href,
