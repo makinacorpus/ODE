@@ -12,6 +12,11 @@ develop: localization requirements
 	python setup.py develop
 	initialize_ode_db development.ini
 
+production:
+	python setup.py develop
+	../env/bin/initialize_ode_db production.ini
+	python setup.py compile_catalog -l fr
+
 test: localization requirements dev_requirements flake8
 	nosetests -v
 
