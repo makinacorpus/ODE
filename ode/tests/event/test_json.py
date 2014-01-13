@@ -1,11 +1,7 @@
 # -*- encoding: utf-8 -*-
 from unittest import TestCase
 from datetime import datetime
-import six
-if six.PY3:
-    from urllib.parse import quote
-else:
-    from urllib import quote
+from six.moves.urllib.parse import quote
 
 from ode.models import DBSession, Event, Tag, Image, Video, Sound
 from ode.tests.event import TestEventMixin

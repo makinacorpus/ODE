@@ -1,10 +1,7 @@
 import datetime
 import csv
 import six
-if six.PY3:
-    from io import StringIO
-else:
-    from StringIO import StringIO
+from six import StringIO
 
 from icalendar import Calendar, Event
 from pyramid.renderers import JSON

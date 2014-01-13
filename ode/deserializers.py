@@ -2,10 +2,7 @@ import csv
 import json
 import re
 import six
-if six.PY3:
-    from io import StringIO
-else:
-    from StringIO import StringIO
+from six import StringIO
 
 from icalendar import Calendar
 from ode.models import icalendar_to_model_keys
@@ -61,7 +58,7 @@ def json_extractor(request):
         except ValueError as e:
             request.errors.add(
                 'body', None,
-                "Invalid JSON request body: %s" % (e.message))
+                "Invalid JSON request body: %s" % e)
         else:
             if 'template' in json_data:
                 # POST or PUT requests
@@ -104,10 +101,17 @@ def csv_format_data_dict(data_dict):
     return data_dict
 
 
+def csv_text(text):
+    if six.PY2:
+        return text.encode('utf-8')
+    else:
+        return text
+
+
 def csv_extractor(request):
     items = []
-    if request.body:
-        reader = csv.DictReader(StringIO(request.text))
+    if request.text:
+        reader = csv.DictReader(StringIO(csv_text(request.text)))
         for row in reader:
             data_dict = {
                 key: value.decode('utf-8') if six.PY2 else value

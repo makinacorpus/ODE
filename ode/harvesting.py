@@ -1,10 +1,6 @@
 import json
 import requests
-import six
-if six.PY3:
-    from urllib.parse import urlparse
-else:
-    from urlparse import urlparse
+from six.moves.urllib.parse import urlparse
 import logging
 
 log = logging.getLogger(__name__)
@@ -19,8 +15,8 @@ from ode.deserializers import icalendar_extractor, json_extractor
 
 class HarvestRequest(object):
 
-    def __init__(self, body):
-        self.body = body
+    def __init__(self, text):
+        self.text = text
         self.errors = Errors()
 
 

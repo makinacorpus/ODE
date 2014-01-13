@@ -205,9 +205,10 @@ class TestHarvesting(TestEventMixin, TestCase):
         ]
         harvest()
         self.assertEqual(DBSession.query(Event).count(), 1)
-        log_mock.warning.assert_any_call(
-            u"Invalid iCalendar request body: Content line could not be parsed"
-            u" into parts: u'*** BOGUS DATA ***': *** BOGUS DATA *** ")
+        expected_messasge = (u"Invalid iCalendar request body: "
+                             u"Content line could not be parsed into parts")
+        actual_message = log_mock.warning.call_args[0][0]
+        self.assertTrue(actual_message.startswith(expected_messasge))
         log_mock.warning.assert_any_call(
             u"Failed to harvest source {} with URL {}".format(
                 source1.id, source1.url),

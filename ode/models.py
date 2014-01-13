@@ -49,6 +49,9 @@ class BaseModel(object):
         return cls(**appstruct)
 
     def update_from_appstruct(self, appstruct):
+        uid = appstruct.pop('id', None)
+        if uid:
+            self.update_from_appstruct_item('id', uid)
         for key, value in appstruct.items():
             if isinstance(value, list):
                 klass = collection_classes[key]

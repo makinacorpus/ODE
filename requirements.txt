@@ -11,7 +11,6 @@ transaction
 zope.sqlalchemy
 waitress
 requests
-webtest
 psycopg2
 -e git+https://github.com/PythonCharmers/xlwt-future#egg=xlwt
 Babel
