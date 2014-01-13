@@ -3,23 +3,20 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-ODE - A web API for human events
-================================
+ODE - A web API and aggregator for human events
+===============================================
 
-Introduction
-------------
+ODE stands for Open Data Events.
 
-ODE is a RESTful web API that allows clients to interact with two kinds of
+It's a RESTful web API that allows clients to interact with two kinds of
 resources: events and sources. Events are human events such as concerts,
-conferences, exhibitions, etc.  Sources are URLs pointing to event data streams
-that get fetched in the background to populate the ODE database.
+conferences, exhibitions, etc.  Sources are URLs pointing to event data
+streams.  To collect event data from sources, we provide a ``harvest`` script, which may be invoked as a cron job.
 
-It's written in Python using the `Pyramid web framework
-<http://www.pylonsproject.org/projects/pyramid/about>`_ and
-`Cornice <http://cornice.readthedocs.org>`_, a REST framework for Pyramid.
+ODE is written in Python 2.7 using the `Pyramid web framework <http://www.pylonsproject.org/projects/pyramid/about>`_ and `Cornice <http://cornice.readthedocs.org>`_, a REST framework for Pyramid.
 
-Development Installation
-------------------------
+Development install
+-------------------
 
 We provide a ``Makefile`` to help with setting up ODE on your machine. You
 probably want to do this in a virtual environement.
@@ -36,8 +33,8 @@ Run the development server::
 
     $ make serve
 
-Usage
------
+Web API
+-------
 
 The ODE API is based on
 `Collection+JSON <http://amundsen.com/media-types/collection/>`_, a JSON-based
@@ -86,8 +83,8 @@ For example, if you'd like to retrive events 20 to 30 sorted by start time in de
     /v1/events?offset=20&limit=10&sort_by=start_time&sort_direction=desc
 
 
-Available operations
---------------------
+Operations
+~~~~~~~~~~
 
 =======     ================  ===========
 Méthode     Ressource         Description
@@ -105,8 +102,8 @@ DELETE      /v1/sources/{id}  Delete a source
 =======     ================  ===========
 
 
-Available representations
--------------------------
+Representation formats
+~~~~~~~~~~~~~~~~~~~~~~
 
 ================  ===================================  ======================================================================================
 Nom               Mimetype                             More info
@@ -117,8 +114,8 @@ CSV               ``text/csv``                         Comma-separated values
 ================  ===================================  ======================================================================================
 
 
-Available fields
-----------------
+Event data fields
+~~~~~~~~~~~~~~~~~
 
 Data fields available for Collection+JSON and text/csv representations.
 
@@ -160,3 +157,18 @@ Field name                       Required  Type/Format                          
 
 Not that this list of fields doesn't apply to the iCalendar format for which
 the specification dictates which fields are available.
+
+
+Source data fields
+~~~~~~~~~~~~~~~~~~
+
+Sources have a single field, ``url``, which is the URL of the data stream.
+
+
+Harvesting
+----------
+
+We provide a ``harvest`` script which collects data from sources and updates the
+ODE database. It takes a Pyramid configuration file as its only argument::
+
+    $ harvest development.ini
