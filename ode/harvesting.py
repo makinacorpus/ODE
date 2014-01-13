@@ -12,37 +12,59 @@ from ode.validation.schema import EventSchema
 from deserializers import icalendar_extractor, json_extractor
 
 
-def exists(uid):
-    return DBSession.query(Event).filter_by(id=uid).count() > 0
-
-
-def validate(cstruct):
-    schema = EventSchema()
-    return schema.deserialize(cstruct)
-
-
 class HarvestRequest(object):
 
     def __init__(self, body):
         self.body = body
 
 
+class EventCstruct(object):
+
+    def __init__(self, cstruct):
+        self.cstruct = cstruct
+
+    def exists_in_database(self):
+        uid = self.cstruct['data']['id']
+        return DBSession.query(Event).filter_by(id=uid).count() > 0
+
+    def validate(self):
+        schema = EventSchema()
+        return schema.deserialize(self.cstruct['data'])
+
+    def has_uid_without_domain_name(self):
+        return (
+            'id' in self.cstruct['data']
+            and
+            u"@" not in self.cstruct['data']['id']
+        )
+
+    def append_domain_name_to_uid(self, source):
+        self.cstruct['data']['id'] += '@' + urlparse(source.url).hostname
+
+    def update_database(self):
+        event = Event.get_by_id(self.cstruct['data']['id'])
+        appstruct = self.validate()
+        event.update_from_appstruct(appstruct)
+        DBSession.merge(event)
+
+    def insert_into_database(self):
+        model_kwargs = self.validate()
+        event = Event(**model_kwargs)
+        DBSession.add(event)
+
+
 def harvest_cstruct(cstruct, source):
-    for item in cstruct['items']:
-        if 'id' in item['data']:
-            item['data']['id'] += '@' + urlparse(source.url).hostname
-        if exists(item['data']['id']):
-            event = Event.get_by_id(item['data']['id'])
-            appstruct = validate(item['data'])
-            event.update_from_appstruct(appstruct)
-            DBSession.merge(event)
+    for item_cstruct in cstruct['items']:
+        event_cstruct = EventCstruct(item_cstruct)
+        if event_cstruct.has_uid_without_domain_name():
+            event_cstruct.append_domain_name_to_uid(source)
+        if event_cstruct.exists_in_database():
+            event_cstruct.update_database()
         else:
             try:
-                model_kwargs = validate(item['data'])
+                event_cstruct.insert_into_database()
             except Invalid:
                 continue
-            event = Event(**model_kwargs)
-            DBSession.add(event)
 
 
 def harvest():

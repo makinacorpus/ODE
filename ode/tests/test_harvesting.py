@@ -18,6 +18,26 @@ X-WR-CALDESC:L'Agenda des évènements autour du Libre, tag toulibre
 BEGIN:VEVENT
 DTSTART;TZID=Europe/Paris:20121124T110000
 DTEND;TZID=Europe/Paris:20121125T170000
+UID:1234@example.com
+SUMMARY:Capitole du Libre
+URL:http://www.agendadulibre.org/showevent.php?id=7064
+DESCRIPTION:Un évènement de l'Agenda du Libre
+LOCATION:Toulouse
+END:VEVENT
+END:VCALENDAR
+"""
+
+uid_missing_domain_part = u"""
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AgendaDuLibre.org
+X-WR-CALNAME:Agenda du Libre - tag toulibre
+X-WR-TIMEZONE:Europe/Paris
+CALSCALE:GREGORIAN
+X-WR-CALDESC:L'Agenda des évènements autour du Libre, tag toulibre
+BEGIN:VEVENT
+DTSTART;TZID=Europe/Paris:20121124T110000
+DTEND;TZID=Europe/Paris:20121125T170000
 UID:1234
 SUMMARY:Capitole du Libre
 URL:http://www.agendadulibre.org/showevent.php?id=7064
@@ -37,7 +57,7 @@ CALSCALE:GREGORIAN
 X-WR-CALDESC:L'Agenda des évènements autour du Libre, tag toulibre
 BEGIN:VEVENT
 DTEND;TZID=Europe/Paris:20121125T170000
-UID:1234
+UID:1234@example.com
 SUMMARY:Capitole du Libre
 URL:http://www.agendadulibre.org/showevent.php?id=7064
 DESCRIPTION:Un évènement de l'Agenda du Libre
@@ -57,7 +77,7 @@ X-WR-CALDESC:Whatever
 BEGIN:VEVENT
 DTSTART:20140120T180000Z
 DTEND:20140120T210000Z
-UID:1234
+UID:1234@example.com
 SUMMARY:Capitole du Libre
 URL:http://www.exemple.org/foo
 DESCRIPTION:Whatever
@@ -132,10 +152,20 @@ class TestHarvesting(TestEventMixin, TestCase):
         self.assertEqual(event.description,
                          u"Description")
 
-    def test_duplicate_is_changed(self):
+    def test_update_from_uid_missing_domain_part(self):
         self.create_event(title=u'Existing event', id=u'1234@example.com')
         DBSession.flush()
-        self.setup_requests_mock()
+        self.setup_requests_mock(icalendar_data=uid_missing_domain_part)
+        source = self.make_source()
+        harvest()
+        self.mock_requests.get.assert_called_with(source.url)
+        event = DBSession.query(Event).one()
+        self.assertEqual(event.title, u"Capitole du Libre")
+
+    def test_update_from_uid_with_domain_part(self):
+        self.create_event(title=u'Existing event', id=u'1234@example.com')
+        DBSession.flush()
+        self.setup_requests_mock(icalendar_data=valid_icalendar)
         source = self.make_source()
         harvest()
         self.mock_requests.get.assert_called_with(source.url)
