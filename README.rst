@@ -1,10 +1,10 @@
 ODE - Open Data Events
 ======================
 
-.. image:: https://travis-ci.org/makinacorpus/ODE.png
+.. image:: https://travis-ci.org/makinacorpus/ODE.png?branch=master
     :target: https://travis-ci.org/makinacorpus/ODE
 
-.. image:: https://coveralls.io/repos/makinacorpus/ODE/badge.png
+.. image:: https://coveralls.io/repos/makinacorpus/ODE/badge.png?branch=master
     :target: https://coveralls.io/r/makinacorpus/ODE
 
 
