@@ -13,7 +13,7 @@ resources: events and sources. Events are human events such as concerts,
 conferences, exhibitions, etc.  Sources are URLs pointing to event data
 streams.  To collect event data from sources, we provide a ``harvest`` script, which may be invoked as a cron job.
 
-ODE is written in Python 2.7 using the `Pyramid web framework <http://www.pylonsproject.org/projects/pyramid/about>`_ and `Cornice <http://cornice.readthedocs.org>`_, a REST framework for Pyramid.
+ODE is written in Python using the `Pyramid web framework <http://www.pylonsproject.org/projects/pyramid/about>`_ and `Cornice <http://cornice.readthedocs.org>`_, a REST framework for Pyramid. It is tested against both Python 2.7 and Python 3.3.
 
 Development install
 -------------------
