@@ -162,7 +162,8 @@ the specification dictates which fields are available.
 Source data fields
 ~~~~~~~~~~~~~~~~~~
 
-Sources have a single field, ``url``, which is the URL of the data stream.
+Sources have a single field, ``url``, which is the URL of a data stream in
+iCalendar or Collection+JSON format.
 
 
 Harvesting

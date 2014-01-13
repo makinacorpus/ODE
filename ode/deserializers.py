@@ -27,11 +27,8 @@ def icalendar_extractor(request):
             cstruct = icalendar_to_cstruct(icalendar_event)
             items.append({'data': cstruct})
     except ValueError as exc:
-        if hasattr(request, 'errors'):
-            request.errors.add('body', None,
-                               "Invalid iCalendar request body: %s " % exc)
-        else:
-            raise
+        request.errors.add('body', None,
+                           "Invalid iCalendar request body: %s " % exc)
     cstruct = {'items': items}
     return cstruct
 

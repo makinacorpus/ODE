@@ -121,12 +121,12 @@ valid_json = (
 class TestHarvesting(TestEventMixin, TestCase):
 
     def setup_requests_mock(self, content_type='text/calendar',
-                            icalendar_data=valid_icalendar):
+                            body_text=valid_icalendar):
         self.mock_requests = self.patch('ode.harvesting.requests')
         self.mock_requests.get.return_value = Mock(
             status_code=200,
             content_type=content_type,
-            text=icalendar_data,
+            text=body_text,
         )
 
     def test_fetch_data_from_source(self):
@@ -143,7 +143,7 @@ class TestHarvesting(TestEventMixin, TestCase):
 
     def test_fetch_json_data_from_source(self):
         self.setup_requests_mock(content_type='text/json',
-                                 icalendar_data=valid_json)
+                                 body_text=valid_json)
         source = self.make_source()
         harvest()
         self.mock_requests.get.assert_called_with(source.url)
@@ -155,7 +155,7 @@ class TestHarvesting(TestEventMixin, TestCase):
     def test_update_from_uid_missing_domain_part(self):
         self.create_event(title=u'Existing event', id=u'1234@example.com')
         DBSession.flush()
-        self.setup_requests_mock(icalendar_data=uid_missing_domain_part)
+        self.setup_requests_mock(body_text=uid_missing_domain_part)
         source = self.make_source()
         harvest()
         self.mock_requests.get.assert_called_with(source.url)
@@ -165,7 +165,7 @@ class TestHarvesting(TestEventMixin, TestCase):
     def test_update_from_uid_with_domain_part(self):
         self.create_event(title=u'Existing event', id=u'1234@example.com')
         DBSession.flush()
-        self.setup_requests_mock(icalendar_data=valid_icalendar)
+        self.setup_requests_mock(body_text=valid_icalendar)
         source = self.make_source()
         harvest()
         self.mock_requests.get.assert_called_with(source.url)
@@ -173,19 +173,19 @@ class TestHarvesting(TestEventMixin, TestCase):
         self.assertEqual(event.title, u"Capitole du Libre")
 
     def test_invalid_calendar(self):
-        self.setup_requests_mock(icalendar_data=start_time_missing)
+        self.setup_requests_mock(body_text=start_time_missing)
         source = self.make_source()
         harvest()
         self.mock_requests.get.assert_called_with(source.url)
         self.assertEqual(DBSession.query(Event).count(), 0)
 
     def test_fix_calendar_with_timezone_aware_datetimes(self):
-        self.setup_requests_mock(icalendar_data=icalendar_with_timezone)
+        self.setup_requests_mock(body_text=icalendar_with_timezone)
         self.make_source()
         harvest()
         harvest()  # Second call was crashing
 
-    def test_bogus_data_does_not_crash_harvesting(self):
+    def test_bogus_icalendar_data_does_not_crash_harvesting(self):
         log_mock = self.patch('ode.harvesting.log')
         source1 = self.make_source(url=u"http://example.com/a",
                                    provider_id='123')
@@ -205,7 +205,19 @@ class TestHarvesting(TestEventMixin, TestCase):
         ]
         harvest()
         self.assertEqual(DBSession.query(Event).count(), 1)
-        log_mock.warning.assert_called_with(
+        log_mock.warning.assert_any_call(
+            u"Invalid iCalendar request body: Content line could not be parsed"
+            u" into parts: u'*** BOGUS DATA ***': *** BOGUS DATA *** ")
+        log_mock.warning.assert_any_call(
             u"Failed to harvest source {} with URL {}".format(
                 source1.id, source1.url),
             exc_info=True)
+
+    def test_bogus_json_data(self):
+        log_mock = self.patch('ode.harvesting.log')
+        self.make_source(url=u"http://example.com/a", provider_id='123')
+        self.setup_requests_mock(content_type='text/json',
+                                 body_text=u'{"foo": 42}')
+        harvest()
+        self.assertEqual(DBSession.query(Event).count(), 0)
+        log_mock.warning.assert_any_call(u"Invalid Collection+JSON input")

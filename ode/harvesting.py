@@ -6,6 +6,7 @@ import logging
 log = logging.getLogger(__name__)
 
 from colander import Invalid
+from cornice.errors import Errors
 
 from ode.models import DBSession, Source, Event
 from ode.validation.schema import EventSchema
@@ -16,6 +17,7 @@ class HarvestRequest(object):
 
     def __init__(self, body):
         self.body = body
+        self.errors = Errors()
 
 
 class EventCstruct(object):
@@ -70,6 +72,10 @@ def harvest_cstruct(cstruct, source):
 def harvest():
     query = DBSession.query(Source)
     for source in query:
+        error_message = u"Failed to harvest source {id} with URL {url}".format(
+            id=source.id,
+            url=source.url,
+        )
         try:
             response = requests.get(source.url)
             if response.status_code != 200:
@@ -86,10 +92,10 @@ def harvest():
             else:
                 cstruct = icalendar_extractor(request)
             harvest_cstruct(cstruct, source)
+            if request.errors:
+                log.warning(error_message, exc_info=True)
+                for error in request.errors:
+                    log.warning(error['description'])
         except Exception:
-            log.warning(
-                u"Failed to harvest source {id} with URL {url}".format(
-                    id=source.id,
-                    url=source.url,
-                ), exc_info=True)
+            log.warning(error_message, exc_info=True)
     DBSession.flush()
