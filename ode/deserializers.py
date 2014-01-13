@@ -24,12 +24,16 @@ def icalendar_to_cstruct(icalendar_event):
 
 
 def icalendar_extractor(request):
-    calendar = Calendar.from_ical(request.text)
-    events = []
-    for icalendar_event in calendar.walk()[1:]:
-        cstruct = icalendar_to_cstruct(icalendar_event)
-        events.append({'data': cstruct})
-    cstruct = {'items': events}
+    items = []
+    try:
+        calendar = Calendar.from_ical(request.text)
+        for icalendar_event in calendar.walk()[1:]:
+            cstruct = icalendar_to_cstruct(icalendar_event)
+            items.append({'data': cstruct})
+    except ValueError as exc:
+        request.errors.add('body', None,
+                           "Invalid iCalendar request body: %s " % exc)
+    cstruct = {'items': items}
     return cstruct
 
 
@@ -50,27 +54,31 @@ def data_list_to_dict(data_list):
 
 
 def json_extractor(request):
+    items = []
     if request.text:
-        json_data = json.loads(request.text)
-        if 'template' in json_data:
-            data_dict = data_list_to_dict(json_data['template']['data'])
-            cstruct = {
-                'items': [{'data': data_dict}]
-            }
-            return cstruct
-        elif 'collection' in json_data.keys():
-            items = []
-            for item in json_data['collection']['items']:
-                data_dict = data_list_to_dict(item['data'])
-                items.append({'data': data_dict})
-            cstruct = {
-                'items': items
-            }
-            return cstruct
+        try:
+            json_data = json.loads(request.text)
+        except ValueError as e:
+            request.errors.add(
+                'body', None,
+                "Invalid JSON request body: %s" % (e.message))
         else:
-            return json_data
+            if 'template' in json_data:
+                # POST or PUT requests
+                data_dict = data_list_to_dict(json_data['template']['data'])
+                items = [{'data': data_dict}]
+            elif 'collection' in json_data.keys():
+                # harvesting
+                items = []
+                for item in json_data['collection']['items']:
+                    data_dict = data_list_to_dict(item['data'])
+                    items.append({'data': data_dict})
+            else:
+                request.errors.add('body', None,
+                                   "Invalid Collection+JSON input")
     else:
-        return {}
+        request.errors.add('body', None, "Empty JSON request body")
+    return {'items': items}
 
 
 def csv_format_data_dict(data_dict):
@@ -97,9 +105,9 @@ def csv_format_data_dict(data_dict):
 
 
 def csv_extractor(request):
-    if request.text:
+    items = []
+    if request.body:
         reader = csv.DictReader(StringIO(request.text))
-        items = []
         for row in reader:
             data_dict = {
                 key: value.decode('utf-8') if six.PY2 else value
@@ -107,7 +115,9 @@ def csv_extractor(request):
             }
             data_dict = csv_format_data_dict(data_dict)
             items.append({'data': data_dict})
-        cstruct = {'items': items}
-        return cstruct
+        if not items:
+            request.errors.add('body', None, "Invalid CSV request body")
     else:
-        return {}
+        request.errors.add('body', None, "Empty CSV request body")
+    cstruct = {'items': items}
+    return cstruct

@@ -5,6 +5,7 @@ from sqlalchemy import engine_from_config
 from ode.models import DBSession, Base
 from ode.deserializers import icalendar_extractor, json_extractor
 from ode.deserializers import csv_extractor
+from ode.resources.base import COLLECTION_JSON_MIMETYPE
 
 
 def main(global_config, **settings):
@@ -22,8 +23,7 @@ def main(global_config, **settings):
     config.add_renderer('ical', 'ode.renderers.IcalRenderer')
     config.add_renderer('no_content', 'ode.renderers.NoContentRenderer')
     config.add_cornice_deserializer('text/calendar', icalendar_extractor)
-    config.add_cornice_deserializer('application/vnd.collection+json',
-                                    json_extractor)
+    config.add_cornice_deserializer(COLLECTION_JSON_MIMETYPE, json_extractor)
     config.add_cornice_deserializer('text/csv', csv_extractor)
     config.add_translation_dirs('colander:locale/', 'ode:locale/')
     config.scan(ignore='ode.tests')

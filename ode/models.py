@@ -24,12 +24,14 @@ def default_column():
 
 class BaseModel(object):
 
+    HIDDEN_FIELDS = ('location_id', 'event_id')
+
     id = Column(Integer, primary_key=True)
 
     def to_data_list(self):
         result = []
         for column in self.__class__.__mapper__.columns:
-            if column.name in ('location_id', 'event_id'):
+            if column.name in self.HIDDEN_FIELDS:
                 continue
             result.append({'name': column.name,
                            'value': getattr(self, column.name)})
@@ -198,8 +200,6 @@ class Event(Base):
         result = []
 
         for column in self.__class__.__mapper__.columns:
-#            if column.name == 'provider_id':
-#                continue
             value = getattr(self, column.name)
             if value:
                 result.append({'name': column.name, 'value': value})
@@ -253,6 +253,7 @@ class Source(Base):
     url = default_column()
     active = Column(Boolean())
     provider_id = default_column()
+    HIDDEN_FIELDS = ('provider_id', 'active')
 
 
 icalendar_to_model_keys = {

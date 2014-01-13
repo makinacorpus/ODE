@@ -11,6 +11,7 @@ from ode.models import DBSession, Event, Tag, Image, Video, Sound
 from ode.tests.event import TestEventMixin
 from ode.deserializers import data_list_to_dict
 from ode.validation.schema import COLLECTION_MAX_LENGTH
+from ode.resources.base import COLLECTION_JSON_MIMETYPE
 
 
 def remove_ids(fields):
@@ -48,35 +49,6 @@ example_data = [
 class TestJson(TestEventMixin, TestCase):
     maxDiff = None
 
-    def post_event(self, event_info=None, headers=None):
-        if headers is None:
-            headers = {'X-ODE-Provider-Id': '123'}
-        if event_info is None:
-            event_info = [
-                {'name': 'title', 'value': u'Titre Événement'},
-            ]
-        for mandatory in ('start_time', 'end_time', 'publication_start',
-                          'publication_end'):
-            if mandatory not in [field['name'] for field in event_info]:
-                event_info.append({
-                    'name': mandatory,
-                    'value': '2014-01-25T15:00:00',
-                })
-
-        body_data = {
-            'template': {
-                'data': event_info
-            }
-        }
-        created = 201
-        headers['content-type'] = 'application/vnd.collection+json'
-        response = self.app.post_json('/v1/events', body_data,
-                                      headers=headers,
-                                      status=created)
-        data_dict = data_list_to_dict(
-            response.json['collection']['items'][0]['data'])
-        return data_dict['id']
-
     def assertEqualIgnoringId(self, result, expected):
         result = remove_ids(result)
         self.assertEqual(data_list_to_dict(result),
@@ -92,7 +64,10 @@ class TestJson(TestEventMixin, TestCase):
 
     def test_post_event_with_invalid_provider_id(self):
         self.app.post_json('/v1/events',
-                           headers={'X-ODE-Provider-Id': '\n'},
+                           headers={
+                               'X-ODE-Provider-Id': '\n',
+                               'Content-Type': COLLECTION_JSON_MIMETYPE,
+                           },
                            status=403)
 
     def test_post_title_too_long(self):
@@ -105,6 +80,16 @@ class TestJson(TestEventMixin, TestCase):
             }
         }, status=400, headers=self.WRITE_HEADERS)
         self.assertErrorMessage(response, 'Longer than maximum')
+
+    def test_post_malformed_json(self):
+        response = self.app.post('/v1/events', '*** MALFORMED JSON ***',
+                                 status=400, headers=self.WRITE_HEADERS)
+        self.assertErrorMessage(response, 'Invalid JSON request body')
+
+    def test_empty_json(self):
+        response = self.app.post('/v1/events', status=400,
+                                 headers=self.WRITE_HEADERS)
+        self.assertErrorMessage(response, 'Empty JSON request body')
 
     def test_update_event(self):
         event_id = self.post_event()
@@ -136,9 +121,22 @@ class TestJson(TestEventMixin, TestCase):
         event_id = self.post_event()
         very_long_title = '*' * 1001
         response = self.app.put_json('/v1/events/%s' % event_id, {
-            'title': very_long_title
+            'template': {
+                'data': [
+                    {'name': 'title', 'value': very_long_title},
+                ],
+            },
         }, headers=self.WRITE_HEADERS, status=400)
         self.assertEqual(response.json['status'], 'error')
+        self.assertErrorMessage(response, 'Longer than maximum')
+
+    def test_update_invalid_collecton_json(self):
+        event_id = self.post_event()
+        response = self.app.put_json('/v1/events/%s' % event_id, {
+            'foo': 'bar',
+        }, headers=self.WRITE_HEADERS, status=400)
+        self.assertEqual(response.json['status'], 'error')
+        self.assertErrorMessage(response, 'Invalid Collection+JSON input')
 
     def test_post_publication_times(self):
         response = self.app.post_json('/v1/events', {

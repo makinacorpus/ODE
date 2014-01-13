@@ -1,8 +1,11 @@
 from unittest import TestCase
 
+from pyramid.httpexceptions import HTTPUnsupportedMediaType
+
 from ode.models import DBSession, Source
 from ode.tests import BaseTestMixin
 from ode.deserializers import data_list_to_dict
+from ode.resources.base import COLLECTION_JSON_MIMETYPE
 
 
 class TestSource(BaseTestMixin, TestCase):
@@ -19,6 +22,8 @@ class TestSource(BaseTestMixin, TestCase):
         source_data = response.json['collection']['items'][0]['data']
         data_dict = data_list_to_dict(source_data)
         self.assertEqual(data_dict['url'], 'http://example.com')
+        self.assertNotIn('active', data_dict)
+        self.assertNotIn('provider_id', data_dict)
 
         source_href = response.json['collection']['items'][0]['href']
         self.assertEqual(source_href,
@@ -62,15 +67,26 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertEqual(source.url, u'http://example.com/mysource')
         self.assertEqual(source.active, True)
 
+    def test_post_unsupported_content_type(self):
+        response = self.app.post('/v1/sources', 'foo',
+                                 headers={
+                                     'Content-Type': 'foo/bar',
+                                     'X-ODE-Provider-Id': '123',
+                                 },
+                                 status=HTTPUnsupportedMediaType.code)
+        self.assertErrorMessage(response, 'Content-Type header should be')
+
     def test_url_is_required(self):
         sources_info = {'sources': [{'url': u'\t  \r '}]}
         self.app.post_json('/v1/sources', sources_info,
-                           headers=self.PROVIDER_ID_HEADER, status=400)
+                           headers=self.WRITE_HEADERS, status=400)
         self.assertSourceCount(0)
 
     def test_anonymous_cannot_create(self):
         sources_info = {'sources': [{'url': u'http://example.com/mysource'}]}
-        self.app.post_json('/v1/sources', sources_info, status=403)
+        self.app.post_json(
+            '/v1/sources', sources_info, status=403,
+            headers={'Content-Type': 'application/vnd.collection+json'})
         self.assertSourceCount(0)
 
     def test_update_source(self):
@@ -92,10 +108,19 @@ class TestSource(BaseTestMixin, TestCase):
         self.assertEqual(source.url, u'http://example.com/myothersource')
         self.assertEqual(source.active, False)
 
+    def test_put_unsupported_content_type(self):
+        source = self.make_source()
+        response = self.app.put(
+            '/v1/sources/%s' % source.id, 'foo',
+            headers={'Content-Type': 'foo/bar', 'X-ODE-Provider-Id': '123'},
+            status=HTTPUnsupportedMediaType.code)
+        self.assertErrorMessage(response, 'Content-Type header should be')
+
     def test_update_required_provider_id(self):
         source = self.make_source()
         self.app.put_json('/v1/sources/%s' % source.id,
                           {'url': {'value': 'whatever'}},
+                          headers={'Content-Type': COLLECTION_JSON_MIMETYPE},
                           status=403)
 
     def test_cannot_update_other_people_stuff(self):

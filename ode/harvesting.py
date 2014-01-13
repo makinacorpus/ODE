@@ -1,4 +1,3 @@
-import dateutil.parser
 import json
 import requests
 import six
@@ -6,66 +5,101 @@ if six.PY3:
     from urllib.parse import urlparse
 else:
     from urlparse import urlparse
+import logging
+
+log = logging.getLogger(__name__)
 
 from colander import Invalid
+from cornice.errors import Errors
 
 from ode.models import DBSession, Source, Event
 from ode.validation.schema import EventSchema
 from ode.deserializers import icalendar_extractor, json_extractor
 
 
-def exists(uid):
-    return DBSession.query(Event).filter_by(id=uid).count() > 0
-
-
-def validate(cstruct):
-    schema = EventSchema()
-    return schema.deserialize(cstruct)
-
-
 class HarvestRequest(object):
 
-    def __init__(self, text):
-        self.text = text
+    def __init__(self, body):
+        self.body = body
+        self.errors = Errors()
+
+
+class EventCstruct(object):
+
+    def __init__(self, cstruct):
+        self.cstruct = cstruct
+
+    def exists_in_database(self):
+        uid = self.cstruct['data']['id']
+        return DBSession.query(Event).filter_by(id=uid).count() > 0
+
+    def validate(self):
+        schema = EventSchema()
+        return schema.deserialize(self.cstruct['data'])
+
+    def has_uid_without_domain_name(self):
+        return (
+            'id' in self.cstruct['data']
+            and
+            u"@" not in self.cstruct['data']['id']
+        )
+
+    def append_domain_name_to_uid(self, source):
+        self.cstruct['data']['id'] += '@' + urlparse(source.url).hostname
+
+    def update_database(self):
+        event = Event.get_by_id(self.cstruct['data']['id'])
+        appstruct = self.validate()
+        event.update_from_appstruct(appstruct)
+        DBSession.merge(event)
+
+    def insert_into_database(self):
+        model_kwargs = self.validate()
+        event = Event(**model_kwargs)
+        DBSession.add(event)
 
 
 def harvest_cstruct(cstruct, source):
-    for item in cstruct['items']:
-        if 'id' in item['data']:
-            item['data']['id'] += '@' + urlparse(source.url).hostname
-        if exists(item['data']['id']):
-            event = Event.get_by_id(item['data']['id'])
-            for time_attr in ('start_time', 'end_time'):
-                if time_attr in item['data'].keys():
-                    item['data'][time_attr] = \
-                        dateutil.parser.parse(item['data'][time_attr])
-            event.update_from_appstruct(item['data'])
-            DBSession.merge(event)
+    for item_cstruct in cstruct['items']:
+        event_cstruct = EventCstruct(item_cstruct)
+        if event_cstruct.has_uid_without_domain_name():
+            event_cstruct.append_domain_name_to_uid(source)
+        if event_cstruct.exists_in_database():
+            event_cstruct.update_database()
         else:
             try:
-                model_kwargs = validate(item['data'])
+                event_cstruct.insert_into_database()
             except Invalid:
                 continue
-            event = Event(**model_kwargs)
-            DBSession.add(event)
 
 
 def harvest():
     query = DBSession.query(Source)
     for source in query:
-        response = requests.get(source.url)
-        if response.status_code != 200:
-            continue
-        content = response.text
+        error_message = u"Failed to harvest source {id} with URL {url}".format(
+            id=source.id,
+            url=source.url,
+        )
         try:
-            json.loads(content)
-            is_json = True
-        except ValueError:
-            is_json = False
-        request = HarvestRequest(content)
-        if is_json:
-            cstruct = json_extractor(request)
-        else:
-            cstruct = icalendar_extractor(request)
-        harvest_cstruct(cstruct, source)
+            response = requests.get(source.url)
+            if response.status_code != 200:
+                continue
+            content = response.text
+            try:
+                json.loads(content)
+                is_json = True
+            except ValueError:
+                is_json = False
+            request = HarvestRequest(content)
+            if is_json:
+                cstruct = json_extractor(request)
+            else:
+                cstruct = icalendar_extractor(request)
+            harvest_cstruct(cstruct, source)
+            if request.errors:
+                log.warning(error_message, exc_info=True)
+                for error in request.errors:
+                    log.warning(error['description'])
+        except Exception:
+            log.warning(error_message, exc_info=True)
     DBSession.flush()

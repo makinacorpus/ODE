@@ -15,13 +15,21 @@ DEVELOPMENT
 We ship a Makefile with a few useful targets to setup a development
 environment.
 
-Install in development mode (you probably want to do that in a `virtual environment <http://www.virtualenv.org>`_::
+Install in development mode (you probably want to do that in a `virtual environment <http://www.virtualenv.org>`_)::
 
     $ make develop
 
 Run the test suite::
 
     $ make test
+
+
+=============
+DOCUMENTATION
+=============
+
+
+Full documentation is available at https://ode.readthedocs.org/
 
 
 =======

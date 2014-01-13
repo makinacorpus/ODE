@@ -4,6 +4,13 @@ from ode.models import Event
 from ode.validation.schema import EventCollectionSchema
 from ode.validation.validators import validate_querystring, has_provider_id
 from ode.resources.base import ResourceMixin, set_content_type
+from ode.resources.base import COLLECTION_JSON_MIMETYPE
+
+CONTENT_TYPES = (
+    'text/csv',
+    'text/calendar',
+    COLLECTION_JSON_MIMETYPE,
+)
 
 
 @resource(collection_path='/v1/events', path='/v1/events/{id}',
@@ -13,11 +20,12 @@ class EventResource(ResourceMixin):
     model = Event
 
     @view(validators=[has_provider_id], schema=EventCollectionSchema,
-          renderer='json')
+          renderer='json', content_type=CONTENT_TYPES)
     def collection_post(self):
         return ResourceMixin.collection_post(self)
 
-    @view(validators=[has_provider_id], schema=EventCollectionSchema)
+    @view(validators=[has_provider_id], schema=EventCollectionSchema,
+          content_type=CONTENT_TYPES)
     def put(self):
         return ResourceMixin.put(self)
 
@@ -34,12 +42,12 @@ class EventResource(ResourceMixin):
     @view(accept='text/calendar', renderer='ical',
           validators=[validate_querystring])
     @view(accept='text/csv', renderer='csv', validators=[validate_querystring])
-    @view(accept=['', 'application/vnd.collection+json'], renderer='json',
+    @view(accept=['', COLLECTION_JSON_MIMETYPE], renderer='json',
           validators=[validate_querystring])
     def collection_get(self):
         return ResourceMixin.collection_get(self)
 
     @view(accept='text/calendar', renderer='ical')
-    @view(accept='application/vnd.collection+json', renderer='json')
+    @view(accept=COLLECTION_JSON_MIMETYPE, renderer='json')
     def get(self):
         return ResourceMixin.get(self)

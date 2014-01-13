@@ -115,3 +115,19 @@ Autre Événement,Another great event,2014-01-26T15:00,2014-01-26T19:00
         self.assertEqual(DBSession.query(Event).count(), 2)
         event = DBSession.query(Event).filter_by(title=u'Événement').one()
         self.assertEqual(event.description, u'A great event')
+
+    def test_post_invalid(self):
+        response = self.app.post('/v1/events', '*** BOGUS ***',
+                                 status=400, headers={
+                                     'Content-Type': 'text/csv',
+                                     'X-ODE-Provider-Id': '123',
+                                 })
+        self.assertErrorMessage(response, 'Invalid CSV request body')
+
+    def test_post_empty(self):
+        response = self.app.post('/v1/events',
+                                 status=400, headers={
+                                     'Content-Type': 'text/csv',
+                                     'X-ODE-Provider-Id': '123',
+                                 })
+        self.assertErrorMessage(response, 'Empty CSV request body')

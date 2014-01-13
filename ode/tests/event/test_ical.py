@@ -85,11 +85,11 @@ class TestPostEvent(TestEventMixin, TestCase):
             calendar.add_component(event)
         return calendar.to_ical()
 
-    def post(self, calendar):
+    def post(self, calendar, status=201):
         return self.app.post('/v1/events', calendar, headers={
             'content-type': 'text/calendar',
             'X-ODE-Provider-Id': '123'
-        }, status=201)
+        }, status=status)
 
     def test_post_single_event(self):
         calendar = self.make_icalendar(titles=[u'Événement'])
@@ -106,3 +106,7 @@ class TestPostEvent(TestEventMixin, TestCase):
         event = DBSession.query(Event).filter_by(title=u'Événement 1').one()
         self.assertEqual(items[0]['href'],
                          'http://localhost/v1/events/%s' % quote(event.id))
+
+    def test_post_malformed_calendar(self):
+        response = self.post('*** BOGUS ***', status=400)
+        self.assertErrorMessage(response, 'Invalid iCalendar request body')
