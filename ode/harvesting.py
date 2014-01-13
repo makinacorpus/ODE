@@ -12,10 +12,17 @@ from ode.validation.schema import EventSchema
 from deserializers import icalendar_extractor, json_extractor
 
 
+class HarvestErrors(object):
+
+    def add(self, *args):
+        pass
+
+
 class HarvestRequest(object):
 
     def __init__(self, body):
         self.body = body
+        self.errors = HarvestErrors()
 
 
 class EventCstruct(object):
