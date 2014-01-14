@@ -1,7 +1,5 @@
 [report]
 ignore_errors = True
-
-[report]
 omit =
     *_mako
     */memory:*
