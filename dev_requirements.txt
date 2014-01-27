@@ -1,8 +1,0 @@
-nose
-mock
-webtest
-Sphinx
-autopep8
-coverage
-flake8
-tox

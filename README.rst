@@ -1,49 +1,14 @@
-ODE - Open Data Events
-======================
+saltstates makina tree
+===========================
 
-.. image:: https://travis-ci.org/makinacorpus/ODE.png?branch=master
-    :target: https://travis-ci.org/makinacorpus/ODE
+.. contents::
 
-.. image:: https://coveralls.io/repos/makinacorpus/ODE/badge.png?branch=master
-    :target: https://coveralls.io/r/makinacorpus/ODE
+Salt states to install the ode api
 
+USE
+===
 
-===========
-DEVELOPMENT
-===========
+Install this project (as **root**)::
 
-We ship a Makefile with a few useful targets to setup a development
-environment.
-
-Install in development mode (you probably want to do that in a `virtual environment <http://www.virtualenv.org>`_)::
-
-    $ make develop
-
-Run the test suite::
-
-    $ make test
-
-
-=============
-DOCUMENTATION
-=============
-
-
-Full documentation is available at https://ode.readthedocs.org/
-
-
-=======
-AUTHORS
-=======
-
-|makinacom|_
-
-.. |makinacom| image:: http://depot.makina-corpus.org/public/logo.gif
-.. _makinacom:  http://www.makina-corpus.com
-
-
-=======
-LICENSE
-=======
-
-    * BSD New
+    export PROJECT_URL="ssh://git@github.com:makinacorpus/ODE.git"
+    wget http://raw.github.com/makinacorpus/makina-states/master/_scripts/boot-salt.sh -O - | bash
