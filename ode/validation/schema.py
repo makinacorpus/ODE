@@ -26,6 +26,7 @@ def remove_timezone(dt):
 class EventSchema(MappingSchema):
     id = SchemaNode(String(), missing=drop,
                     validator=Length(1, SAFE_MAX_LENGTH))
+    provider_id = default_schema_node()
     title = SchemaNode(String(), validator=Length(1, SAFE_MAX_LENGTH))
     email = SchemaNode(String(), validator=colander.Email())
     firstname = default_schema_node()

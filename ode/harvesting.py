@@ -57,6 +57,7 @@ class EventCstruct(object):
 
 def harvest_cstruct(cstruct, source):
     for item_cstruct in cstruct['items']:
+        item_cstruct['data']['provider_id'] = source.provider_id
         event_cstruct = EventCstruct(item_cstruct)
         if event_cstruct.has_uid_without_domain_name():
             event_cstruct.append_domain_name_to_uid(source)
