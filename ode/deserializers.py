@@ -23,7 +23,8 @@ def icalendar_to_cstruct(icalendar_event):
 def icalendar_extractor(request):
     items = []
     try:
-        calendar = Calendar.from_ical(request.text)
+        text = request.text.replace(u'\u2028', ' ')  # Fix weird encoding error
+        calendar = Calendar.from_ical(text)
         for icalendar_event in calendar.walk()[1:]:
             cstruct = icalendar_to_cstruct(icalendar_event)
             items.append({'data': cstruct})
