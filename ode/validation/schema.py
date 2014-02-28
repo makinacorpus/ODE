@@ -32,7 +32,7 @@ class EventSchema(MappingSchema):
     firstname = default_schema_node()
     lastname = default_schema_node()
     telephone = default_schema_node()
-    description = default_schema_node()
+    description = SchemaNode(String(), missing='')
     event_id = default_schema_node()
     email = SchemaNode(String(), missing='', validator=colander.Email())
     firstname = default_schema_node()

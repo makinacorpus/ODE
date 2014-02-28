@@ -1,6 +1,6 @@
 import pyramid
 from sqlalchemy import (Column, Integer, Unicode, DateTime, ForeignKey,
-                        Boolean, String)
+                        Boolean, String, UnicodeText)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.orm import relationship
@@ -155,7 +155,7 @@ class Event(Base):
     lastname = default_column()
     email = default_column()
     telephone = default_column()
-    description = Column(Unicode(SAFE_MAX_LENGTH))
+    description = Column(UnicodeText())
     language = default_column()
     latlong = default_column()
     organiser = default_column()
