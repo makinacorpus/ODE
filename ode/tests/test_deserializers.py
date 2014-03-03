@@ -57,6 +57,8 @@ csv_sample = ('id,firstname,lastname,email,telephone,description,language,latl'
 
 
 ics_sample = '''BEGIN:VCALENDAR
+PRODID:-//My calendar product//mxm.dk//
+VERSION:2.0
 BEGIN:VEVENT
 SUMMARY:Test medias
 DTSTART;VALUE=DATE-TIME:20131212T000000
@@ -180,6 +182,7 @@ class TestExtractor(TestCase):
     def test_ics(self):
         request = self.DummyRequest(ics_sample)
         cstruct = icalendar_extractor(request)
+        self.maxDiff = None
         self.assertDictEqual(cstruct, self.cstruct_ics)
 
     def test_json(self):

@@ -4,31 +4,61 @@ import re
 import six
 from six import StringIO
 
-from icalendar import Calendar
-from ode.models import icalendar_to_model_keys
+from ics import Calendar
+from ics.parse import ParseError
+
+
+def default_extractor(attribute):
+    def extractor(event):
+        if hasattr(event, attribute):
+            return getattr(event, attribute)
+
+    return extractor
+
+
+def date_exractor(attribute):
+    def extractor(event):
+        if hasattr(event, attribute):
+            return getattr(event, attribute).format('YYYY-MM-DDTHH:mm:ss')
+
+    return extractor
+
+
+def url_extractor(event):
+    for line in event._unused:
+        if line.name == 'URL':
+            return line.value
+
+
+icalendar_to_model_keys = {
+    'id': default_extractor('uid'),
+    'title': default_extractor('name'),
+    'url': url_extractor,
+    'description': default_extractor('description'),
+    'end_time': date_exractor('end'),
+    'start_time': date_exractor('begin'),
+    'location_name': default_extractor('location'),
+}
 
 
 def icalendar_to_cstruct(icalendar_event):
     result = {}
-    for icalendar_key, model_attribute in icalendar_to_model_keys.items():
-        if icalendar_key in icalendar_event:
-            if icalendar_key in ('dtstart', 'dtend'):
-                result[model_attribute] = \
-                    icalendar_event[icalendar_key].dt.isoformat()
-            else:
-                result[model_attribute] = icalendar_event[icalendar_key]
+    for model_attribute, extractor in icalendar_to_model_keys.items():
+        value = extractor(icalendar_event)
+        if value:
+            result[model_attribute] = value
     return result
 
 
 def icalendar_extractor(request):
     items = []
     try:
-        text = request.text.replace(u'\u2028', ' ')  # Fix weird encoding error
-        calendar = Calendar.from_ical(text)
-        for icalendar_event in calendar.walk()[1:]:
+        text = request.text
+        calendar = Calendar(text)
+        for icalendar_event in calendar.events:
             cstruct = icalendar_to_cstruct(icalendar_event)
             items.append({'data': cstruct})
-    except ValueError as exc:
+    except ParseError as exc:
         request.errors.add('body', None,
                            "Invalid iCalendar request body: %s " % exc)
     cstruct = {'items': items}

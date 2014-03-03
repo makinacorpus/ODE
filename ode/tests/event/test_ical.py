@@ -75,6 +75,8 @@ class TestPostEvent(TestEventMixin, TestCase):
 
     def make_icalendar(self, titles):
         calendar = icalendar.Calendar()
+        calendar.add('prodid', '-//My calendar product//mxm.dk//')
+        calendar.add('version', '2.0')
         for index, title in enumerate(titles):
             event = icalendar.Event()
             event.add('uid', '123-%s@example.com' % index)
@@ -104,8 +106,13 @@ class TestPostEvent(TestEventMixin, TestCase):
         response = self.post(calendar)
         items = response.json['collection']['items']
         event = DBSession.query(Event).filter_by(title=u'Événement 1').one()
-        self.assertEqual(items[0]['href'],
-                         'http://localhost/v1/events/%s' % quote(event.id))
+
+        for item in items:
+            for name, value in item['data']:
+                if name == u'title' and value == u'Événement 1':
+                    expected_url = u'http://localhost/v1/events/%s' % quote(
+                                   event.id)
+                    self.assertEqual(items[0]['href'], expected_url)
 
     def test_post_malformed_calendar(self):
         response = self.post('*** BOGUS ***', status=400)

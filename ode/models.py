@@ -269,7 +269,6 @@ icalendar_to_model_keys = {
     'location': 'location_name',
 }
 
-
 collection_classes = {
     'locations': Location,
     'sounds': Sound,
