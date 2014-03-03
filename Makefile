@@ -12,12 +12,14 @@ develop: requirements
 	pip install -r dev_requirements.txt
 	python setup.py develop
 	initialize_ode_db development.ini
+	alembic -c development.ini upgrade head
 	${COMPILE_TRANSLATIONS}
 
 
 production:
 	python setup.py develop
 	../env/bin/initialize_ode_db production.ini
+	alembic -c production.ini upgrade head
 	python setup.py compile_catalog -l fr
 
 test: localization requirements dev_requirements flake8
