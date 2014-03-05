@@ -1,4 +1,6 @@
 from __future__ import with_statement
+
+import os
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
@@ -11,7 +13,9 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name)
+config_file_path = os.path.dirname(os.path.abspath(config.config_file_name))
+defaults = {'here': config_file_path}
+fileConfig(config.config_file_name, defaults)
 
 # For 'autogenerate' support
 target_metadata = models.Base.metadata
