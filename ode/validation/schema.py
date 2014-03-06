@@ -120,7 +120,7 @@ class SourceCollectionSchema(MappingSchema):
             data = SourceSchema()
 
 
-COLLECTION_MAX_LENGTH = 50
+COLLECTION_MAX_LENGTH = 100
 
 
 class QueryStringSchema(MappingSchema):
